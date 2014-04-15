@@ -37,7 +37,9 @@ Grid.prototype = {
   },
 
   getTile: function(row, column) {
-    return this._items[row][column];
+    if (row < this.numRows && column < this.numColumns) {
+      return this._items[row][column];
+    }
   },
 };
 
@@ -55,6 +57,10 @@ SpriteTileRenderer.prototype = {
       var y = row * this.tileHeight;
       ctx.fillStyle = tile.value;
       ctx.fillRect(x, y, this.tileWidth, this.tileHeight)
+      var str = tile.row + ',' + tile.column
+      ctx.fillStyle = 'black';
+      //ctx.font = '16px serif';
+      ctx.fillText(str, x + 7, y + 13);
     });
   },
 };
@@ -71,8 +77,6 @@ PlayerRenderer.prototype = {
   render: function(ctx) {
     var x = this.player.position.column * this.tileWidth;
     var y = this.player.position.row * this.tileHeight;
-    //ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-    //ctx.fillRect(x, y, this.tileWidth, this.tileHeight);
 
     if (this.player.direction == 'up') {
       ctx.drawImage(this.playerSprite.image,
@@ -141,7 +145,7 @@ function loadSprite(src) {
 }
 
 function makeTestGrid() {
-  var grid = new Grid(99, 99, Tile);
+  var grid = new Grid(100, 100, Tile);
 
   grid.forEach(function(tile) {
     if (tile.row == 0 || tile.column == 0 ||
@@ -174,6 +178,11 @@ WorldView.prototype = {
     for (var i = 0; i < this.numRows; i++) {
       for (var j = 0; j < this.numColumns; j++) {
         var tile = this.getTile(i, j);
+        if (!tile) {
+          // TODO is this the best way? need to return a blank tile somehow.
+          //      make this blank tile configurable.
+          tile = new Tile(i, j, 'black');
+        }
         callback(tile, i, j);
       }
     }
@@ -205,10 +214,10 @@ function startBiscuits(canvas) {
   loadSprite('playerSprites.png').then(function(playerSprite) {
 
     var world = makeTestGrid();
-    var grid = new WorldView(world, 20, 20);
+    var worldview = new WorldView(world, 20, 20);
 
-    tileWidth = canvas.width / grid.numColumns;
-    tileHeight = canvas.height / grid.numRows;
+    tileWidth = canvas.width / worldview.numColumns;
+    tileHeight = canvas.height / worldview.numRows;
     
     var player = {
       position: {row: 2, column: 1},
@@ -217,10 +226,10 @@ function startBiscuits(canvas) {
 
     // TODO i don't like having to pass document around
     var keybindings = new KeyBindings(document);
-    var movementHandler = new MovementHandler(keybindings, player, grid);
+    var movementHandler = new MovementHandler(keybindings, player, worldview);
 
     startRender(canvas, [
-      new SpriteTileRenderer(grid, sprites, tileWidth, tileHeight),
+      new SpriteTileRenderer(worldview, sprites, tileWidth, tileHeight),
       new PlayerRenderer(player, playerSprite, tileWidth, tileHeight),
     ]);
   });

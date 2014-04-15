@@ -42,3 +42,23 @@ teleport (i.e. doorway)
 
 when shifting worldview, make sure to handle corners. they are special cases.
 shift one direction then the other.
+
+max movement speed
+
+
+planes, trains, automobiles, submarines, etc
+
+
+stage renderer, i.e. be able to switch master renderer
+world map
+inventory
+settings
+
+
+dev stuff:
+- break into smaller files
+- angular?
+- unit test framework
+- grunt?
+- bower install list
+
