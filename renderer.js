@@ -30,6 +30,11 @@ Grid.prototype = {
     }
   },
 
+  getTile: function(row, column) {
+    var idx = row * this.numColumns + column;
+    return this._items[idx];
+  },
+
   setTile: function(row, column, value) {
     var idx = row * this.numColumns + column;
     this._items[idx] = new Tile(row, column, value);
@@ -76,7 +81,11 @@ function startBiscuits(canvas) {
   var grid = new Grid(20, 20);
 
   grid.forEach(function(tile) {
-    tile.value = 'gray';
+    if (tile.row == 0) {
+      tile.value = 'black';
+    } else {
+      tile.value = 'gray';
+    }
   });
 
   tileWidth = canvas.width / grid.numColumns;
@@ -93,24 +102,28 @@ function startBiscuits(canvas) {
     new PlayerRenderer(player, tileWidth, tileHeight),
   ];
 
-  document.addEventListener('keypress', function(event) {
-    var keyCodeMap = {
-      38: 'UP',
-      40: 'DOWN',
-      37: 'LEFT',
-      39: 'RIGHT',
-    };
 
-    if (event.keyCode == 38) {
+  var keybindings = new KeyBindings(document);
+
+  keybindings.on('UP', function() {
+    var nextRow = player.position.row - 1;
+    var nextTile = grid.getTile(nextRow, player.position.column);
+    if (nextTile.value == 'black') {
+    } else {
       player.position.row -= 1;
-    } else if (event.keyCode == 40) {
-      player.position.row += 1;
-    } else if (event.keyCode == 37) {
-      player.position.column -= 1;
-    } else if (event.keyCode == 39) {
-      player.position.column += 1;
     }
-  }, true);
+  });
+
+  keybindings.on('DOWN', function() {
+    player.position.row += 1;
+  });
+  keybindings.on('LEFT', function() {
+    player.position.column -= 1;
+  });
+  keybindings.on('RIGHT', function() {
+    player.position.column += 1;
+  });
+
 
   function masterRender() {
     for (var i = 0, ii = renderers.length; i < ii; i++) {
@@ -123,3 +136,47 @@ function startBiscuits(canvas) {
 
   requestAnimationFrame(masterRender);
 }
+
+
+function KeyBindings(document) {
+
+  var keybindings = this;
+
+  document.addEventListener('keypress', function(event) {
+
+    var keyCodeMap = {
+      38: 'UP',
+      40: 'DOWN',
+      37: 'LEFT',
+      39: 'RIGHT',
+    };
+
+    var eventName = keyCodeMap[event.keyCode];
+    if (eventName) {
+      keybindings._fire(eventName);
+      event.preventDefault();
+    }
+
+  }, true);
+
+  this.listeners = {};
+}
+
+KeyBindings.prototype = {
+  _fire: function(name) {
+    var listeners = this.listeners[name] || [];
+    for (var i = 0, ii = listeners.length; i < ii; i++) {
+      listeners[i]();
+    }
+  },
+  on: function(name, callback) {
+    var listeners = this.listeners[name];
+
+    if (!listeners) {
+      var listeners = [];
+      this.listeners[name] = listeners;
+    }
+
+    this.listeners[name].push(callback);
+  },
+};
