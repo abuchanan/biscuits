@@ -57,6 +57,18 @@ SpriteTileRenderer.prototype = {
       var y = row * this.tileHeight;
       ctx.fillStyle = tile.value;
       ctx.fillRect(x, y, this.tileWidth, this.tileHeight)
+    });
+  },
+};
+
+function TileCoordinateDebugRenderer(grid) {
+  this.grid = grid;
+}
+TileCoordinateDebugRenderer.prototype = {
+  render: function(ctx) {
+    this.grid.forEach(function(tile, row, column) {
+      var x = column * this.tileWidth;
+      var y = row * this.tileHeight;
       var str = tile.row + ',' + tile.column
       ctx.fillStyle = 'black';
       //ctx.font = '16px serif';
@@ -231,6 +243,7 @@ function startBiscuits(canvas) {
     startRender(canvas, [
       new SpriteTileRenderer(worldview, sprites, tileWidth, tileHeight),
       new PlayerRenderer(player, playerSprite, tileWidth, tileHeight),
+      new TileCoordinateDebugRenderer(worldview),
     ]);
   });
 }
