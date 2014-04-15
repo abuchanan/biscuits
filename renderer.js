@@ -231,6 +231,22 @@ WorldView.prototype = {
 };
 
 
+function SpriteAnimation(sprites) {
+  this.sprites = sprites;
+  this._frame_i = 0;
+}
+SpriteAnimation.prototype = {
+  render: function(ctx, x, y, w, h) {
+    var duration = 30;
+    var sprite_i = Math.floor(this._frame_i / duration) % this.sprites.length;
+
+    this.sprites[sprite_i].render(ctx, x, y, w, h);
+
+    this._frame_i += 1;
+  },
+};
+
+
 function startBiscuits(canvas) {
 
   Q.all([
@@ -254,9 +270,16 @@ function startBiscuits(canvas) {
 
     var blankTile = new SolidColor('black');
 
-    var squirrelSprite = spritesheets[1].slice(0, 0, 30, 30);
+    // TODO a simple list doesn't give fine grained control over each
+    //      frame (such as frame duraction). imploy a addFrame method
+    var squirrelSpriteAnim = new SpriteAnimation([
+      spritesheets[1].slice(0, 0, 30, 30),
+      spritesheets[1].slice(30, 30, 30, 30),
+      spritesheets[1].slice(0, 0, 30, 30),
+    ]);
+
     var squirrelTile = world.getTile(5, 5);
-    squirrelTile.layers.push(squirrelSprite);
+    squirrelTile.layers.push(squirrelSpriteAnim);
     squirrelTile.block = true;
 
     var tileWidth = canvas.width / worldview.numColumns;
