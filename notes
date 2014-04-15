@@ -1,0 +1,31 @@
+tile map
+
+loading chunks of map
+
+game state
+
+character
+- name
+- items
+- health
+
+map state
+- e.g. door X has been unlocked
+- story state
+
+location of character on map
+
+enemies
+- difficulty level
+
+combat calculation
+- weapons
+- level
+- enemy level
+- difficulty level
+
+damage
+
+status layer
+
+
