@@ -76,15 +76,50 @@ PlayerRenderer.prototype = {
     //ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
     //ctx.fillRect(x, y, this.tileWidth, this.tileHeight);
 
-    ctx.drawImage(this.playerSprite.image,
-                  // source image x, y
-                  0, 0,
-                  // source image width, height
-                  76, 76,
-                  // destination x, y
-                  x, y,
-                  // destination width, height
-                  this.tileWidth, this.tileHeight);
+    if (this.player.direction == 'up') {
+      ctx.drawImage(this.playerSprite.image,
+                    // source image x, y
+                    5, 175,
+                    // source image width, height
+                    80, 80,
+                    // destination x, y
+                    x, y,
+                    // destination width, height
+                    this.tileWidth, this.tileHeight);
+
+    } else if (this.player.direction == 'down') {
+      ctx.drawImage(this.playerSprite.image,
+                    // source image x, y
+                    5, 275,
+                    // source image width, height
+                    80, 80,
+                    // destination x, y
+                    x, y,
+                    // destination width, height
+                    this.tileWidth, this.tileHeight);
+
+    } else if (this.player.direction == 'left') {
+      ctx.drawImage(this.playerSprite.image,
+                    // source image x, y
+                    0, 0,
+                    // source image width, height
+                    80, 80,
+                    // destination x, y
+                    x, y,
+                    // destination width, height
+                    this.tileWidth, this.tileHeight);
+
+    } else if (this.player.direction == 'right') {
+      ctx.drawImage(this.playerSprite.image,
+                    // source image x, y
+                    375, 95,
+                    // source image width, height
+                    80, 80,
+                    // destination x, y
+                    x, y,
+                    // destination width, height
+                    this.tileWidth, this.tileHeight);
+    }
   },
 };
 
@@ -132,6 +167,7 @@ function startBiscuits(canvas) {
     
     var player = {
       position: {row: 2, column: 1},
+      direction: 'down',
     };
 
     // TODO i don't like having to pass document around
@@ -180,16 +216,18 @@ function MovementHandler(keybindings, player, grid) {
   }
 
   function makeCallback(rowDelta, columnDelta) {
-    return function() {
+    return function(direction) {
       move(rowDelta, columnDelta);
+      player.direction = direction;
     }
   }
 
-  keybindings.on('UP', makeCallback(-1, 0));
-  keybindings.on('DOWN', makeCallback(1, 0));
-  keybindings.on('LEFT', makeCallback(0, -1));
-  keybindings.on('RIGHT', makeCallback(0, 1));
+  keybindings.on('up', makeCallback(-1, 0));
+  keybindings.on('down', makeCallback(1, 0));
+  keybindings.on('left', makeCallback(0, -1));
+  keybindings.on('right', makeCallback(0, 1));
 }
+
 
 function KeyBindings(document) {
 
@@ -198,10 +236,10 @@ function KeyBindings(document) {
   document.addEventListener('keypress', function(event) {
 
     var keyCodeMap = {
-      38: 'UP',
-      40: 'DOWN',
-      37: 'LEFT',
-      39: 'RIGHT',
+      38: 'up',
+      40: 'down',
+      37: 'left',
+      39: 'right',
     };
 
     var eventName = keyCodeMap[event.keyCode];
@@ -219,7 +257,7 @@ KeyBindings.prototype = {
   _fire: function(name) {
     var listeners = this.listeners[name] || [];
     for (var i = 0, ii = listeners.length; i < ii; i++) {
-      listeners[i]();
+      listeners[i](name);
     }
   },
   on: function(name, callback) {
