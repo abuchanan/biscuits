@@ -17,6 +17,9 @@ location of character on map
 
 enemies
 - difficulty level
+- figuring out which enemies are in the current view
+
+each tile has a background and foreground? background and foreground can draw themselves
 
 combat calculation
 - weapons

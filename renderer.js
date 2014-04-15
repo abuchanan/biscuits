@@ -46,6 +46,7 @@ function SpriteTileRenderer(grid, sprites, tileHeight, tileWidth) {
   this.grid = grid;
   this.tileHeight = tileHeight;
   this.tileWidth = tileWidth;
+  this.sprites = sprites;
 }
 
 SpriteTileRenderer.prototype = {
@@ -60,8 +61,22 @@ SpriteTileRenderer.prototype = {
       if (tile) {
         ctx.fillStyle = tile.value;
         ctx.fillRect(x, y, renderer.tileWidth, renderer.tileHeight);
+
       } else {
         renderer.drawBlank(ctx, x, y);
+      }
+
+      // TODO hack
+      if (row == 1 && column == 1) {
+        ctx.drawImage(renderer.sprites[1].image, 
+                      // source image x, y
+                      0, 0,
+                      // source image width, height
+                      30, 30,
+                      // destination x, y
+                      x, y,
+                      // destination width, height
+                      renderer.tileWidth, renderer.tileHeight);
       }
     });
   },
@@ -230,9 +245,15 @@ WorldView.prototype = {
 
 function startBiscuits(canvas) {
 
-  loadSprite('playerSprites.png').then(function(playerSprite) {
+  Q.all([
+    loadSprite('playerSprites.png'),
+    loadSprite('Monster-squirrel.png'),
 
-    var sprites = {};
+  ]).then(function(sprites) {
+
+    var playerSprite = sprites[0];
+    var squirrelSprite = sprites[1];
+
     var world = makeTestGrid();
     var worldview = new WorldView(world, 20, 20);
 
