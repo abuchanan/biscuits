@@ -15,31 +15,29 @@ function Grid(numRows, numColumns, Tile) {
   this.Tile = Tile;
   this._items = [];
 
-  for (var row_i = 0; row_i < numRows; row_i++) {
-    for (var col_i = 0; col_i < numColumns; col_i++) {
-      this.setTile(row_i, col_i, undefined);
+  for (var row_i = 0; row_i < this.numRows; row_i++) {
+    var row = [];
+    this._items.push(row);
+
+    for (var col_i = 0; col_i < this.numColumns; col_i++) {
+      var tile = new this.Tile(row_i, col_i, undefined);
+      row.push(tile);
     }
   }
 }
 
 Grid.prototype = {
   forEach: function(callback) {
-    for (var i = 0, ii = this.numRows; i < ii; i++) {
-      for (var j = 0, jj = this.numColumns; j < jj; j++) {
-        var idx = i * this.numColumns + j;
-        callback(this._items[idx]);
+    for (var row_i = 0; row_i < this.numRows; row_i++) {
+      for (var col_i = 0; col_i < this.numColumns; col_i++) {
+        var item = this._items[row_i][col_i];
+        callback(item);
       }
     }
   },
 
   getTile: function(row, column) {
-    var idx = row * this.numColumns + column;
-    return this._items[idx];
-  },
-
-  setTile: function(row, column, value) {
-    var idx = row * this.numColumns + column;
-    this._items[idx] = new this.Tile(row, column, value);
+    return this._items[row][column];
   },
 };
 
@@ -52,9 +50,9 @@ function SpriteTileRenderer(grid, sprites, tileHeight, tileWidth) {
 
 SpriteTileRenderer.prototype = {
   render: function(ctx) {
-    this.grid.forEach(function(tile) {
-      var x = tile.column * this.tileWidth;
-      var y = tile.row * this.tileHeight;
+    this.grid.forEach(function(tile, row, column) {
+      var x = column * this.tileWidth;
+      var y = row * this.tileHeight;
       ctx.fillStyle = tile.value;
       ctx.fillRect(x, y, this.tileWidth, this.tileHeight)
     });
@@ -143,24 +141,71 @@ function loadSprite(src) {
 }
 
 function makeTestGrid() {
-  var grid = new Grid(20, 20, Tile);
+  var grid = new Grid(99, 99, Tile);
 
   grid.forEach(function(tile) {
-    if (tile.row == 0 || tile.column == 0) {
+    if (tile.row == 0 || tile.column == 0 ||
+        tile.row == grid.numRows - 1 ||
+        tile.column == grid.numColumns - 1) {
+
       tile.value = 'black';
       tile.block = true;
     } else {
       tile.value = 'gray';
     }
+
   });
   return grid;
 }
+
+
+function WorldView(world, numRows, numColumns) {
+  this.world = world;
+  this.numRows = numRows;
+  this.numColumns = numColumns;
+  this.offset = {
+    row: 0,
+    column: 0,
+  };
+}
+
+WorldView.prototype = {
+  forEach: function(callback) {
+    for (var i = 0; i < this.numRows; i++) {
+      for (var j = 0; j < this.numColumns; j++) {
+        var tile = this.getTile(i, j);
+        callback(tile, i, j);
+      }
+    }
+  },
+  getTile: function(i, j) {
+    var row_i = this.offset.row + i;
+    var col_i = this.offset.column + j;
+    return this.world.getTile(row_i, col_i);
+  },
+
+  // TODO need to be careful about shifting out of bounds
+  shiftRight: function() {
+    this.offset.column += this.numColumns - 2;
+  },
+  shiftLeft: function() {
+    this.offset.column -= this.numColumns - 2;
+  },
+  shiftUp: function() {
+    this.offset.row -= this.numRows - 2;
+  },
+  shiftDown: function() {
+    this.offset.row += this.numRows - 2;
+  },
+};
+
 
 function startBiscuits(canvas) {
 
   loadSprite('playerSprites.png').then(function(playerSprite) {
 
-    var grid = makeTestGrid();
+    var world = makeTestGrid();
+    var grid = new WorldView(world, 20, 20);
 
     tileWidth = canvas.width / grid.numColumns;
     tileHeight = canvas.height / grid.numRows;
@@ -208,10 +253,27 @@ function MovementHandler(keybindings, player, grid) {
     var nextTile = grid.getTile(nextRow, nextCol);
 
     if (nextTile && !nextTile.block) {
-      player.position.row = nextRow;
-      player.position.column = nextCol;
+
+      if (nextTile.column == grid.offset.column + grid.numColumns - 1) {
+        player.position.column = 1;
+        grid.shiftRight();
+      } else if (nextTile.column == grid.offset.column) {
+        grid.shiftLeft();
+        player.position.column = grid.numColumns - 2;
+
+      } else if (nextTile.row == grid.offset.row + grid.numRows - 1) {
+        grid.shiftDown();
+        player.position.row = 1;
+
+      } else if (nextTile.row == grid.offset.row) {
+        grid.shiftUp();
+        player.position.row = grid.numRows - 2;
+
+      } else {
+        player.position.row = nextRow;
+        player.position.column = nextCol;
+      }
       
-      // TODO handle loading next screen
     }
   }
 

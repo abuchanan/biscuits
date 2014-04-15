@@ -33,3 +33,12 @@ saving
 AI
 
 sprites that cover multiple tiles
+
+separate world grid from viewable grid
+
+teleport (i.e. doorway)
+- sets both visibile grid position and player position
+
+
+when shifting worldview, make sure to handle corners. they are special cases.
+shift one direction then the other.
