@@ -1,16 +1,27 @@
 'use strict';
 
-function Tile(row, column, value) {
+function Tile(row, column) {
   this.row = row;
   this.column = column;
-  this.value = value;
+  this.layers = [];
   this.block = false;
 }
 
-function Grid(numRows, numColumns, Tile) {
+
+function SolidColor(color) {
+  this.color = color;
+}
+SolidColor.prototype = {
+  render: function(ctx, x, y, w, h) {
+      ctx.fillStyle = this.color;
+      ctx.fillRect(x, y, w, h);
+  }
+}
+
+
+function Grid(numRows, numColumns) {
   this.numRows = numRows;
   this.numColumns = numColumns;
-  this.Tile = Tile;
   this._items = [];
 
   for (var row_i = 0; row_i < this.numRows; row_i++) {
@@ -18,7 +29,7 @@ function Grid(numRows, numColumns, Tile) {
     this._items.push(row);
 
     for (var col_i = 0; col_i < this.numColumns; col_i++) {
-      var tile = new this.Tile(row_i, col_i, undefined);
+      var tile = new Tile(row_i, col_i);
       row.push(tile);
     }
   }
@@ -42,14 +53,14 @@ Grid.prototype = {
 };
 
 
-function SpriteTileRenderer(grid, sprites, tileHeight, tileWidth) {
+function GridRenderer(grid, blankTile, tileHeight, tileWidth) {
   this.grid = grid;
   this.tileHeight = tileHeight;
   this.tileWidth = tileWidth;
-  this.sprites = sprites;
+  this.blankTile = blankTile;
 }
 
-SpriteTileRenderer.prototype = {
+GridRenderer.prototype = {
   render: function(ctx) {
     var renderer = this;
 
@@ -59,25 +70,19 @@ SpriteTileRenderer.prototype = {
       var y = row * renderer.tileHeight;
 
       if (tile) {
-        ctx.fillStyle = tile.value;
-        ctx.fillRect(x, y, renderer.tileWidth, renderer.tileHeight);
-
+        for (var layer_i = 0; layer_i < tile.layers.length; layer_i++) {
+          var layer = tile.layers[layer_i];
+          layer.render(ctx, x, y, renderer.tileWidth, renderer.tileHeight);
+          
+        }
       } else {
-        renderer.drawBlank(ctx, x, y);
-      }
-
-      // TODO hack
-      if (row == 1 && column == 1) {
-        renderer.sprites[0].render(ctx, x, y, renderer.tileWidth, renderer.tileHeight);
+        renderer.blankTile.render(ctx, x, y, renderer.tileWidth, renderer.tileHeight);
       }
     });
   },
-
-  drawBlank: function(ctx, x, y) {
-    ctx.fillStyle = 'black';
-    ctx.fillRect(x, y, this.tileWidth, this.tileHeight);
-  },
 };
+
+
 
 function TileCoordinateDebugRenderer(grid) {
   this.grid = grid;
@@ -116,7 +121,6 @@ PlayerRenderer.prototype = {
     }
 
     sprite.render(ctx, x, y, this.tileWidth, this.tileHeight);
-
   },
 };
 
@@ -166,20 +170,22 @@ function loadSpriteSheet(src) {
 }
 
 function makeTestGrid() {
-  var grid = new Grid(100, 100, Tile);
+  var grid = new Grid(100, 100);
+  var blackTile = new SolidColor('black');
+  var grayTile = new SolidColor('gray');
 
   grid.forEach(function(tile) {
     if (tile.row == 0 || tile.column == 0 ||
         tile.row == grid.numRows - 1 ||
         tile.column == grid.numColumns - 1) {
 
-      tile.value = 'black';
+      tile.layers.push(blackTile);
       tile.block = true;
     } else {
-      tile.value = 'gray';
+      tile.layers.push(grayTile);
     }
-
   });
+
   return grid;
 }
 
@@ -242,12 +248,16 @@ function startBiscuits(canvas) {
       'right': playerSpriteSheet.slice(375, 95, 80, 80),
     };
 
-    var otherSprites = [
-      spritesheets[1].slice(0, 0, 30, 30),
-    ];
 
     var world = makeTestGrid();
     var worldview = new WorldView(world, 20, 20);
+
+    var blankTile = new SolidColor('black');
+
+    var squirrelSprite = spritesheets[1].slice(0, 0, 30, 30);
+    var squirrelTile = world.getTile(5, 5);
+    squirrelTile.layers.push(squirrelSprite);
+    squirrelTile.block = true;
 
     var tileWidth = canvas.width / worldview.numColumns;
     var tileHeight = canvas.height / worldview.numRows;
@@ -262,7 +272,7 @@ function startBiscuits(canvas) {
     var movementHandler = new MovementHandler(keybindings, player, worldview);
 
     startRender(canvas, [
-      new SpriteTileRenderer(worldview, otherSprites, tileWidth, tileHeight),
+      new GridRenderer(worldview, blankTile, tileWidth, tileHeight),
       new PlayerRenderer(player, playerSprites, tileWidth, tileHeight),
       //new TileCoordinateDebugRenderer(worldview),
     ]);
