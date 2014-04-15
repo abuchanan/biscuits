@@ -62,24 +62,52 @@ SpriteTileRenderer.prototype = {
 };
 
 
-function PlayerRenderer(player, tileHeight, tileWidth) {
+function PlayerRenderer(player, playerSprite, tileHeight, tileWidth) {
   this.tileHeight = tileHeight;
   this.tileWidth = tileWidth;
   this.player = player;
+  this.playerSprite = playerSprite;
 }
 
 PlayerRenderer.prototype = {
   render: function(ctx) {
     var x = this.player.position.column * this.tileWidth;
     var y = this.player.position.row * this.tileHeight;
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.fillRect(x, y, this.tileWidth, this.tileHeight);
+    //ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+    //ctx.fillRect(x, y, this.tileWidth, this.tileHeight);
+
+    ctx.drawImage(this.playerSprite.image,
+                  // source image x, y
+                  0, 0,
+                  // source image width, height
+                  76, 76,
+                  // destination x, y
+                  x, y,
+                  // destination width, height
+                  this.tileWidth, this.tileHeight);
   },
 };
 
 
-function startBiscuits(canvas) {
+function Sprite(image) {
+  this.image = image;
+}
 
+function loadSprite(src) {
+  var deferred = Q.defer();
+
+  var img = new Image();
+
+  img.onload = function() {
+    var sprite = new Sprite(img);
+    deferred.resolve(sprite);
+  }
+  img.src = src;
+  
+  return deferred.promise;
+}
+
+function makeTestGrid() {
   var grid = new Grid(20, 20, Tile);
 
   grid.forEach(function(tile) {
@@ -90,26 +118,40 @@ function startBiscuits(canvas) {
       tile.value = 'gray';
     }
   });
+  return grid;
+}
 
-  tileWidth = canvas.width / grid.numColumns;
-  tileHeight = canvas.height / grid.numRows;
-  
+function startBiscuits(canvas) {
+
+  loadSprite('playerSprites.png').then(function(playerSprite) {
+
+    var grid = makeTestGrid();
+
+    tileWidth = canvas.width / grid.numColumns;
+    tileHeight = canvas.height / grid.numRows;
+    
+    var player = {
+      position: {row: 2, column: 1},
+    };
+
+    // TODO i don't like having to pass document around
+    var keybindings = new KeyBindings(document);
+    var movementHandler = new MovementHandler(keybindings, player, grid);
+
+    startRender(canvas, [
+      new SpriteTileRenderer(grid, sprites, tileWidth, tileHeight),
+      new PlayerRenderer(player, playerSprite, tileWidth, tileHeight),
+    ]);
+  });
+}
+
+
+function startRender(canvas, renderers) {
   var ctx = canvas.getContext('2d');
 
-  var player = {
-    position: {row: 2, column: 1},
-  };
-
-  var renderers = [
-    new SpriteTileRenderer(grid, sprites, tileWidth, tileHeight),
-    new PlayerRenderer(player, tileWidth, tileHeight),
-  ];
-
-
-  var keybindings = new KeyBindings(document);
-  var movementHandler = new MovementHandler(keybindings, player, grid);
-
   function masterRender() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (var i = 0, ii = renderers.length; i < ii; i++) {
       ctx.save();
       renderers[i].render(ctx);
@@ -117,9 +159,9 @@ function startBiscuits(canvas) {
     }
     requestAnimationFrame(masterRender);
   }
-
   requestAnimationFrame(masterRender);
 }
+
 
 function MovementHandler(keybindings, player, grid) {
 
@@ -129,9 +171,11 @@ function MovementHandler(keybindings, player, grid) {
 
     var nextTile = grid.getTile(nextRow, nextCol);
 
-    if (!nextTile.block) {
+    if (nextTile && !nextTile.block) {
       player.position.row = nextRow;
       player.position.column = nextCol;
+      
+      // TODO handle loading next screen
     }
   }
 
