@@ -6,11 +6,13 @@ function Tile(row, column, value) {
   this.row = row;
   this.column = column;
   this.value = value;
+  this.block = false;
 }
 
-function Grid(numRows, numColumns) {
+function Grid(numRows, numColumns, Tile) {
   this.numRows = numRows;
   this.numColumns = numColumns;
+  this.Tile = Tile;
   this._items = [];
 
   for (var row_i = 0; row_i < numRows; row_i++) {
@@ -37,7 +39,7 @@ Grid.prototype = {
 
   setTile: function(row, column, value) {
     var idx = row * this.numColumns + column;
-    this._items[idx] = new Tile(row, column, value);
+    this._items[idx] = new this.Tile(row, column, value);
   },
 };
 
@@ -78,11 +80,12 @@ PlayerRenderer.prototype = {
 
 function startBiscuits(canvas) {
 
-  var grid = new Grid(20, 20);
+  var grid = new Grid(20, 20, Tile);
 
   grid.forEach(function(tile) {
-    if (tile.row == 0) {
+    if (tile.row == 0 || tile.column == 0) {
       tile.value = 'black';
+      tile.block = true;
     } else {
       tile.value = 'gray';
     }
@@ -104,26 +107,7 @@ function startBiscuits(canvas) {
 
 
   var keybindings = new KeyBindings(document);
-
-  keybindings.on('UP', function() {
-    var nextRow = player.position.row - 1;
-    var nextTile = grid.getTile(nextRow, player.position.column);
-    if (nextTile.value == 'black') {
-    } else {
-      player.position.row -= 1;
-    }
-  });
-
-  keybindings.on('DOWN', function() {
-    player.position.row += 1;
-  });
-  keybindings.on('LEFT', function() {
-    player.position.column -= 1;
-  });
-  keybindings.on('RIGHT', function() {
-    player.position.column += 1;
-  });
-
+  var movementHandler = new MovementHandler(keybindings, player, grid);
 
   function masterRender() {
     for (var i = 0, ii = renderers.length; i < ii; i++) {
@@ -137,6 +121,31 @@ function startBiscuits(canvas) {
   requestAnimationFrame(masterRender);
 }
 
+function MovementHandler(keybindings, player, grid) {
+
+  function move(rowDelta, columnDelta) {
+    var nextRow = player.position.row + rowDelta;
+    var nextCol = player.position.column + columnDelta;
+
+    var nextTile = grid.getTile(nextRow, nextCol);
+
+    if (!nextTile.block) {
+      player.position.row = nextRow;
+      player.position.column = nextCol;
+    }
+  }
+
+  function makeCallback(rowDelta, columnDelta) {
+    return function() {
+      move(rowDelta, columnDelta);
+    }
+  }
+
+  keybindings.on('UP', makeCallback(-1, 0));
+  keybindings.on('DOWN', makeCallback(1, 0));
+  keybindings.on('LEFT', makeCallback(0, -1));
+  keybindings.on('RIGHT', makeCallback(0, 1));
+}
 
 function KeyBindings(document) {
 
