@@ -68,15 +68,7 @@ SpriteTileRenderer.prototype = {
 
       // TODO hack
       if (row == 1 && column == 1) {
-        ctx.drawImage(renderer.sprites[1].image, 
-                      // source image x, y
-                      0, 0,
-                      // source image width, height
-                      30, 30,
-                      // destination x, y
-                      x, y,
-                      // destination width, height
-                      renderer.tileWidth, renderer.tileHeight);
+        renderer.sprites[0].render(ctx, x, y, renderer.tileWidth, renderer.tileHeight);
       }
     });
   },
@@ -105,11 +97,11 @@ TileCoordinateDebugRenderer.prototype = {
 };
 
 
-function PlayerRenderer(player, playerSprite, tileHeight, tileWidth) {
+function PlayerRenderer(player, sprites, tileHeight, tileWidth) {
   this.tileHeight = tileHeight;
   this.tileWidth = tileWidth;
   this.player = player;
-  this.playerSprite = playerSprite;
+  this.sprites = sprites;
 }
 
 PlayerRenderer.prototype = {
@@ -117,65 +109,55 @@ PlayerRenderer.prototype = {
     var x = this.player.position.column * this.tileWidth;
     var y = this.player.position.row * this.tileHeight;
 
-    if (this.player.direction == 'up') {
-      ctx.drawImage(this.playerSprite.image,
-                    // source image x, y
-                    5, 175,
-                    // source image width, height
-                    80, 80,
-                    // destination x, y
-                    x, y,
-                    // destination width, height
-                    this.tileWidth, this.tileHeight);
+    var sprite = this.sprites[this.player.direction]
 
-    } else if (this.player.direction == 'down') {
-      ctx.drawImage(this.playerSprite.image,
-                    // source image x, y
-                    5, 275,
-                    // source image width, height
-                    80, 80,
-                    // destination x, y
-                    x, y,
-                    // destination width, height
-                    this.tileWidth, this.tileHeight);
-
-    } else if (this.player.direction == 'left') {
-      ctx.drawImage(this.playerSprite.image,
-                    // source image x, y
-                    0, 0,
-                    // source image width, height
-                    80, 80,
-                    // destination x, y
-                    x, y,
-                    // destination width, height
-                    this.tileWidth, this.tileHeight);
-
-    } else if (this.player.direction == 'right') {
-      ctx.drawImage(this.playerSprite.image,
-                    // source image x, y
-                    375, 95,
-                    // source image width, height
-                    80, 80,
-                    // destination x, y
-                    x, y,
-                    // destination width, height
-                    this.tileWidth, this.tileHeight);
+    if (!sprite) {
+      throw 'Error: missing sprite';
     }
+
+    sprite.render(ctx, x, y, this.tileWidth, this.tileHeight);
+
   },
 };
 
 
-function Sprite(image) {
+function Sprite(image, x, y, w, h) {
+  this.image = image;
+  this.x = x;
+  this.y = y;
+  this.w = w;
+  this.h = h;
+}
+Sprite.prototype = {
+  render: function(ctx, x, y, w, h) {
+    ctx.drawImage(this.image,
+                  // source image x, y
+                  this.x, this.y,
+                  // source image width, height
+                  this.w, this.h,
+                  // destination x, y
+                  x, y,
+                  // destination width, height
+                  w, h);
+  }
+};
+
+function SpriteSheet(image) {
   this.image = image;
 }
+SpriteSheet.prototype = {
+  slice: function(x, y, w, h) {
+    return new Sprite(this.image, x, y, w, h);
+  }
+};
 
-function loadSprite(src) {
+function loadSpriteSheet(src) {
   var deferred = Q.defer();
 
   var img = new Image();
 
   img.onload = function() {
-    var sprite = new Sprite(img);
+    var sprite = new SpriteSheet(img);
     deferred.resolve(sprite);
   }
   img.src = src;
@@ -246,13 +228,23 @@ WorldView.prototype = {
 function startBiscuits(canvas) {
 
   Q.all([
-    loadSprite('playerSprites.png'),
-    loadSprite('Monster-squirrel.png'),
+    loadSpriteSheet('playerSprites.png'),
+    loadSpriteSheet('Monster-squirrel.png'),
 
-  ]).then(function(sprites) {
+  ]).then(function(spritesheets) {
 
-    var playerSprite = sprites[0];
-    var squirrelSprite = sprites[1];
+    var playerSpriteSheet = spritesheets[0];
+
+    var playerSprites = {
+      'up': playerSpriteSheet.slice(5, 175, 80, 80),
+      'down': playerSpriteSheet.slice(5, 275, 80, 80),
+      'left': playerSpriteSheet.slice(0, 0, 80, 80),
+      'right': playerSpriteSheet.slice(375, 95, 80, 80),
+    };
+
+    var otherSprites = [
+      spritesheets[1].slice(0, 0, 30, 30),
+    ];
 
     var world = makeTestGrid();
     var worldview = new WorldView(world, 20, 20);
@@ -270,8 +262,8 @@ function startBiscuits(canvas) {
     var movementHandler = new MovementHandler(keybindings, player, worldview);
 
     startRender(canvas, [
-      new SpriteTileRenderer(worldview, sprites, tileWidth, tileHeight),
-      new PlayerRenderer(player, playerSprite, tileWidth, tileHeight),
+      new SpriteTileRenderer(worldview, otherSprites, tileWidth, tileHeight),
+      new PlayerRenderer(player, playerSprites, tileWidth, tileHeight),
       //new TileCoordinateDebugRenderer(worldview),
     ]);
   }).fail(function(error) {

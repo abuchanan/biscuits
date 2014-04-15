@@ -62,4 +62,11 @@ dev stuff:
 - grunt?
 - bower install list
 
-
+renderers
+- background
+-- animated sprite
+- player
+-- possibly animate in between tiles
+-- player shares some functionaltiy in common with background
+- monsters
+-- renderer for each monster?
