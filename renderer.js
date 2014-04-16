@@ -183,38 +183,10 @@ function makeMainTestGrid() {
 }
 
 
-function ViewpointLoader(world, view, player) {
-  this.world = world;
+function ViewpointLoader(viewpoints, view, player) {
+  this.viewpoints = viewpoints;
   this.view = view;
   this.player = player;
-
-  // TODO hard-codeded
-  this.viewpoints = {
-    'main': {
-      viewPosition: {
-        map: 'main',
-        row: 0,
-        column: 0,
-      },
-      playerPosition: {
-        map: 'main',
-        row: 2,
-        column: 2,
-      },
-    },
-    'room': {
-      viewPosition: {
-        map: 'room',
-        row: 0,
-        column: 0,
-      },
-      playerPosition: {
-        map: 'room',
-        row: 2,
-        column: 2,
-      },
-    },
-  };
 }
 
 ViewpointLoader.prototype = {
@@ -304,12 +276,39 @@ function startBiscuits(canvas) {
       },
     };
 
+    var viewpoints = {
+      'main': {
+        viewPosition: {
+          map: 'main',
+          row: 0,
+          column: 0,
+        },
+        playerPosition: {
+          map: 'main',
+          row: 2,
+          column: 2,
+        },
+      },
+      'room': {
+        viewPosition: {
+          map: 'room',
+          row: 0,
+          column: 0,
+        },
+        playerPosition: {
+          map: 'room',
+          row: 2,
+          column: 2,
+        },
+      },
+    };
+
 
     var world = makeTestWorld();
   
     var worldview = new WorldView(world, 20, 20);
 
-    var viewpointLoader = new ViewpointLoader(world, worldview, player);
+    var viewpointLoader = new ViewpointLoader(viewpoints, worldview, player);
     viewpointLoader.load('main');
 
     var blankTile = new SolidColor('black');
