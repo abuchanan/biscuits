@@ -1,4 +1,3 @@
-tile map
 
 loading chunks of map
 
@@ -19,7 +18,6 @@ enemies
 - difficulty level
 - figuring out which enemies are in the current view
 
-each tile has a background and foreground? background and foreground can draw themselves
 
 combat calculation
 - weapons
@@ -37,7 +35,6 @@ AI
 
 sprites that cover multiple tiles
 
-separate world grid from viewable grid
 
 teleport (i.e. doorway)
 - sets both visibile grid position and player position
@@ -63,10 +60,12 @@ dev stuff:
 - bower install list
 
 renderers
-- background
--- animated sprite
 - player
 -- possibly animate in between tiles
--- player shares some functionaltiy in common with background
 - monsters
 -- renderer for each monster?
+
+possible simplication of positions: some are relative (player) while some are absolute (tile, view)
+can I make player absolute?
+
+s/renderer/layer/

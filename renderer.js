@@ -5,6 +5,7 @@ function Tile(row, column) {
   this.column = column;
   this.layers = [];
   this.block = false;
+  this.portal = false;
 }
 
 
@@ -73,30 +74,10 @@ GridRenderer.prototype = {
         for (var layer_i = 0; layer_i < tile.layers.length; layer_i++) {
           var layer = tile.layers[layer_i];
           layer.render(ctx, x, y, renderer.tileWidth, renderer.tileHeight);
-          
         }
       } else {
         renderer.blankTile.render(ctx, x, y, renderer.tileWidth, renderer.tileHeight);
       }
-    });
-  },
-};
-
-
-
-function TileCoordinateDebugRenderer(grid) {
-  this.grid = grid;
-}
-TileCoordinateDebugRenderer.prototype = {
-  render: function(ctx) {
-    // TODO be careful about using "this" in forEach
-    this.grid.forEach(function(tile, row, column) {
-      var x = column * this.tileWidth;
-      var y = row * this.tileHeight;
-      var str = tile.row + ',' + tile.column
-      ctx.fillStyle = 'black';
-      //ctx.font = '16px serif';
-      ctx.fillText(str, x + 7, y + 13);
     });
   },
 };
@@ -125,51 +106,59 @@ PlayerRenderer.prototype = {
 };
 
 
-function Sprite(image, x, y, w, h) {
-  this.image = image;
-  this.x = x;
-  this.y = y;
-  this.w = w;
-  this.h = h;
+function World() {
+  this.maps = {};
 }
-Sprite.prototype = {
-  render: function(ctx, x, y, w, h) {
-    ctx.drawImage(this.image,
-                  // source image x, y
-                  this.x, this.y,
-                  // source image width, height
-                  this.w, this.h,
-                  // destination x, y
-                  x, y,
-                  // destination width, height
-                  w, h);
-  }
+World.prototype = {
+
+  registerMap: function(name, grid) {
+    this.maps[name] = grid;
+  },
+
+  getTile: function(map, row, column) {
+    // TODO handle missing map
+    return this.maps[map].getTile(row, column);
+  },
 };
 
-function SpriteSheet(image) {
-  this.image = image;
-}
-SpriteSheet.prototype = {
-  slice: function(x, y, w, h) {
-    return new Sprite(this.image, x, y, w, h);
-  }
-};
 
-function loadSpriteSheet(src) {
-  var deferred = Q.defer();
+function makeTestWorld() {
+  var mainGrid = makeMainTestGrid();
+  var roomGrid = makeRoomTestGrid();
 
-  var img = new Image();
+  var world = new World();
+  world.registerMap('main', mainGrid);
+  world.registerMap('room', roomGrid);
 
-  img.onload = function() {
-    var sprite = new SpriteSheet(img);
-    deferred.resolve(sprite);
-  }
-  img.src = src;
-  
-  return deferred.promise;
+  return world;
 }
 
-function makeTestGrid() {
+function makeRoomTestGrid() {
+  var grid = new Grid(50, 50);
+  var blackTile = new SolidColor('black');
+  var blueTile = new SolidColor('blue');
+
+  grid.forEach(function(tile) {
+    if (tile.row == 0 || tile.column == 0 ||
+        tile.row == grid.numRows - 1 ||
+        tile.column == grid.numColumns - 1) {
+
+      tile.layers.push(blackTile);
+      tile.block = true;
+    } else {
+      tile.layers.push(blueTile);
+    }
+  });
+
+  var portal = grid.getTile(10, 10);
+  portal.portal = 'main';
+  portal.layers = [new SolidColor('green')];
+
+  return grid;
+}
+
+
+function makeMainTestGrid() {
   var grid = new Grid(100, 100);
   var blackTile = new SolidColor('black');
   var grayTile = new SolidColor('gray');
@@ -186,21 +175,77 @@ function makeTestGrid() {
     }
   });
 
+  var portal = grid.getTile(10, 10);
+  portal.portal = 'room';
+  portal.layers = [new SolidColor('green')];
+
   return grid;
 }
+
+
+function ViewpointLoader(world, view, player) {
+  this.world = world;
+  this.view = view;
+  this.player = player;
+
+  // TODO hard-codeded
+  this.viewpoints = {
+    'main': {
+      viewPosition: {
+        map: 'main',
+        row: 0,
+        column: 0,
+      },
+      playerPosition: {
+        map: 'main',
+        row: 2,
+        column: 2,
+      },
+    },
+    'room': {
+      viewPosition: {
+        map: 'room',
+        row: 0,
+        column: 0,
+      },
+      playerPosition: {
+        map: 'room',
+        row: 2,
+        column: 2,
+      },
+    },
+  };
+}
+
+ViewpointLoader.prototype = {
+  load: function(name) {
+    var viewpoint = this.viewpoints[name];
+    this.view.setPosition(viewpoint.viewPosition);
+    this.player.setPosition(viewpoint.playerPosition);
+  },
+};
 
 
 function WorldView(world, numRows, numColumns) {
   this.world = world;
   this.numRows = numRows;
   this.numColumns = numColumns;
-  this.offset = {
+  // TODO or map is an instance of Map instead of a string (map name)?
+  this.position = {
+    map: false,
     row: 0,
     column: 0,
   };
 }
 
 WorldView.prototype = {
+
+  setPosition: function(pos) {
+    this.position.map = pos.map;
+    this.position.row = pos.row;
+    this.position.column = pos.column;
+  },
+
   forEach: function(callback) {
     for (var i = 0; i < this.numRows; i++) {
       for (var j = 0; j < this.numColumns; j++) {
@@ -209,40 +254,25 @@ WorldView.prototype = {
       }
     }
   },
+
   getTile: function(i, j) {
-    var row_i = this.offset.row + i;
-    var col_i = this.offset.column + j;
-    return this.world.getTile(row_i, col_i);
+    var row_i = this.position.row + i;
+    var col_i = this.position.column + j;
+    return this.world.getTile(this.position.map, row_i, col_i);
   },
 
   // TODO need to be careful about shifting out of bounds
   shiftRight: function() {
-    this.offset.column += this.numColumns - 2;
+    this.position.column += this.numColumns - 2;
   },
   shiftLeft: function() {
-    this.offset.column -= this.numColumns - 2;
+    this.position.column -= this.numColumns - 2;
   },
   shiftUp: function() {
-    this.offset.row -= this.numRows - 2;
+    this.position.row -= this.numRows - 2;
   },
   shiftDown: function() {
-    this.offset.row += this.numRows - 2;
-  },
-};
-
-
-function SpriteAnimation(sprites) {
-  this.sprites = sprites;
-  this._frame_i = 0;
-}
-SpriteAnimation.prototype = {
-  render: function(ctx, x, y, w, h) {
-    var duration = 30;
-    var sprite_i = Math.floor(this._frame_i / duration) % this.sprites.length;
-
-    this.sprites[sprite_i].render(ctx, x, y, w, h);
-
-    this._frame_i += 1;
+    this.position.row += this.numRows - 2;
   },
 };
 
@@ -264,9 +294,23 @@ function startBiscuits(canvas) {
       'right': playerSpriteSheet.slice(375, 95, 80, 80),
     };
 
+    var player = {
+      position: {map: false, row: 0, column: 0},
+      direction: 'down',
+      setPosition: function(pos) {
+        this.position.map = pos.map;
+        this.position.row = pos.row;
+        this.position.column = pos.column;
+      },
+    };
 
-    var world = makeTestGrid();
+
+    var world = makeTestWorld();
+  
     var worldview = new WorldView(world, 20, 20);
+
+    var viewpointLoader = new ViewpointLoader(world, worldview, player);
+    viewpointLoader.load('main');
 
     var blankTile = new SolidColor('black');
 
@@ -278,21 +322,17 @@ function startBiscuits(canvas) {
       spritesheets[1].slice(0, 0, 30, 30),
     ]);
 
-    var squirrelTile = world.getTile(5, 5);
+    var squirrelTile = world.getTile('main', 5, 5);
     squirrelTile.layers.push(squirrelSpriteAnim);
     squirrelTile.block = true;
 
     var tileWidth = canvas.width / worldview.numColumns;
     var tileHeight = canvas.height / worldview.numRows;
     
-    var player = {
-      position: {row: 2, column: 1},
-      direction: 'down',
-    };
 
     // TODO i don't like having to pass document around
     var keybindings = new KeyBindings(document);
-    var movementHandler = new MovementHandler(keybindings, player, worldview);
+    var movementHandler = new MovementHandler(keybindings, player, worldview, viewpointLoader);
 
     startRender(canvas, [
       new GridRenderer(worldview, blankTile, tileWidth, tileHeight),
@@ -320,94 +360,3 @@ function startRender(canvas, renderers) {
   }
   requestAnimationFrame(masterRender);
 }
-
-
-function MovementHandler(keybindings, player, grid) {
-
-  function move(rowDelta, columnDelta) {
-    var nextRow = player.position.row + rowDelta;
-    var nextCol = player.position.column + columnDelta;
-
-    var nextTile = grid.getTile(nextRow, nextCol);
-
-    if (nextTile && !nextTile.block) {
-
-      if (nextTile.column == grid.offset.column + grid.numColumns - 1) {
-        player.position.column = 1;
-        grid.shiftRight();
-      } else if (nextTile.column == grid.offset.column) {
-        grid.shiftLeft();
-        player.position.column = grid.numColumns - 2;
-
-      } else if (nextTile.row == grid.offset.row + grid.numRows - 1) {
-        grid.shiftDown();
-        player.position.row = 1;
-
-      } else if (nextTile.row == grid.offset.row) {
-        grid.shiftUp();
-        player.position.row = grid.numRows - 2;
-
-      } else {
-        player.position.row = nextRow;
-        player.position.column = nextCol;
-      }
-      
-    }
-  }
-
-  function makeCallback(rowDelta, columnDelta) {
-    return function(direction) {
-      move(rowDelta, columnDelta);
-      player.direction = direction;
-    }
-  }
-
-  keybindings.on('up', makeCallback(-1, 0));
-  keybindings.on('down', makeCallback(1, 0));
-  keybindings.on('left', makeCallback(0, -1));
-  keybindings.on('right', makeCallback(0, 1));
-}
-
-
-function KeyBindings(document) {
-
-  var keybindings = this;
-
-  document.addEventListener('keypress', function(event) {
-
-    var keyCodeMap = {
-      38: 'up',
-      40: 'down',
-      37: 'left',
-      39: 'right',
-    };
-
-    var eventName = keyCodeMap[event.keyCode];
-    if (eventName) {
-      keybindings._fire(eventName);
-      event.preventDefault();
-    }
-
-  }, true);
-
-  this.listeners = {};
-}
-
-KeyBindings.prototype = {
-  _fire: function(name) {
-    var listeners = this.listeners[name] || [];
-    for (var i = 0, ii = listeners.length; i < ii; i++) {
-      listeners[i](name);
-    }
-  },
-  on: function(name, callback) {
-    var listeners = this.listeners[name];
-
-    if (!listeners) {
-      var listeners = [];
-      this.listeners[name] = listeners;
-    }
-
-    this.listeners[name].push(callback);
-  },
-};
