@@ -1,8 +1,9 @@
 'use strict';
 
 
-function World(player, numLayers) {
+function World(player) {
   this.player = player;
+  var numLayers = 3;
 
   // TODO document "3" and make it easily configurable?
   this._index = [];
@@ -10,7 +11,7 @@ function World(player, numLayers) {
     this._index[i] = rbush(3);
   }
 
-  this.add(player, 1, player.position);
+  this.add(player, 2, player.position);
 }
 World.prototype = {
 
@@ -53,10 +54,17 @@ World.prototype = {
     }
     return items;
   },
+
+  view: function(width, height) {
+    var view = new WorldView(this, 20, 20);
+    this.player.position.onChange(view.handlePlayerPositionChange.bind(view));
+    return view;
+  },
 };
 
 
-function WorldView(width, height) {
+function WorldView(world, width, height) {
+  this.world = world;
   this.width = width;
   this.height = height;
   this.position = new Position(0, 0);
@@ -90,6 +98,13 @@ WorldView.prototype = {
     }
   },
 
+  items: function() {
+    var viewX = this.position.getX();
+    var viewY = this.position.getY();
+    return this.world.query(viewX, viewY,
+                            viewX + this.width - 1, viewY + this.height - 1);
+  },
+
   // TODO need to be careful about shifting out of bounds
   shiftRight: function() {
     this.position.setX(this.position.getX() + this.width - 2);
@@ -105,30 +120,50 @@ WorldView.prototype = {
   },
 };
 
-var worldO;
+
+function SceneManager() {
+
+  function startRenderLoop(renderFunction) {
+    function handleFrame() {
+      renderFunction();
+      requestAnimationFrame(handleFrame);
+    }
+    requestAnimationFrame(handleFrame);
+  }
+
+  return {
+    _scenes: {},
+    _currentScene: false,
+
+    // no-op
+    render: function() {},
+    start: function() {
+      var canvasRenderer = CanvasLayersRenderer(canvas, [
+        this,
+      ]);
+
+      startRenderLoop(canvasRenderer);
+    },
+    addScene: function(name, sceneFunction) {
+      this._scenes[name] = sceneFunction;
+    },
+    load: function(name) {
+      // TODO unload current scene
+      this._scenes[name](this);
+    },
+  }
+}
+
 
 function startBiscuits(canvas) {
 
-  makeTestWorld().then(function(world) {
-    var view = new WorldView(20, 20);
-    worldO = world;
+  var sceneManager = SceneManager();
+  sceneManager.addScene('main', makeTestWorld);
 
-    world.player.position.onChange(view.handlePlayerPositionChange.bind(view));
+  sceneManager.addScene('room', makeRoomTestWorld);
 
-    var keybindings = new KeyBindings(document);
-    var movementHandler = new MovementHandler(keybindings, world, world.player);
-
-    var viewRenderer = WorldViewRenderer(world, view);
-
-    var canvasRenderer = CanvasLayersRenderer(canvas, [
-      viewRenderer,
-    ]);
-
-    startRenderLoop(canvasRenderer);
-
-  }).fail(function(error) {
-    console.log(error);
-  });
+  sceneManager.load('main');
+  sceneManager.start();
 }
 
 
@@ -138,12 +173,12 @@ function CanvasLayersRenderer(canvas, layers) {
   return function() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0, ii = layers.length; i < ii; i++) {
-      layers[i](ctx);
+      layers[i].render(ctx);
     }
   }
 }
 
-function WorldViewRenderer(world, view) {
+function WorldViewRenderer(view) {
 
   // TODO blank tile handling?
   return function(ctx) {
@@ -153,8 +188,7 @@ function WorldViewRenderer(world, view) {
 
     var viewX = view.position.getX();
     var viewY = view.position.getY();
-    var items = world.query(viewX, viewY,
-                            viewX + view.width - 1, viewY + view.height - 1);
+    var items = view.items();
 
     for (var i = 0, ii = items.length; i < ii; i++) {
       var item = items[i];
@@ -173,13 +207,4 @@ function WorldViewRenderer(world, view) {
       obj.render.call(obj, ctx, x, y, tileWidth, tileHeight);
     }
   }
-}
-
-
-function startRenderLoop(renderFunction) {
-  function handleFrame() {
-    renderFunction();
-    requestAnimationFrame(handleFrame);
-  }
-  requestAnimationFrame(handleFrame);
 }
