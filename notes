@@ -1,5 +1,5 @@
 
-loading chunks of map
+loading chunks of map, i.e. load on demand
 
 game state
 
@@ -12,7 +12,6 @@ map state
 - e.g. door X has been unlocked
 - story state
 
-location of character on map
 
 enemies
 - difficulty level
@@ -29,15 +28,13 @@ damage
 
 status layer
 
+monster movement: can't move into portals
+
 saving
 
 AI
 
 sprites that cover multiple tiles
-
-
-teleport (i.e. doorway)
-- sets both visibile grid position and player position
 
 
 max movement speed
@@ -47,6 +44,8 @@ planes, trains, automobiles, submarines, etc
 
 
 stage renderer, i.e. be able to switch master renderer
+- door that leads to store doesn't match viewpointloader
+
 world map
 inventory
 settings
@@ -65,7 +64,6 @@ renderers
 - monsters
 -- renderer for each monster?
 
-possible simplication of positions: some are relative (player) while some are absolute (tile, view)
-can I make player absolute?
-
 s/renderer/layer/
+
+reimplement portals, squirrel, loader
