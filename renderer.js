@@ -118,6 +118,36 @@ WorldView.prototype = {
   shiftDown: function() {
     this.position.setY(this.position.getY() + this.height - 2);
   },
+
+  // TODO blank tile handling?
+  render: function(ctx) {
+
+    var tileWidth = ctx.canvas.width / this.width;
+    var tileHeight = ctx.canvas.height / this.height;
+
+    var viewX = this.position.getX();
+    var viewY = this.position.getY();
+    var items = this.items();
+
+    for (var i = 0, ii = items.length; i < ii; i++) {
+      var item = items[i];
+
+      /*
+        An item's position might not directly map to the canvas position,
+        so we provide x/y coordinates the the item's render method.
+
+        TODO alternatively, we could just transform the context, and the
+             item would just draw whereever the context currently is.
+      */
+      var x = (item[0] - viewX) * tileWidth;
+      var y = (item[1] - viewY) * tileHeight;
+      var obj = item[4];
+
+      if (obj.render) {
+        obj.render.call(obj, ctx, x, y, tileWidth, tileHeight);
+      }
+    }
+  }
 };
 
 
@@ -145,11 +175,12 @@ function SceneManager() {
       startRenderLoop(canvasRenderer);
     },
     addScene: function(name, sceneFunction) {
+      console.log(name, sceneFunction);
       this._scenes[name] = sceneFunction;
     },
     load: function(name) {
       // TODO unload current scene
-      this._scenes[name](this);
+      this._scenes[name]();
     },
   }
 }
@@ -158,12 +189,18 @@ function SceneManager() {
 function startBiscuits(canvas) {
 
   var sceneManager = SceneManager();
-  sceneManager.addScene('main', makeTestWorld);
+  Q.all([
+    makeTestWorld(sceneManager),
+    //makeRoomTestWorld(sceneManager),
 
-  sceneManager.addScene('room', makeRoomTestWorld);
+  ]).then(function() {
+    sceneManager.load('main');
+    sceneManager.start();
 
-  sceneManager.load('main');
-  sceneManager.start();
+  })
+  .fail(function(reason) {
+    console.log(reason);
+  });
 }
 
 
@@ -174,37 +211,6 @@ function CanvasLayersRenderer(canvas, layers) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (var i = 0, ii = layers.length; i < ii; i++) {
       layers[i].render(ctx);
-    }
-  }
-}
-
-function WorldViewRenderer(view) {
-
-  // TODO blank tile handling?
-  return function(ctx) {
-
-    var tileWidth = ctx.canvas.width / view.width;
-    var tileHeight = ctx.canvas.height / view.height;
-
-    var viewX = view.position.getX();
-    var viewY = view.position.getY();
-    var items = view.items();
-
-    for (var i = 0, ii = items.length; i < ii; i++) {
-      var item = items[i];
-
-      /*
-        An item's position might not directly map to the canvas position,
-        so we provide x/y coordinates the the item's render method.
-
-        TODO alternatively, we could just transform the context, and the
-             item would just draw whereever the context currently is.
-      */
-      var x = (item[0] - viewX) * tileWidth;
-      var y = (item[1] - viewY) * tileHeight;
-      var obj = item[4];
-
-      obj.render.call(obj, ctx, x, y, tileWidth, tileHeight);
     }
   }
 }

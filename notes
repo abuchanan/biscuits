@@ -28,13 +28,12 @@ damage
 
 status layer
 
-monster movement: can't move into portals
-
 saving
 
 AI
 
 sprites that cover multiple tiles
+- should work, just need proof 
 
 
 max movement speed
@@ -66,4 +65,5 @@ renderers
 
 s/renderer/layer/
 
-reimplement portals, squirrel, loader
+saving world state, e.g. load main, change squirrel state, load room, then 
+go back to main and have the squirrel be in the same state.
