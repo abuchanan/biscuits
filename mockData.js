@@ -80,13 +80,39 @@ function makeTestWorld(sceneManager) {
 
     world.add(player, 2, playerPosition);
 
-    makeMainTestGrid(world, 50);
+    //makeMainTestGrid(world, 50);
+
+    parseMap(fooData).then(function(slices) {
+
+      // TODO this loop could be optimized
+      for (var y = 0; y < fooData.height; y++) {
+        for (var x = 0; x < fooData.width; x++) {
+          var k = (y * fooData.width) + x;
+          var tileID = fooData.layers[0].data[k];
+          var tile = slices[tileID];
+          world.add(tile, 0, new Position(x, y));
+        }
+      }
+
+      var objects = fooData.layers[1].objects;
+      var block = {isBlock: true};
+
+      for (var i = 0; i < objects.length; i++) {
+        var obj = objects[i];
+        var x = obj.x / fooData.tilewidth;
+        var y = obj.y / fooData.tileheight;
+        var maxX = x + (obj.width / fooData.tilewidth) - 1;
+        var maxY = y + (obj.height / fooData.tileheight) - 1;
+        world.add(block, 1, new Position(x, y), maxX, maxY);
+      }
+
+    });
 
     var squirrel = Squirrel.create();
     world.add(squirrel, 1, new Position(5, 5));
 
-    var portal = Portal(sceneManager.load.bind(sceneManager, 'main-b'));
-    world.add(portal, 1, new Position(8, 8));
+    //var portal = Portal(sceneManager.load.bind(sceneManager, 'main-b'));
+    //world.add(portal, 1, new Position(8, 8));
 
     var movement = MovementHandler(world, player, playerPosition);
     var collider = Collider(world, player);
