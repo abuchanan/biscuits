@@ -1,33 +1,59 @@
-
-function Squirrel() {
-  return loadSpriteSheet('media/Monster-squirrel.png')
+function Player() {
+  return loadSpriteSheet('media/playerSprites.png')
   .then(function(spritesheet) {
 
-    // TODO a simple list doesn't give fine grained control over each
-    //      frame (such as frame duraction). imploy a addFrame method
-    var squirrelSpriteAnim = new SpriteAnimation([
-      spritesheet.slice(0, 0, 30, 30),
-      spritesheet.slice(30, 30, 30, 30),
-      spritesheet.slice(0, 0, 30, 30),
-    ]);
-    squirrelSpriteAnim.isBlock = true;
+    var sprites = {
+        'up': spritesheet.slice(5, 175, 80, 80),
+        'down': spritesheet.slice(5, 275, 80, 80),
+        'left': spritesheet.slice(0, 0, 80, 80),
+        'right': spritesheet.slice(375, 95, 80, 80),
+    };
 
-    return squirrelSpriteAnim;
+    return {
+      direction: 'down',
+
+      render: function(ctx, x, y, w, h) {
+          var sprite = sprites[this.direction]
+          sprite.render(ctx, x, y, w, h);
+      },
+    };
   });
 }
 
-function Portal(name, load) {
+
+function SquirrelService() {
+  return loadSpriteSheet('media/Monster-squirrel.png')
+  .then(function(spritesheet) {
+
+    return {
+      create: function() {
+        // TODO a simple list doesn't give fine grained control over each
+        //      frame (such as frame duraction). imploy a addFrame method
+        var squirrelSpriteAnim = new SpriteAnimation([
+          spritesheet.slice(0, 0, 30, 30),
+          spritesheet.slice(30, 30, 30, 30),
+          spritesheet.slice(0, 0, 30, 30),
+        ]);
+        squirrelSpriteAnim.isBlock = true;
+
+        return squirrelSpriteAnim;
+      },
+    };
+  });
+}
+
+
+function Portal(load) {
   return {
     handlePlayerCollision: function(player) {
-      console.log('portal', name);
       load();
     },
   }
 }
 
-function collide(world, player) {
+function Collider(world, player) {
 
-  function handlePlayerPositionChange(position) {
+  return function(position) {
     var x = position.getX();
     var y = position.getY();
     var items = world.query(x, y);
@@ -40,48 +66,70 @@ function collide(world, player) {
       }
     }
   }
-
-  player.position.onChange(handlePlayerPositionChange);
 }
 
 
 function makeTestWorld(sceneManager) {
 
-  var reqs = [Player(), Squirrel()];
+  var reqs = [Player(), SquirrelService()];
 
-  return Q.spread(reqs, function(player, squirrel) {
+  return Q.spread(reqs, function(player, Squirrel) {
 
-    var world = new World(player);
+    var world = new World();
+    var playerPosition = new Position(0, 0);
+
+    world.add(player, 2, playerPosition);
 
     makeMainTestGrid(world, 50);
+
+    var squirrel = Squirrel.create();
     world.add(squirrel, 1, new Position(5, 5));
 
-    var portal = Portal('main-b', sceneManager.load.bind(sceneManager, 'main-b'));
+    var portal = Portal(sceneManager.load.bind(sceneManager, 'main-b'));
     world.add(portal, 1, new Position(8, 8));
 
-    var keybindings = new KeyBindings(document);
-    // TODO don't use new
-    new MovementHandler(keybindings, world, world.player);
+    var movement = MovementHandler(world, player, playerPosition);
+    var collider = Collider(world, player);
 
-    collide(world, player);
+    var keybindings = KeyBindingsService(document);
 
-    var view = world.view(20, 20);
+    var view = new WorldView(world, 20, 20);
+
+    playerPosition.onChange(collider);
+    playerPosition.onChange(view.handlePlayerPositionChange.bind(view));
 
     sceneManager.addScene('main', function() {
-      player.position.set(2, 2);
+      // TODO not only set position, but direction
+      playerPosition.set(2, 2);
       view.position.set(0, 0);
       sceneManager.render = view.render.bind(view);
+
+      var deregisterKeybindings = keybindings.listen(function(name) {
+        movement[name]();
+      });
+
+      // return unload function
+      return function() {
+        deregisterKeybindings();
+      }
+
     });
 
     sceneManager.addScene('main-b', function() {
-      player.position.set(2, 10);
+      playerPosition.set(2, 10);
       view.position.set(0, 0);
       sceneManager.render = view.render.bind(view);
+
+      var deregisterKeybindings = keybindings.listen(function(name) {
+        movement[name]();
+      });
+
+      // return unload function
+      return function() {
+        deregisterKeybindings();
+      }
     });
 
-    // TODO it's very important to fully unload/clean up a scene
-    // when another is loaded. I sense this could be an easy thing to get
-    // wrong, creating subtle bugs. How to make this foolproof?
   });
 }
 
@@ -112,33 +160,6 @@ function makeRoomTestWorld(sceneManager) {
   });
 }
 
-function Player() {
-  return loadSpriteSheet('media/playerSprites.png')
-  .then(function(playerSpriteSheet) {
-
-    return {
-      position: new Position(0, 0),
-      direction: 'down',
-
-      sprites: {
-        'up': playerSpriteSheet.slice(5, 175, 80, 80),
-        'down': playerSpriteSheet.slice(5, 275, 80, 80),
-        'left': playerSpriteSheet.slice(0, 0, 80, 80),
-        'right': playerSpriteSheet.slice(375, 95, 80, 80),
-      },
-
-      render: function(ctx, x, y, w, h) {
-        var sprite = this.sprites[this.direction]
-
-        if (!sprite) {
-          throw 'Error: missing player sprite';
-        }
-
-        sprite.render(ctx, x, y, w, h);
-      },
-    };
-  });
-}
 
 
 function Area(w, h, color) {

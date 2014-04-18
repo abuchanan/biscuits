@@ -1,42 +1,28 @@
-function KeyBindings(document) {
+function KeyBindingsService(document) {
 
-  var keybindings = this;
+  var keyCodeMap = {
+    38: 'up',
+    40: 'down',
+    37: 'left',
+    39: 'right',
+  };
 
-  document.addEventListener('keypress', function(event) {
+  return {
+    listen: function(callback) {
 
-    var keyCodeMap = {
-      38: 'up',
-      40: 'down',
-      37: 'left',
-      39: 'right',
-    };
+      function listener(event) {
+        var eventName = keyCodeMap[event.keyCode];
+        if (eventName) {
+          callback(eventName);
+          event.preventDefault();
+        }
+      }
 
-    var eventName = keyCodeMap[event.keyCode];
-    if (eventName) {
-      keybindings._fire(eventName);
-      event.preventDefault();
-    }
+      document.addEventListener('keypress', listener, true);
 
-  }, true);
-
-  this.listeners = {};
+      return function() {
+        document.removeEventListener('keypress', listener, true);
+      }
+    },
+  };
 }
-
-KeyBindings.prototype = {
-  _fire: function(name) {
-    var listeners = this.listeners[name] || [];
-    for (var i = 0, ii = listeners.length; i < ii; i++) {
-      listeners[i](name);
-    }
-  },
-  on: function(name, callback) {
-    var listeners = this.listeners[name];
-
-    if (!listeners) {
-      var listeners = [];
-      this.listeners[name] = listeners;
-    }
-
-    this.listeners[name].push(callback);
-  },
-};

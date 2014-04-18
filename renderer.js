@@ -1,8 +1,7 @@
 'use strict';
 
 
-function World(player) {
-  this.player = player;
+function World() {
   var numLayers = 3;
 
   // TODO document "3" and make it easily configurable?
@@ -10,8 +9,6 @@ function World(player) {
   for (var i = 0; i < numLayers; i++) {
     this._index[i] = rbush(3);
   }
-
-  this.add(player, 2, player.position);
 }
 World.prototype = {
 
@@ -53,12 +50,6 @@ World.prototype = {
       items.push.apply(items, res);
     }
     return items;
-  },
-
-  view: function(width, height) {
-    var view = new WorldView(this, 20, 20);
-    this.player.position.onChange(view.handlePlayerPositionChange.bind(view));
-    return view;
   },
 };
 

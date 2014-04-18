@@ -1,4 +1,4 @@
-function MovementHandler(keybindings, world, player) {
+function MovementHandler(world, player, position) {
 
   function canMoveTo(x, y) {
     var items = world.query(x, y);
@@ -14,22 +14,24 @@ function MovementHandler(keybindings, world, player) {
     return true;
   }
 
-  function makeCallback(deltaX, deltaY) {
-    return function(direction) {
+  function makeCallback(direction, deltaX, deltaY) {
+    return function() {
 
-      var nextX = player.position.getX() + deltaX
-      var nextY = player.position.getY() + deltaY;
+      var nextX = position.getX() + deltaX
+      var nextY = position.getY() + deltaY;
 
       player.direction = direction;
 
       if (canMoveTo(nextX, nextY)) {
-        player.position.set(nextX, nextY);
+        position.set(nextX, nextY);
       }
     }
   }
 
-  keybindings.on('up', makeCallback(0, -1));
-  keybindings.on('down', makeCallback(0, 1));
-  keybindings.on('left', makeCallback(-1, 0));
-  keybindings.on('right', makeCallback(1, 0));
+  return {
+    up: makeCallback('up', 0, -1),
+    down: makeCallback('down', 0, 1),
+    left: makeCallback('left', -1, 0),
+    right: makeCallback('right', 1, 0),
+  };
 }
