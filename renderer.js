@@ -154,7 +154,7 @@ function SceneManager() {
 
   return {
     _scenes: {},
-    _currentScene: false,
+    _unload: false,
 
     // no-op
     render: function() {},
@@ -170,8 +170,10 @@ function SceneManager() {
       this._scenes[name] = sceneFunction;
     },
     load: function(name) {
-      // TODO unload current scene
-      this._scenes[name]();
+      if (this._unload) {
+        this._unload();
+      }
+      this._unload = this._scenes[name]();
     },
   }
 }
