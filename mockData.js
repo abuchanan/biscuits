@@ -68,7 +68,6 @@ function Collider(world, player) {
   }
 }
 
-
 function makeTestWorld(sceneManager) {
 
   var reqs = [Player(), SquirrelService()];
@@ -82,9 +81,9 @@ function makeTestWorld(sceneManager) {
 
     //makeMainTestGrid(world, 50);
 
-    var mapData = fooData2;
-
-    parseMap(mapData).then(function(layers) {
+    loadMap('foo2.json').then(parseMap)
+    .then(function(layers) {
+      console.log('layers', layers);
       // TODO number of layers in world needs to be set  here
 
         for (var layer_i = 0; layer_i < layers.length; layer_i++) {

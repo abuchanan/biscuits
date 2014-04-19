@@ -110,3 +110,17 @@ function parseMap(map) {
       return layerObjs;
     });
 }
+
+function loadMap(src) {
+  var deferred = Q.defer();
+  var req = new XMLHttpRequest();
+  req.onload = function() {
+    var d = JSON.parse(this.responseText);
+    deferred.resolve(d);
+  };
+  req.responseType = 'application/json';
+  req.overrideMimeType('application/json');
+  req.open('get', src, true);
+  req.send();
+  return deferred.promise;
+}
