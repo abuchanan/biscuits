@@ -5,7 +5,7 @@
  </tileset>
  <layer name="Tile Layer 1" width="20" height="20">
   <data encoding="base64" compression="zlib">
-   eJyTZGBgkKISlgZiRSBWohJWHjVvSJmnAsRaUKxKBfNA8nJQTIw/6G2eDgMi7esOwvgYNW/UPHTzNBkQeZRSrA3EAOw2NSs=
+   eJyTZGBgkKISlgZiRSBWohJWHjVvSJnHhYZHzRte8Ttq3tA3TxOItaiEtYEYAJDDM6E=
   </data>
  </layer>
  <objectgroup name="Block layer" width="20" height="20">
@@ -16,15 +16,14 @@
   <object x="0" y="0" width="32" height="640"/>
   <object x="608" y="0" width="32" height="640"/>
   <object x="0" y="0" width="640" height="32"/>
-  <object x="224" y="224" width="128" height="128"/>
  </objectgroup>
  <objectgroup name="Objects" width="20" height="20">
-  <object name="portal other" type="portal" x="64" y="544" width="32" height="32">
+  <object name="portal main-b" type="portal" x="64" y="544" width="32" height="32">
    <properties>
-    <property name="portal" value="other"/>
+    <property name="portal" value="main"/>
    </properties>
   </object>
-  <object name="main" type="loadpoint" x="64" y="64" width="32" height="32"/>
-  <object name="squirrel" type="squirrel" x="128" y="128" width="32" height="32"/>
+  <object name="other" type="loadpoint" x="64" y="64" width="32" height="32"/>
+  <object name="squirrel" type="squirrel" x="480" y="480" width="32" height="32"/>
  </objectgroup>
 </map>

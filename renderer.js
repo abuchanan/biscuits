@@ -183,7 +183,8 @@ function startBiscuits(canvas) {
 
   var sceneManager = SceneManager();
   Q.all([
-    loadWorld('foo4.json', sceneManager),
+    loadWorld('foo6.json', sceneManager),
+    loadWorld('other1.json', sceneManager),
 
   ]).then(function() {
     sceneManager.load('main');
