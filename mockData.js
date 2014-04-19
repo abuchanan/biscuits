@@ -81,7 +81,7 @@ function makeTestWorld(sceneManager) {
 
     //makeMainTestGrid(world, 50);
 
-    loadMap('foo2.json').then(parseMap)
+    loadMap('foo3.json').then(parseMap)
     .then(function(layers) {
       console.log('layers', layers);
       // TODO number of layers in world needs to be set  here
@@ -89,6 +89,13 @@ function makeTestWorld(sceneManager) {
         for (var layer_i = 0; layer_i < layers.length; layer_i++) {
           for (var obj_i = 0; obj_i < layers[layer_i].length; obj_i++) {
             var obj = layers[layer_i][obj_i];
+
+            if (obj.portal) {
+              obj.handlePlayerCollision = function() {
+                sceneManager.load(obj.portal);
+              }
+            }
+
             world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);
           }
         }

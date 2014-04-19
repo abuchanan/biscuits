@@ -2,7 +2,7 @@
 
 
 function World() {
-  var numLayers = 3;
+  var numLayers = 4;
 
   // TODO document "3" and make it easily configurable?
   this._index = [];
