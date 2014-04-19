@@ -1,8 +1,8 @@
 'use strict';
 
 
-function World() {
-  var numLayers = 4;
+// TODO a 3D index would be better than an array of indices.
+function World(numLayers) {
 
   // TODO document "3" and make it easily configurable?
   this._index = [];
@@ -166,10 +166,10 @@ function SceneManager() {
       startRenderLoop(canvasRenderer);
     },
     addScene: function(name, sceneFunction) {
-      console.log(name, sceneFunction);
       this._scenes[name] = sceneFunction;
     },
     load: function(name) {
+      console.log(name);
       if (this._unload) {
         this._unload();
       }

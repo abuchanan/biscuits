@@ -61,6 +61,8 @@ function parseObjectLayer(layer, map) {
         y: y,
         maxX: maxX,
         maxY: maxY,
+        type: obj.type,
+        name: obj.name,
       };
 
       var parsedObj = _.extend({}, layer.properties, obj.properties, pos);

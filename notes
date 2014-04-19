@@ -91,8 +91,6 @@ possibly ditch tile coordinate system and use x/y coordinates
 animation when switching world (e.g. go in door, current scene fades out)
 
 things to define in Tiled and other ideas for objects:
-- load points
-- portals
 - animated tiles (squirrel)
 - monsters
 - moveable objects
@@ -102,6 +100,8 @@ things to define in Tiled and other ideas for objects:
 
 
 "do action" buttons: talk to someone, attack, use magic, whatever
+
+map load validation
 
 
 http://opengameart.org/content/tiled-terrains

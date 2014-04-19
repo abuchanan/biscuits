@@ -70,84 +70,71 @@ function Collider(world, player) {
 
 function makeTestWorld(sceneManager) {
 
-  var reqs = [Player(), SquirrelService()];
+  var reqs = [
+    Player(),
+    SquirrelService(),
+    loadMap('foo4.json').then(parseMap),
+  ];
 
-  return Q.spread(reqs, function(player, Squirrel) {
+  return Q.spread(reqs, function(player, Squirrel, layers) {
 
-    var world = new World();
+    var world = new World(layers.length);
+    var view = new WorldView(world, 20, 20);
+
     var playerPosition = new Position(0, 0);
-
-    world.add(player, 2, playerPosition);
-
-    //makeMainTestGrid(world, 50);
-
-    loadMap('foo3.json').then(parseMap)
-    .then(function(layers) {
-      console.log('layers', layers);
-      // TODO number of layers in world needs to be set  here
-
-        for (var layer_i = 0; layer_i < layers.length; layer_i++) {
-          for (var obj_i = 0; obj_i < layers[layer_i].length; obj_i++) {
-            var obj = layers[layer_i][obj_i];
-
-            if (obj.portal) {
-              obj.handlePlayerCollision = function() {
-                sceneManager.load(obj.portal);
-              }
-            }
-
-            world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);
-          }
-        }
-    });
-
-    var squirrel = Squirrel.create();
-    world.add(squirrel, 1, new Position(5, 5));
-
-    //var portal = Portal(sceneManager.load.bind(sceneManager, 'main-b'));
-    //world.add(portal, 1, new Position(8, 8));
-
     var movement = MovementHandler(world, player, playerPosition);
     var collider = Collider(world, player);
 
-    var keybindings = KeyBindingsService(document);
-
-    var view = new WorldView(world, 20, 20);
-
+    world.add(player, 2, playerPosition);
     playerPosition.onChange(collider);
     playerPosition.onChange(view.handlePlayerPositionChange.bind(view));
 
-    sceneManager.addScene('main', function() {
-      // TODO not only set position, but direction
-      playerPosition.set(2, 2);
-      view.position.set(0, 0);
-      sceneManager.render = view.render.bind(view);
+    //var squirrel = Squirrel.create();
+    //world.add(squirrel, 1, new Position(5, 5));
 
-      var deregisterKeybindings = keybindings.listen(function(name) {
-        movement[name]();
-      });
+    var keybindings = KeyBindingsService(document);
 
-      // return unload function
-      return function() {
-        deregisterKeybindings();
+    function makeScene(playerX, playerY, viewX, viewY) {
+        return function() {
+            // TODO not only set position, but direction
+            playerPosition.set(playerX, playerY);
+            view.position.set(viewX, viewY);
+            sceneManager.render = view.render.bind(view);
+
+            var deregisterKeybindings = keybindings.listen(function(name) {
+              movement[name]();
+            });
+
+            // return unload function
+            return function() {
+              deregisterKeybindings();
+            }
+        }
+    }
+
+    for (var layer_i = 0; layer_i < layers.length; layer_i++) {
+      for (var obj_i = 0; obj_i < layers[layer_i].length; obj_i++) {
+        var obj = layers[layer_i][obj_i];
+
+        if (obj.type == 'loadpoint') {
+            console.log(obj.type, obj.name);
+            // TODO better default than 0, like center player in view
+            var viewX = obj.viewX || 0;
+            var viewY = obj.viewY || 0;
+            var load = makeScene(obj.x, obj.y, viewX, viewY);
+            sceneManager.addScene(obj.name, load);
+
+        } else {
+
+            if (obj.portal) {
+              obj.handlePlayerCollision = sceneManager.load.bind(sceneManager, obj.portal);
+            }
+
+            world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);
+        }
+
       }
-
-    });
-
-    sceneManager.addScene('main-b', function() {
-      playerPosition.set(2, 10);
-      view.position.set(0, 0);
-      sceneManager.render = view.render.bind(view);
-
-      var deregisterKeybindings = keybindings.listen(function(name) {
-        movement[name]();
-      });
-
-      // return unload function
-      return function() {
-        deregisterKeybindings();
-      }
-    });
+    }
 
   });
 }
