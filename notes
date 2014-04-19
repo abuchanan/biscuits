@@ -56,6 +56,8 @@ sprites that cover multiple tiles
 
 
 max movement speed
+- base movement time on frame rate?
+- switch from tile coordinate movement?
 
 
 planes, trains, automobiles, submarines, etc
@@ -67,6 +69,8 @@ stage renderer, i.e. be able to switch master renderer
 world map
 inventory
 settings
+
+bridge: player on top of tile going one way, beneath tile going another
 
 
 dev stuff:

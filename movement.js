@@ -1,29 +1,30 @@
-function MovementHandler(world, player, position) {
+function MovementHandler(position, options) {
 
-  function canMoveTo(x, y) {
-    var items = world.query(x, y);
+  function noop() {}
 
-    for (var i = 0, ii = items.length; i < ii; i++) {
-      // TODO handling query results is a little clunky
-      var obj = items[i][4];
+  var startCallback = options.onStart || noop;
+  var endCallback = options.onEnd || noop;
+  var canMove = options.canMove || function() { return true; };
 
-      if (obj.isBlock) {
-        return false;
-      }
-    }
-    return true;
-  }
+  var currentMovement = false;
+  var currentMovementIdx = 0;
+  var movementDuration = options.duration || 10;
 
   function makeCallback(direction, deltaX, deltaY) {
     return function() {
+      if (!currentMovement) {
 
-      var nextX = position.getX() + deltaX
-      var nextY = position.getY() + deltaY;
+        var nextX = position.getX() + deltaX
+        var nextY = position.getY() + deltaY;
 
-      player.direction = direction;
+        if (canMove(nextX, nextY)) {
+          position.set(nextX, nextY);
 
-      if (canMoveTo(nextX, nextY)) {
-        position.set(nextX, nextY);
+          currentMovement = true;
+          currentMovementIdx = 0;
+
+          startCallback(direction);
+        }
       }
     }
   }
@@ -33,5 +34,16 @@ function MovementHandler(world, player, position) {
     down: makeCallback('down', 0, 1),
     left: makeCallback('left', -1, 0),
     right: makeCallback('right', 1, 0),
+
+    tick: function() {
+      if (currentMovement) {
+        if (currentMovementIdx == movementDuration) {
+          currentMovement = false;
+          endCallback();
+        } else {
+          currentMovementIdx += 1;
+        }
+      }
+    }
   };
 }

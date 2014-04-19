@@ -156,6 +156,14 @@ function SceneManager() {
     _scenes: {},
     _unload: false,
 
+    onTick: [],
+    _doTick: function() {
+      var onTick = this.onTick;
+      for (var i = 0, ii = onTick.length; i < ii; i++) {
+        onTick[i]();
+      }
+    },
+
     // no-op
     render: function() {},
     start: function() {
@@ -163,7 +171,12 @@ function SceneManager() {
         this,
       ]);
 
-      startRenderLoop(canvasRenderer);
+      var doTick = this._doTick.bind(this);
+
+      startRenderLoop(function() {
+        canvasRenderer();
+        doTick();
+      });
     },
     addScene: function(name, sceneFunction) {
       this._scenes[name] = sceneFunction;

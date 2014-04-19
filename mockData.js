@@ -73,9 +73,30 @@ function loadWorld(mapfile, sceneManager) {
 
     var world = new World(layers.length);
     var view = new WorldView(world, 20, 20);
-
     var playerPosition = new Position(0, 0);
-    var movement = MovementHandler(world, player, playerPosition);
+
+    var movement = MovementHandler(playerPosition, {
+      duration: 5,
+      onStart: function(direction) {
+        player.direction = direction;
+      },
+      canMove: function(x, y) {
+        var items = world.query(x, y);
+
+        for (var i = 0, ii = items.length; i < ii; i++) {
+          // TODO handling query results is a little clunky
+          var obj = items[i][4];
+
+          if (obj.isBlock) {
+            return false;
+          }
+        }
+        return true;
+      },
+    });
+
+    sceneManager.onTick.push(movement.tick);
+
     var collider = Collider(world, player);
 
     world.add(player, 2, playerPosition);
