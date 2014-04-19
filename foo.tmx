@@ -26,5 +26,6 @@
   </object>
   <object name="main" type="loadpoint" x="64" y="64" width="32" height="32"/>
   <object name="main-b" type="loadpoint" x="448" y="128" width="32" height="32"/>
+  <object name="squirrel" type="squirrel" x="128" y="128" width="32" height="32"/>
  </objectgroup>
 </map>

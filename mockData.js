@@ -43,14 +43,6 @@ function SquirrelService() {
 }
 
 
-function Portal(load) {
-  return {
-    handlePlayerCollision: function(player) {
-      load();
-    },
-  }
-}
-
 function Collider(world, player) {
 
   return function(position) {
@@ -68,12 +60,13 @@ function Collider(world, player) {
   }
 }
 
-function makeTestWorld(sceneManager) {
+
+function loadWorld(mapfile, sceneManager) {
 
   var reqs = [
     Player(),
     SquirrelService(),
-    loadMap('foo4.json').then(parseMap),
+    loadMap(mapfile).then(parseMap),
   ];
 
   return Q.spread(reqs, function(player, Squirrel, layers) {
@@ -89,10 +82,9 @@ function makeTestWorld(sceneManager) {
     playerPosition.onChange(collider);
     playerPosition.onChange(view.handlePlayerPositionChange.bind(view));
 
-    //var squirrel = Squirrel.create();
-    //world.add(squirrel, 1, new Position(5, 5));
-
     var keybindings = KeyBindingsService(document);
+
+    var squirrel = Squirrel.create();
 
     function makeScene(playerX, playerY, viewX, viewY) {
         return function() {
@@ -128,6 +120,12 @@ function makeTestWorld(sceneManager) {
 
             if (obj.portal) {
               obj.handlePlayerCollision = sceneManager.load.bind(sceneManager, obj.portal);
+            }
+
+            if (obj.type == 'squirrel') {
+
+                //world.add(squirrel, 1, new Position(5, 5));
+                obj.render = squirrel.render.bind(squirrel);
             }
 
             world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);

@@ -1,5 +1,9 @@
 
-loading chunks of map, i.e. load on demand
+Load on demand:
+- worlds on demand
+-- load Tiled json, get load points, but don't bother with sprite slicing
+   and world creation
+- chunks of large worlds on demand?
 
 conversation windows
 
@@ -106,3 +110,6 @@ map load validation
 
 http://opengameart.org/content/tiled-terrains
 http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.png
+
+https://github.com/ubilabs/kd-tree-javascript
+https://www.zotero.org/c.a.s.t._library/items/itemKey/SZCJ6RAH

@@ -183,8 +183,7 @@ function startBiscuits(canvas) {
 
   var sceneManager = SceneManager();
   Q.all([
-    makeTestWorld(sceneManager),
-    //makeRoomTestWorld(sceneManager),
+    loadWorld('foo4.json', sceneManager),
 
   ]).then(function() {
     sceneManager.load('main');
