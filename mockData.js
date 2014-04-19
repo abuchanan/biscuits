@@ -34,7 +34,6 @@ function SquirrelService() {
           spritesheet.slice(30, 30, 30, 30),
           spritesheet.slice(0, 0, 30, 30),
         ]);
-        squirrelSpriteAnim.isBlock = true;
 
         return squirrelSpriteAnim;
       },
@@ -89,6 +88,7 @@ function loadWorld(mapfile, sceneManager) {
 
   return Q.spread(reqs, function(player, Squirrel, layers) {
 
+    var onTick = [];
     var world = new World(layers.length);
     var view = new WorldView(world, 20, 20);
 
@@ -105,7 +105,7 @@ function loadWorld(mapfile, sceneManager) {
       canMove: world.isBlocked.bind(world),
     });
 
-    sceneManager.onTick.push(movement.tick);
+    onTick.push(movement.tick);
 
     var collider = PlayerCollider(world, player);
 
@@ -117,12 +117,21 @@ function loadWorld(mapfile, sceneManager) {
 
     var squirrel = Squirrel.create();
 
+
+    function onFrame(ctx) {
+      view.render(ctx);
+
+      for (var i = 0, ii = onTick.length; i < ii; i++) {
+        onTick[i]();
+      }
+    }
+
     function makeScene(playerX, playerY, viewX, viewY) {
         return function() {
             // TODO not only set position, but direction
             playerPosition.set(playerX, playerY);
             view.position.set(viewX, viewY);
-            sceneManager.render = view.render.bind(view);
+            sceneManager.render = onFrame;
 
             var deregisterKeybindings = keybindings.listen(function(name) {
               movement[name]();
@@ -134,6 +143,7 @@ function loadWorld(mapfile, sceneManager) {
             }
         }
     }
+
 
     for (var layer_i = 0; layer_i < layers.length; layer_i++) {
       for (var obj_i = 0; obj_i < layers[layer_i].length; obj_i++) {
@@ -158,7 +168,7 @@ function loadWorld(mapfile, sceneManager) {
 
                 obj.render = squirrel.render.bind(squirrel);
                 obj.isBlock = true;
-                sceneManager.onTick.push(SquirrelMovement(world, pos));
+                onTick.push(SquirrelMovement(world, pos));
             }
 
             world.add(obj, layer_i, pos, obj.maxX, obj.maxY);

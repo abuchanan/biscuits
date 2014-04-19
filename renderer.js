@@ -32,7 +32,7 @@ World.prototype = {
 
     insert();
 
-    position.onChange(function() {
+    position.onChange(function(pos) {
       layer.remove(item);
       insert();
     });
@@ -170,26 +170,16 @@ function SceneManager() {
     _scenes: {},
     _unload: false,
 
-    onTick: [],
-    _doTick: function() {
-      var onTick = this.onTick;
-      for (var i = 0, ii = onTick.length; i < ii; i++) {
-        onTick[i]();
-      }
-    },
-
     // no-op
     render: function() {},
     start: function() {
+      // TODO could let the scene decide which renderer to use
       var canvasRenderer = CanvasLayersRenderer(canvas, [
         this,
       ]);
 
-      var doTick = this._doTick.bind(this);
-
       startRenderLoop(function() {
         canvasRenderer();
-        doTick();
       });
     },
     addScene: function(name, sceneFunction) {
@@ -211,7 +201,7 @@ function startBiscuits(canvas) {
   var sceneManager = SceneManager();
   Q.all([
     loadWorld('foo6.json', sceneManager),
-    loadWorld('other1.json', sceneManager),
+    //loadWorld('other1.json', sceneManager),
 
   ]).then(function() {
     sceneManager.load('main');
