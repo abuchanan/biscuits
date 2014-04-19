@@ -82,30 +82,17 @@ function makeTestWorld(sceneManager) {
 
     //makeMainTestGrid(world, 50);
 
-    parseMap(fooData).then(function(slices) {
+    var mapData = fooData2;
 
-      // TODO this loop could be optimized
-      for (var y = 0; y < fooData.height; y++) {
-        for (var x = 0; x < fooData.width; x++) {
-          var k = (y * fooData.width) + x;
-          var tileID = fooData.layers[0].data[k];
-          var tile = slices[tileID];
-          world.add(tile, 0, new Position(x, y));
+    parseMap(mapData).then(function(layers) {
+      // TODO number of layers in world needs to be set  here
+
+        for (var layer_i = 0; layer_i < layers.length; layer_i++) {
+          for (var obj_i = 0; obj_i < layers[layer_i].length; obj_i++) {
+            var obj = layers[layer_i][obj_i];
+            world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);
+          }
         }
-      }
-
-      var objects = fooData.layers[1].objects;
-      var block = {isBlock: true};
-
-      for (var i = 0; i < objects.length; i++) {
-        var obj = objects[i];
-        var x = obj.x / fooData.tilewidth;
-        var y = obj.y / fooData.tileheight;
-        var maxX = x + (obj.width / fooData.tilewidth) - 1;
-        var maxY = y + (obj.height / fooData.tileheight) - 1;
-        world.add(block, 1, new Position(x, y), maxX, maxY);
-      }
-
     });
 
     var squirrel = Squirrel.create();

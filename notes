@@ -1,6 +1,17 @@
 
 loading chunks of map, i.e. load on demand
 
+conversation windows
+
+store
+
+remote weapons
+- e.g. detonate bomb
+- time bomb
+
+long distance weapons
+- e.g. bow and arrow
+
 game state
 
 character
@@ -30,7 +41,11 @@ status layer
 
 saving
 
+walk through long grass, player sprite changes to match
+
 AI
+- AI might need some concept of "tick" so that every frame/cycle/tick/whatever
+  it can decide the action to take based on world state
 
 sprites that cover multiple tiles
 - should work, just need proof 
@@ -67,3 +82,27 @@ s/renderer/layer/
 
 saving world state, e.g. load main, change squirrel state, load room, then 
 go back to main and have the squirrel be in the same state.
+
+
+possibly ditch tile coordinate system and use x/y coordinates
+- will affect collision detection but should be simple fix
+- will affect movement, but could be improvement
+
+animation when switching world (e.g. go in door, current scene fades out)
+
+things to define in Tiled and other ideas for objects:
+- load points
+- portals
+- animated tiles (squirrel)
+- monsters
+- moveable objects
+- equippable items
+- chests
+- locked doors
+
+
+"do action" buttons: talk to someone, attack, use magic, whatever
+
+
+http://opengameart.org/content/tiled-terrains
+http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.png
