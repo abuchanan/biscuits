@@ -126,6 +126,7 @@ function loadWorld(mapfile, sceneManager) {
 
                 //world.add(squirrel, 1, new Position(5, 5));
                 obj.render = squirrel.render.bind(squirrel);
+                obj.isBlock = true;
             }
 
             world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);
