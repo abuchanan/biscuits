@@ -51,6 +51,20 @@ World.prototype = {
     }
     return items;
   },
+
+  isBlocked: function(x, y) {
+    var items = this.query(x, y);
+
+    for (var i = 0, ii = items.length; i < ii; i++) {
+      // TODO handling query results is a little clunky
+      var obj = items[i][4];
+
+      if (obj.isBlock) {
+        return false;
+      }
+    }
+    return true;
+  },
 };
 
 

@@ -6,13 +6,13 @@ function MovementHandler(position, options) {
   var endCallback = options.onEnd || noop;
   var canMove = options.canMove || function() { return true; };
 
-  var currentMovement = false;
-  var currentMovementIdx = 0;
-  var movementDuration = options.duration || 10;
+  var moving = false;
+  var movingIdx = 0;
+  var duration = options.duration || 10;
 
   function makeCallback(direction, deltaX, deltaY) {
     return function() {
-      if (!currentMovement) {
+      if (!moving) {
 
         var nextX = position.getX() + deltaX
         var nextY = position.getY() + deltaY;
@@ -20,8 +20,8 @@ function MovementHandler(position, options) {
         if (canMove(nextX, nextY)) {
           position.set(nextX, nextY);
 
-          currentMovement = true;
-          currentMovementIdx = 0;
+          moving = true;
+          movingIdx = 0;
 
           startCallback(direction);
         }
@@ -36,12 +36,12 @@ function MovementHandler(position, options) {
     right: makeCallback('right', 1, 0),
 
     tick: function() {
-      if (currentMovement) {
-        if (currentMovementIdx == movementDuration) {
-          currentMovement = false;
+      if (moving) {
+        if (movingIdx == duration) {
+          moving = false;
           endCallback();
         } else {
-          currentMovementIdx += 1;
+          movingIdx += 1;
         }
       }
     }

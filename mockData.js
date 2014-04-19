@@ -43,7 +43,7 @@ function SquirrelService() {
 }
 
 
-function Collider(world, player) {
+function PlayerCollider(world, player) {
 
   return function(position) {
     var x = position.getX();
@@ -60,6 +60,24 @@ function Collider(world, player) {
   }
 }
 
+function SquirrelMovement(world, position) {
+  var frame = 0;
+
+  var movement = MovementHandler(position, {
+    duration: 5,
+    canMove: world.isBlocked.bind(world),
+  });
+
+  return function() {
+    frame += 1;
+    movement.tick();
+
+    if (frame % 50 == 0) {
+      var move = Math.random() < 0.5 ? movement.left : movement.right;
+      move();
+    }
+  }
+}
 
 function loadWorld(mapfile, sceneManager) {
 
@@ -73,6 +91,10 @@ function loadWorld(mapfile, sceneManager) {
 
     var world = new World(layers.length);
     var view = new WorldView(world, 20, 20);
+
+    // TODO possibly this could be integrated with the player object
+    //      just need to ensure that position changes in one world don't affect
+    //      another (inactive) world
     var playerPosition = new Position(0, 0);
 
     var movement = MovementHandler(playerPosition, {
@@ -80,24 +102,12 @@ function loadWorld(mapfile, sceneManager) {
       onStart: function(direction) {
         player.direction = direction;
       },
-      canMove: function(x, y) {
-        var items = world.query(x, y);
-
-        for (var i = 0, ii = items.length; i < ii; i++) {
-          // TODO handling query results is a little clunky
-          var obj = items[i][4];
-
-          if (obj.isBlock) {
-            return false;
-          }
-        }
-        return true;
-      },
+      canMove: world.isBlocked.bind(world),
     });
 
     sceneManager.onTick.push(movement.tick);
 
-    var collider = Collider(world, player);
+    var collider = PlayerCollider(world, player);
 
     world.add(player, 2, playerPosition);
     playerPosition.onChange(collider);
@@ -138,6 +148,7 @@ function loadWorld(mapfile, sceneManager) {
             sceneManager.addScene(obj.name, load);
 
         } else {
+            var pos = new Position(obj.x, obj.y)
 
             if (obj.portal) {
               obj.handlePlayerCollision = sceneManager.load.bind(sceneManager, obj.portal);
@@ -145,12 +156,12 @@ function loadWorld(mapfile, sceneManager) {
 
             if (obj.type == 'squirrel') {
 
-                //world.add(squirrel, 1, new Position(5, 5));
                 obj.render = squirrel.render.bind(squirrel);
                 obj.isBlock = true;
+                sceneManager.onTick.push(SquirrelMovement(world, pos));
             }
 
-            world.add(obj, layer_i, new Position(obj.x, obj.y), obj.maxX, obj.maxY);
+            world.add(obj, layer_i, pos, obj.maxX, obj.maxY);
         }
 
       }
