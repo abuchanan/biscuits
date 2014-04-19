@@ -205,9 +205,10 @@ function startBiscuits(canvas) {
   Q.all([
     loadWorld('foo6.json', sceneManager),
     loadWorld('other1.json', sceneManager),
+    loadWorld('bar2.json', sceneManager),
 
   ]).then(function() {
-    sceneManager.load('main');
+    sceneManager.load('bar.main');
     sceneManager.start();
 
   })

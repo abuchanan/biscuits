@@ -65,6 +65,9 @@ function SquirrelMovement(world, position) {
 
   var movement = MovementHandler(position, {
     duration: 5,
+    // TODO checking for blocks should be layer specific, i.e. I can think of
+    //      cases where the player shouldn't be block by a block that's on
+    //      another layer
     canMove: world.isBlocked.bind(world),
   });
 
@@ -90,7 +93,11 @@ function loadWorld(mapfile, sceneManager) {
   return Q.spread(reqs, function(player, Squirrel, layers) {
 
     var onTick = [];
-    var world = new World(layers.length);
+    // Extra layer for player
+    // TODO you don't always want the player on the top layer, e.g.
+    //      walking *behind* the top of the trophy in bar1 map
+    var numLayers = layers.length + 1;
+    var world = new World(numLayers);
     var view = new WorldView(world, 20, 20);
 
     // TODO possibly this could be integrated with the player object
@@ -99,7 +106,7 @@ function loadWorld(mapfile, sceneManager) {
     var playerPosition = new Position(0, 0);
 
     var movement = MovementHandler(playerPosition, {
-      duration: 5,
+      duration: 3,
       onStart: function(direction) {
         player.direction = direction;
       },
@@ -110,7 +117,9 @@ function loadWorld(mapfile, sceneManager) {
 
     var collider = PlayerCollider(world, player);
 
-    world.add(player, 2, playerPosition);
+    // TODO maybe loadpoint from Tiled should determine layer?
+    world.add(player, numLayers - 1, playerPosition);
+
     playerPosition.onChange(collider);
     playerPosition.onChange(view.handlePlayerPositionChange.bind(view));
 

@@ -79,9 +79,14 @@ function parseTileLayer(map, layer, slices) {
     for (var x = 0; x < map.width; x++) {
         var k = (y * map.width) + x;
         var tileID = layer.data[k];
-        var slice = slices[tileID];
-        var tile = new Tile(x, y, x, y, slice);
-        tiles.push(tile);
+        if (tileID) {
+          var slice = slices[tileID];
+          if (!slice) {
+            throw "No slice for tile ID: " + tileID;
+          }
+          var tile = new Tile(x, y, x, y, slice);
+          tiles.push(tile);
+        }
     }
   }
 
