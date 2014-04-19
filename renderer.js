@@ -12,7 +12,10 @@ function World(numLayers) {
 }
 World.prototype = {
 
-  add: function(object, layerIdx, position, maxX, maxY) {
+  add: function(object, layerIdx, position, w, h) {
+
+    w = w || 1;
+    h = h || 1;
 
     var layer = this._index[layerIdx];
     if (!layer) {
@@ -24,8 +27,8 @@ World.prototype = {
     function insert() {
       var x = position.getX();
       var y = position.getY();
-      var mX = maxX || x;
-      var mY = maxY || y;
+      var mX = x + w - 1;
+      var mY = y + h - 1;
       item = [x, y, mX, mY, object];
       layer.insert(item);
     }
@@ -201,7 +204,7 @@ function startBiscuits(canvas) {
   var sceneManager = SceneManager();
   Q.all([
     loadWorld('foo6.json', sceneManager),
-    //loadWorld('other1.json', sceneManager),
+    loadWorld('other1.json', sceneManager),
 
   ]).then(function() {
     sceneManager.load('main');

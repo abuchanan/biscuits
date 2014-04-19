@@ -88,9 +88,6 @@ renderers
 
 s/renderer/layer/
 
-saving world state, e.g. load main, change squirrel state, load room, then 
-go back to main and have the squirrel be in the same state.
-
 
 possibly ditch tile coordinate system and use x/y coordinates
 - will affect collision detection but should be simple fix

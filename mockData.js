@@ -11,6 +11,7 @@ function Player() {
 
     return {
       direction: 'down',
+      isBlock: true,
 
       render: function(ctx, x, y, w, h) {
           var sprite = sprites[this.direction]
@@ -171,7 +172,7 @@ function loadWorld(mapfile, sceneManager) {
                 onTick.push(SquirrelMovement(world, pos));
             }
 
-            world.add(obj, layer_i, pos, obj.maxX, obj.maxY);
+            world.add(obj, layer_i, pos, obj.w, obj.h);
         }
 
       }
@@ -225,37 +226,4 @@ Area.prototype = {
     ctx.fillRect(x, y, this.w * tileWidth, this.h * tileHeight);
     ctx.restore();
   }
-}
-
-
-function makeMainTestGrid(world, size, color) {
-  var color = color || 'gray';
-
-  var horizontalEdge = new Area(size, 1, 'black');
-  var verticalEdge = new Area(1, size, 'black');
-
-  // TODO in real data, the background should be seperate from blocks
-  //      so that movement can query less data (exclude the background tiles)
-  horizontalEdge.isBlock = true;
-  verticalEdge.isBlock = true;
-
-  // top edge
-  world.add(horizontalEdge, 0, new Position(0, 0),
-            horizontalEdge.w - 1, 0);
-
-  // bottom edge
-  world.add(horizontalEdge, 0, new Position(0, size - 1),
-            horizontalEdge.w - 1, size - 1);
-
-  // left edge
-  world.add(verticalEdge, 0, new Position(0, 0), 0, verticalEdge.h - 1);
-
-  // right edge
-  world.add(verticalEdge, 0, new Position(size - 1, 0), size - 1, verticalEdge.h - 1);
-
-  var walkable = new Area(size - 1, size - 1, color);
-  world.add(walkable, 0, new Position(1, 1), walkable.w, walkable.h);
-
-  var portal = new Area(1, 1, 'blue');
-  world.add(portal, 1, new Position(8, 8));
 }

@@ -1,8 +1,8 @@
-function Tile(x, y, maxX, maxY, sprite) {
+function Tile(x, y, w, h, sprite) {
   this.x = x;
   this.y = y;
-  this.maxX = maxX;
-  this.maxY = maxY;
+  this.w = w;
+  this.h = h;
   this.sprite = sprite;
 }
 Tile.prototype = {
@@ -53,14 +53,14 @@ function parseObjectLayer(layer, map) {
 
       var x = obj.x / map.tilewidth;
       var y = obj.y / map.tileheight;
-      var maxX = x + (obj.width / map.tilewidth) - 1;
-      var maxY = y + (obj.height / map.tileheight) - 1;
+      var w = obj.width / map.tilewidth;
+      var h = obj.height / map.tileheight;
 
       var pos = {
         x: x,
         y: y,
-        maxX: maxX,
-        maxY: maxY,
+        w: w,
+        h: h,
         type: obj.type,
         name: obj.name,
       };
