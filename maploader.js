@@ -125,6 +125,7 @@ function loadMap(src) {
     var d = JSON.parse(this.responseText);
     deferred.resolve(d);
   };
+  // TODO if this request fails, the whole app will hang
   req.responseType = 'application/json';
   req.overrideMimeType('application/json');
   req.open('get', src, true);
