@@ -34,13 +34,6 @@ WorldView.prototype = {
     }
   },
 
-  items: function() {
-    var viewX = this.position.getX();
-    var viewY = this.position.getY();
-    return this.world.query(viewX, viewY,
-                            viewX + this.width - 1, viewY + this.height - 1);
-  },
-
   // TODO need to be careful about shifting out of bounds
   shiftRight: function() {
     this.position.setX(this.position.getX() + this.width - 2);
@@ -53,6 +46,13 @@ WorldView.prototype = {
   },
   shiftDown: function() {
     this.position.setY(this.position.getY() + this.height - 2);
+  },
+
+  items: function() {
+    var viewX = this.position.getX();
+    var viewY = this.position.getY();
+    return this.world.query(viewX, viewY,
+                            viewX + this.width - 1, viewY + this.height - 1);
   },
 
   // TODO blank tile handling?
@@ -77,7 +77,7 @@ WorldView.prototype = {
       */
       var x = (item[0] - viewX) * tileWidth;
       var y = (item[1] - viewY) * tileHeight;
-      var obj = item[4];
+      var obj = item[2];
 
       if (obj.render) {
         obj.render.call(obj, ctx, x, y, tileWidth, tileHeight);

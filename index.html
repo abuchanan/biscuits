@@ -3,8 +3,10 @@
   <head>
     <meta charset='utf-8'>
     <title>Biscuits</title>
-    <script src='bower_components/q/q.js'></script>
     <script src='bower_components/underscore/underscore.js'></script>
+    <script src='box2d.js'></script>
+    <script src='bower_components/q/q.js'></script>
+    <script src='bower_components/pixi/bin/pixi.js'></script>
 
     <script src='sprite.js'></script>
     <script src='foo.json'></script>
@@ -25,10 +27,10 @@
     <script src='app.js'></script>
   </head>
   <body>
-    <canvas id='biscuits-canvas' width='500' height='500'></canvas>
+    <div id="biscuits-container"></div>
     <script>
-      var canvas = document.getElementById('biscuits-canvas');
-      startBiscuits(canvas);
+      var container = document.getElementById("biscuits-container");
+      startBiscuits(container);
     </script>
   </body>
 </html>

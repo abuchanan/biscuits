@@ -1,9 +1,5 @@
 'use strict';
 
-
-
-
-
 function SceneManager() {
 
   function startRenderLoop(renderFunction) {
@@ -44,17 +40,41 @@ function SceneManager() {
 }
 
 
-function startBiscuits(canvas) {
+function startBiscuits(container) {
+
+// create an new instance of a pixi stage
+	var stage = new PIXI.Stage(0xffffff);
+
+	// create a renderer instance
+	var renderer = new PIXI.WebGLRenderer(500, 500);
+  //autoDetectRenderer(400, 300);
+
+	// add the renderer view element to the DOM
+	container.appendChild(renderer.view);
+
+	requestAnimFrame(animate);
+
+  var objContainer = new PIXI.DisplayObjectContainer();
+  stage.addChild(objContainer);
+
+	function animate() {
+
+	    requestAnimFrame( animate );
+
+	    // render the stage
+	    renderer.render(stage);
+      sceneManager.render();
+	}
 
   var sceneManager = SceneManager();
   Q.all([
     //loadWorld('foo6.json', sceneManager),
     //loadWorld('other1.json', sceneManager),
-    loadWorld('bar2.json', sceneManager),
+    loadWorld('bar2.json', sceneManager, objContainer),
 
   ]).then(function() {
-    sceneManager.load('bar.main');
-    sceneManager.start();
+    //sceneManager.load('bar.main');
+    sceneManager.load('box2dtest');
 
   })
   .fail(function(reason) {

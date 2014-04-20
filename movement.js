@@ -1,31 +1,23 @@
-function MovementHandler(position, options) {
+function MovementHandler(body, options) {
 
   function noop() {}
 
+  // TODO
   var startCallback = options.onStart || noop;
   var endCallback = options.onEnd || noop;
-  var canMove = options.canMove || function() { return true; };
-
-  var moving = false;
-  var movingIdx = 0;
-  var duration = options.duration || 10;
 
   function makeCallback(direction, deltaX, deltaY) {
     return function() {
-      if (!moving) {
 
-        var nextX = position.getX() + deltaX
-        var nextY = position.getY() + deltaY;
+      var vel = body.GetLinearVelocity();
+      var speed = vel.Length();
 
-        if (canMove(nextX, nextY)) {
-          position.set(nextX, nextY);
-
-          moving = true;
-          movingIdx = 0;
-
-          startCallback(direction);
-        }
+      if (speed < 0.2) {
+        var x = body.GetMass() * 0.1;
+        var impulse = new Box2D.b2Vec2(x * deltaX, x * deltaY)
+        body.ApplyLinearImpulse(impulse, body.GetWorldCenter());
       }
+
     }
   }
 
@@ -34,16 +26,5 @@ function MovementHandler(position, options) {
     down: makeCallback('down', 0, 1),
     left: makeCallback('left', -1, 0),
     right: makeCallback('right', 1, 0),
-
-    tick: function() {
-      if (moving) {
-        if (movingIdx == duration) {
-          moving = false;
-          endCallback();
-        } else {
-          movingIdx += 1;
-        }
-      }
-    }
   };
 }

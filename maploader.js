@@ -19,30 +19,29 @@ function parseTileset(tileset) {
     var tileX = tileset.margin;
     var tileY = tileset.margin;
 
-    return loadSpriteSheet(tileset.image).then(function(sheet) {
+    var texture = PIXI.Texture.fromImage(tileset.image);
 
-        var slices = {};
-        var maxX = tileset.imagewidth - tileset.margin - tileset.tilewidth;
+    var slices = {};
+    var maxX = tileset.imagewidth - tileset.margin - tileset.tilewidth;
 
-        while (tileY < tileset.imageheight) {
+    while (tileY < tileset.imageheight) {
 
-            var slice = sheet.slice(tileX, tileY,
-                                    tileset.tilewidth, tileset.tileheight);
+        var r = new PIXI.Rectangle(tileX, tileY, tileset.tilewidth, tileset.tileheight);
+        var slice = new PIXI.Texture(texture, r);
 
-            slices[tileID] = slice;
+        slices[tileID] = slice;
 
-            if (tileX == maxX) {
-              tileX = tileset.margin;
-              tileY += tileset.tileheight + tileset.spacing;
-            } else {
-              tileX += tileset.tilewidth + tileset.spacing;
-            }
-
-            tileID += 1;
+        if (tileX == maxX) {
+          tileX = tileset.margin;
+          tileY += tileset.tileheight + tileset.spacing;
+        } else {
+          tileX += tileset.tilewidth + tileset.spacing;
         }
 
-        return slices;
-    });
+        tileID += 1;
+    }
+
+    return slices;
 }
 
 function parseObjectLayer(layer, map) {
@@ -81,11 +80,15 @@ function parseTileLayer(map, layer, slices) {
         var tileID = layer.data[k];
         if (tileID) {
           var slice = slices[tileID];
+
           if (!slice) {
             throw "No slice for tile ID: " + tileID;
           }
-          var tile = new Tile(x, y, x, y, slice);
-          tiles.push(tile);
+
+          var sprite = new PIXI.Sprite(slice);
+          sprite.position.x = x * map.tilewidth;
+          sprite.position.y = y * map.tileheight;
+          tiles.push(sprite);
         }
     }
   }
@@ -95,27 +98,26 @@ function parseTileLayer(map, layer, slices) {
 
 function parseMap(map) {
 
-  return Q.all([
-      parseTileset(map.tilesets[0]),
-    ]).then(function(tilesets) {
-        var tiles = tilesets[0];
-        var layerObjs = [];
+  // TODO parse all tilesets
+  var tileset = parseTileset(map.tilesets[0]);
+  var layerObjs = [];
 
-        for (var layer_i = 0; layer_i < map.layers.length; layer_i++) {
-            var layer = map.layers[layer_i];
+  for (var layer_i = 0; layer_i < map.layers.length; layer_i++) {
+      var layer = map.layers[layer_i];
 
-            if (layer.type == 'tilelayer') {
-              var x = parseTileLayer(map, layer, tiles);
-              layerObjs.push(x);
+      if (layer.type == 'tilelayer') {
+        var x = parseTileLayer(map, layer, tileset);
+        layerObjs.push(x);
 
-            } else if (layer.type = 'objectgroup') {
-              var x = parseObjectLayer(layer, map);
-              layerObjs.push(x);
-            }
-        }
+      /*
+      } else if (layer.type = 'objectgroup') {
+        var x = parseObjectLayer(layer, map);
+        layerObjs.push(x);
+      */
+      }
+  }
 
-      return layerObjs;
-    });
+  return layerObjs;
 }
 
 function loadMap(src) {

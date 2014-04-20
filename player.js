@@ -1,24 +1,31 @@
 function Player() {
-  return loadSpriteSheet('media/playerSprites.png')
-  .then(function(spritesheet) {
+	// create a texture from an image path
+	var texture = PIXI.Texture.fromImage("media/playerSprites.png");
+
+  var upTexture = new PIXI.Texture(texture, new PIXI.Rectangle(5, 175, 80, 80));
+  var downTexture = new PIXI.Texture(texture, new PIXI.Rectangle(5, 275, 80, 80));
+  var leftTexture = new PIXI.Texture(texture, new PIXI.Rectangle(0, 0, 80, 80));
+  var rightTexture = new PIXI.Texture(texture, new PIXI.Rectangle(370, 95, 80, 80));
+  //return loadSpriteSheet('media/playerSprites.png')
+  //.then(function(spritesheet) {
 
     var sprites = {
-        'up': spritesheet.slice(5, 175, 80, 80),
-        'down': spritesheet.slice(5, 275, 80, 80),
-        'left': spritesheet.slice(0, 0, 80, 80),
-        'right': spritesheet.slice(375, 95, 80, 80),
+        'up': new PIXI.Sprite(upTexture),
+        'down': new PIXI.Sprite(downTexture),
+        'left': new PIXI.Sprite(leftTexture),
+        'right': new PIXI.Sprite(rightTexture),
     };
 
     return {
       direction: 'down',
       isBlock: true,
+      sprites: sprites,
 
       render: function(ctx, x, y, w, h) {
           var sprite = sprites[this.direction]
           sprite.render(ctx, x, y, w, h);
       },
     };
-  });
 }
 
 function PlayerCollider(world, player) {
