@@ -12,10 +12,11 @@ function MovementHandler(body, options) {
       var vel = body.GetLinearVelocity();
       var speed = vel.Length();
 
-      if (speed < 0.2) {
-        var x = body.GetMass() * 0.1;
+      if (speed < 0.5) {
+        var x = body.GetMass();
         var impulse = new Box2D.b2Vec2(x * deltaX, x * deltaY)
         body.ApplyLinearImpulse(impulse, body.GetWorldCenter());
+        startCallback(direction);
       }
 
     }

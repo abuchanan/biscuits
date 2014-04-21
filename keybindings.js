@@ -18,10 +18,10 @@ function KeyBindingsService(document) {
         }
       }
 
-      document.addEventListener('keypress', listener, true);
+      document.addEventListener('keydown', listener, true);
 
       return function() {
-        document.removeEventListener('keypress', listener, true);
+        document.removeEventListener('keydown', listener, true);
       }
     },
   };

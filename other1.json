@@ -137,7 +137,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"..\/..\/..\/Volumes\/Tiled 0.9.1\/examples\/tmw_desert_spacing.png",
+         "image":"media/tmw_desert_spacing.png",
          "imageheight":199,
          "imagewidth":265,
          "margin":1,

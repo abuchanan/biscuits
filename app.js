@@ -46,7 +46,7 @@ function startBiscuits(container) {
 	var stage = new PIXI.Stage(0xffffff);
 
 	// create a renderer instance
-	var renderer = new PIXI.WebGLRenderer(500, 500);
+	var renderer = new PIXI.WebGLRenderer(640, 640);
   //autoDetectRenderer(400, 300);
 
 	// add the renderer view element to the DOM
@@ -54,28 +54,32 @@ function startBiscuits(container) {
 
 	requestAnimFrame(animate);
 
-  var objContainer = new PIXI.DisplayObjectContainer();
-  stage.addChild(objContainer);
+  var masterContainer = new PIXI.DisplayObjectContainer();
+  stage.addChild(masterContainer);
 
 	function animate() {
-
 	    requestAnimFrame( animate );
-
-	    // render the stage
-	    renderer.render(stage);
       sceneManager.render();
+	    renderer.render(stage);
 	}
 
   var sceneManager = SceneManager();
-  Q.all([
-    //loadWorld('foo6.json', sceneManager),
-    //loadWorld('other1.json', sceneManager),
-    loadWorld('bar2.json', sceneManager, objContainer),
 
-  ]).then(function() {
+  var worldFiles = ['foo6.json', 'other1.json', 'bar2.json'];
+  var worlds = [];
+
+  for (var i = 0; i < worldFiles.length; i++) {
+    var file = worldFiles[i];
+    var worldContainer = new PIXI.DisplayObjectContainer();
+    masterContainer.addChild(worldContainer);
+    worldContainer.visible = false;
+    var world = loadWorld(file, sceneManager, worldContainer);
+    worlds.push(world);
+  }
+
+  Q.all(worlds).then(function() {
     //sceneManager.load('bar.main');
-    sceneManager.load('box2dtest');
-
+    sceneManager.load('main');
   })
   .fail(function(reason) {
     console.log(reason);

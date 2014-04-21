@@ -1,12 +1,4 @@
 
-/*
-var wallBody = world.CreateBody( new Box2D.b2BodyDef() );
-var wallShape = new Box2D.b2EdgeShape();
-wallShape.Set(new Box2D.b2Vec2(0.0, 0.0), new Box2D.b2Vec2(40.0, 0.0));
-wallBody.CreateFixture(wallShape, 0.0);
-*/
-
-
 function World() {
   var gravity = new Box2D.b2Vec2(0.0, 0.0);
   var world = new Box2D.b2World(gravity);
@@ -45,17 +37,17 @@ function World() {
 
   return {
 
-    add: function(data, x, y) {
-        console.log('add', data);
+    addDynamic: function(data, x, y, w, h) {
+      w = w || 1.0;
+      h = h || 1.0;
 
       var bodyDef = new Box2D.b2BodyDef();
       bodyDef.set_type(Box2D.b2_dynamicBody);
-      bodyDef.set_position(new Box2D.b2Vec2(x, y));
+      bodyDef.set_position(new Box2D.b2Vec2(x + w / 2, y + h / 2));
       var body = world.CreateBody(bodyDef);
-      body.SetLinearDamping(0.05);
 
       var shape = new Box2D.b2PolygonShape();
-      shape.SetAsBox(1.0, 1.0);
+      shape.SetAsBox(w / 2, h / 2);
       var fixture = body.CreateFixture(shape, 80);
 
       fixture.objectData = data;
@@ -63,9 +55,26 @@ function World() {
       return body;
     },
 
+    addStatic: function(data, x, y, w, h) {
+      w = w || 1.0;
+      h = h || 1.0;
+
+      var bodyDef = new Box2D.b2BodyDef();
+      bodyDef.set_position(new Box2D.b2Vec2(x + (w / 2), y + (h / 2)));
+      var body = world.CreateBody(bodyDef);
+
+      var shape = new Box2D.b2PolygonShape();
+      shape.SetAsBox(w / 2, h / 2);
+      var fixture = body.CreateFixture(shape, 0);
+
+      fixture.objectData = data;
+
+      return fixture;
+    },
+
     start: function() {
       simulateIntervalId = setInterval(function() {
-        world.Step(15, 2, 2);
+        world.Step(0.15, 8, 2);
       }, 15);
     },
 
@@ -74,6 +83,24 @@ function World() {
         clearInterval(simulateIntervalId);
         simulateIntervalId = false;
       }
+    },
+
+    contactListener: function(callback) {
+      var listener = new Box2D.b2ContactListener();
+
+      Box2D.customizeVTable(listener, [{
+          original: Box2D.b2ContactListener.prototype.BeginContact,
+          replacement:
+              function (thsPtr, contactPtr) {
+                  var contact = Box2D.wrapPointer( contactPtr, Box2D.b2Contact );
+                  var fixtureA = contact.GetFixtureA();
+                  var fixtureB = contact.GetFixtureB();
+
+                  callback(fixtureA, fixtureB);
+              }
+      }]);
+
+      world.SetContactListener( listener );
     },
 
     query: function(x1, y1, x2, y2) {

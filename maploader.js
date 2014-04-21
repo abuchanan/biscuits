@@ -50,16 +50,16 @@ function parseObjectLayer(layer, map) {
   for (var i = 0; i < layer.objects.length; i++) {
       var obj = layer.objects[i];
 
-      var x = obj.x / map.tilewidth;
-      var y = obj.y / map.tileheight;
-      var w = obj.width / map.tilewidth;
-      var h = obj.height / map.tileheight;
+      //var x = obj.x / map.tilewidth;
+      //var y = obj.y / map.tileheight;
+      //var w = obj.width / map.tilewidth;
+      //var h = obj.height / map.tileheight;
 
       var pos = {
-        x: x,
-        y: y,
-        w: w,
-        h: h,
+        x: obj.x,
+        y: obj.y,
+        w: obj.width,
+        h: obj.height,
         type: obj.type,
         name: obj.name,
       };
@@ -100,24 +100,25 @@ function parseMap(map) {
 
   // TODO parse all tilesets
   var tileset = parseTileset(map.tilesets[0]);
-  var layerObjs = [];
+  var data = {
+    tilelayers: [],
+    objectlayers: [],
+  };
 
   for (var layer_i = 0; layer_i < map.layers.length; layer_i++) {
       var layer = map.layers[layer_i];
 
       if (layer.type == 'tilelayer') {
-        var x = parseTileLayer(map, layer, tileset);
-        layerObjs.push(x);
+        var tilelayer = parseTileLayer(map, layer, tileset);
+        data.tilelayers.push(tilelayer);
 
-      /*
       } else if (layer.type = 'objectgroup') {
-        var x = parseObjectLayer(layer, map);
-        layerObjs.push(x);
-      */
+        var objectlayer = parseObjectLayer(layer, map);
+        data.objectlayers.push(objectlayer);
       }
   }
 
-  return layerObjs;
+  return data;
 }
 
 function loadMap(src) {
@@ -125,7 +126,8 @@ function loadMap(src) {
   var req = new XMLHttpRequest();
   req.onload = function() {
     var d = JSON.parse(this.responseText);
-    deferred.resolve(d);
+    var data = parseMap(d);
+    deferred.resolve(data);
   };
   // TODO if this request fails, the whole app will hang
   req.responseType = 'application/json';

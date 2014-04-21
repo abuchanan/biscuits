@@ -55,34 +55,4 @@ WorldView.prototype = {
                             viewX + this.width - 1, viewY + this.height - 1);
   },
 
-  // TODO blank tile handling?
-  render: function(ctx) {
-
-    var tileWidth = ctx.canvas.width / this.width;
-    var tileHeight = ctx.canvas.height / this.height;
-
-    var viewX = this.position.getX();
-    var viewY = this.position.getY();
-    var items = this.items();
-
-    for (var i = 0, ii = items.length; i < ii; i++) {
-      var item = items[i];
-
-      /*
-        An item's position might not directly map to the canvas position,
-        so we provide x/y coordinates the the item's render method.
-
-        TODO alternatively, we could just transform the context, and the
-             item would just draw whereever the context currently is.
-      */
-      var x = (item[0] - viewX) * tileWidth;
-      var y = (item[1] - viewY) * tileHeight;
-      var obj = item[2];
-
-      if (obj.render) {
-        obj.render.call(obj, ctx, x, y, tileWidth, tileHeight);
-      }
-    }
-  }
 };
-
