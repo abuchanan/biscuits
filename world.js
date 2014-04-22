@@ -1,5 +1,5 @@
 
-function World() {
+function World(scale) {
   var gravity = new Box2D.b2Vec2(0.0, 0.0);
   var world = new Box2D.b2World(gravity);
 
@@ -38,8 +38,10 @@ function World() {
   return {
 
     addDynamic: function(data, x, y, w, h) {
-      w = w || 1.0;
-      h = h || 1.0;
+      x = x / scale;
+      y = y / scale;
+      w = w / scale || 1.0;
+      h = h / scale || 1.0;
 
       var bodyDef = new Box2D.b2BodyDef();
       bodyDef.set_type(Box2D.b2_dynamicBody);
@@ -56,8 +58,10 @@ function World() {
     },
 
     addStatic: function(data, x, y, w, h) {
-      w = w || 1.0;
-      h = h || 1.0;
+      x = x / scale;
+      y = y / scale;
+      w = w / scale || 1.0;
+      h = h / scale || 1.0;
 
       var bodyDef = new Box2D.b2BodyDef();
       bodyDef.set_position(new Box2D.b2Vec2(x + (w / 2), y + (h / 2)));

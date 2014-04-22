@@ -21,8 +21,8 @@ function Player() {
     var clip = new PIXI.MovieClip(downTextures);
 
     // TODO scale player sprite images in actual image file
-    clip.scale.x = 32 / 80;
-    clip.scale.y = 32 / 80;
+    clip.width = 32;
+    clip.height = 32;
 
     var direction = 'down';
 

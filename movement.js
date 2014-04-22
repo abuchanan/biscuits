@@ -1,5 +1,7 @@
 function MovementHandler(body, options) {
 
+  body.SetLinearDamping(2);
+
   function noop() {}
 
   // TODO

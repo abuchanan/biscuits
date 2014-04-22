@@ -13,24 +13,22 @@ function loadWorld(mapfile, sceneManager, container) {
     //var squirrel = Squirrel.create();
     var keybindings = KeyBindingsService(document);
 
-    var world = World();
     var scale = 32;
+    var world = World(scale);
 
-    var playerX = 100;
-    var playerY = 100;
     var playerW = 32;
     var playerH = 32;
 
-    var body = world.addDynamic(player, playerX / scale, playerY / scale, playerW / scale, playerH / scale);
-    body.SetLinearDamping(2);
+    var body = world.addDynamic(player, 0, 0, playerW, playerH);
 
     var movement = MovementHandler(body, {
       onStart: player.setDirection,
     });
 
-    //var view = new WorldView(world, 20, 20);
-
     // Portal handling
+    // TODO player jumps through portal with the slightest overlap.
+    //      would be nicer to wait until the player is overlapping more
+    //      so it feels like you're *in* the portal
     world.contactListener(function(fixtureA, fixtureB) {
         if (fixtureA.objectData.portal && fixtureB.objectData === player) {
           sceneManager.load(fixtureA.objectData.portal);
@@ -99,7 +97,7 @@ function loadWorld(mapfile, sceneManager, container) {
           g.endFill();
           container.addChild(g);
 
-          world.addStatic(obj, obj.x / scale, obj.y / scale, obj.w / scale, obj.h / scale);
+          world.addStatic(obj, obj.x, obj.y, obj.w, obj.h);
         }
 
         else if (obj.portal) {
@@ -110,7 +108,7 @@ function loadWorld(mapfile, sceneManager, container) {
           g.endFill();
           container.addChild(g);
 
-          var fixture = world.addStatic(obj, obj.x / scale, obj.y / scale, obj.w / scale, obj.h / scale);
+          var fixture = world.addStatic(obj, obj.x, obj.y, obj.w, obj.h);
           fixture.SetSensor(true);
         }
 
