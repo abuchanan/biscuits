@@ -2,35 +2,16 @@
 
 function SceneManager() {
 
-  function startRenderLoop(renderFunction) {
-    function handleFrame() {
-      renderFunction();
-      requestAnimationFrame(handleFrame);
-    }
-    requestAnimationFrame(handleFrame);
-  }
-
   return {
     _scenes: {},
     _unload: false,
 
     // no-op
     render: function() {},
-    start: function() {
-      // TODO could let the scene decide which renderer to use
-      var canvasRenderer = CanvasLayersRenderer(canvas, [
-        this,
-      ]);
-
-      startRenderLoop(function() {
-        canvasRenderer();
-      });
-    },
     addScene: function(name, sceneFunction) {
       this._scenes[name] = sceneFunction;
     },
     load: function(name) {
-      console.log(name);
       if (this._unload) {
         this._unload();
       }
