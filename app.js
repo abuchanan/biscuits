@@ -7,7 +7,7 @@ function SceneManager() {
     _unload: false,
 
     // no-op
-    render: function() {},
+    onFrame: function() {},
     addScene: function(name, sceneFunction) {
       this._scenes[name] = sceneFunction;
     },
@@ -40,7 +40,7 @@ function startBiscuits(container) {
 
 	function animate() {
 	    requestAnimFrame( animate );
-      sceneManager.render();
+      sceneManager.onFrame();
 	    renderer.render(stage);
 	}
 
@@ -65,16 +65,4 @@ function startBiscuits(container) {
   .fail(function(reason) {
     console.log(reason);
   });
-}
-
-
-function CanvasLayersRenderer(canvas, layers) {
-  var ctx = canvas.getContext('2d');
-
-  return function() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var i = 0, ii = layers.length; i < ii; i++) {
-      layers[i].render(ctx);
-    }
-  }
 }

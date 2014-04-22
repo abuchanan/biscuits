@@ -10,7 +10,7 @@ function loadWorld(mapfile, sceneManager, container) {
   return Q.spread(reqs, function(player, Squirrel, map) {
 
     // TODO maybe loadpoint from Tiled should determine layer?
-    var keybindings = KeyBindingsService(document);
+    var keybindings = KeyBindingsService();
 
     /*
     The physics world and the renderer use a different scale.
@@ -64,7 +64,9 @@ function loadWorld(mapfile, sceneManager, container) {
 
             body.SetTransform(new Box2D.b2Vec2(x, y), body.GetAngle());
 
-            sceneManager.render = function() {
+            // TODO container.width = 32 * 8;
+
+            sceneManager.onFrame = function() {
               var pos = body.GetPosition();
 
               player.clip.position.x = (pos.get_x() * scale) - (playerW / 2);

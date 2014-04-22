@@ -109,17 +109,8 @@ share tilesets among multiple worlds
 
 map load validation
 
-bowerify rbush
-
-webgl renderer
-
-pixi.js
-
-https://github.com/jeresig/jquery.hotkeys/blob/master/jquery.hotkeys.js
-
 http://opengameart.org/content/tiled-terrains
 http://opengameart.org/content/oga-16x16-jrpg-sprites-tiles
 http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.png
 
-https://github.com/ubilabs/kd-tree-javascript
 https://www.zotero.org/c.a.s.t._library/items/itemKey/SZCJ6RAH
