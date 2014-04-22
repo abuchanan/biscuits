@@ -76,6 +76,11 @@ function World(scale) {
       return fixture;
     },
 
+    addSensor: function(data, x, y, w, h) {
+      var fixture = this.addStatic(data, x, y, w, h);
+      fixture.SetSensor(true);
+    },
+
     start: function() {
       simulateIntervalId = setInterval(function() {
         world.Step(0.15, 8, 2);

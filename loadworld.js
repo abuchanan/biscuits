@@ -13,11 +13,21 @@ function loadWorld(mapfile, sceneManager, container) {
     //var squirrel = Squirrel.create();
     var keybindings = KeyBindingsService(document);
 
+    /*
+    The physics world and the renderer use a different scale.
+
+    Box2D (the physics engine) recommends a scale (meters) that doesn't match
+    the renderer's scale (pixels). Because of this, we have to convert between
+    the two scales, which (unfortunately) shows a bit here in this code.
+
+    TODO clean this up and try to completely encapsulate the
+         scale within World.
+    */
     var scale = 32;
     var world = World(scale);
 
-    var playerW = 32;
-    var playerH = 32;
+    var playerW = player.clip.width;
+    var playerH = player.clip.height;
 
     var body = world.addDynamic(player, 0, 0, playerW, playerH);
 
@@ -69,6 +79,8 @@ function loadWorld(mapfile, sceneManager, container) {
             // return unload function
             return function() {
               world.stop();
+              // TODO sceneManager should handle removing the containers from
+              //      the master container?
               container.visible = false;
               deregisterKeybindings();
             }
@@ -91,12 +103,6 @@ function loadWorld(mapfile, sceneManager, container) {
 
         if (obj.isBlock) {
 
-          var g = new PIXI.Graphics();
-          g.beginFill(0x000000);
-          g.drawRect(obj.x, obj.y, obj.w, obj.h);
-          g.endFill();
-          container.addChild(g);
-
           world.addStatic(obj, obj.x, obj.y, obj.w, obj.h);
         }
 
@@ -108,8 +114,7 @@ function loadWorld(mapfile, sceneManager, container) {
           g.endFill();
           container.addChild(g);
 
-          var fixture = world.addStatic(obj, obj.x, obj.y, obj.w, obj.h);
-          fixture.SetSensor(true);
+          world.addSensor(obj, obj.x, obj.y, obj.w, obj.h);
         }
 
         else if (obj.type == 'loadpoint') {
@@ -118,12 +123,6 @@ function loadWorld(mapfile, sceneManager, container) {
           var viewY = obj.viewY || 0;
           // TODO get player direction
           var load = makeScene(obj.x, obj.y, 'down', viewX, viewY);
-
-          g.beginFill(0xdddddd);
-          g.drawRect(obj.x, obj.y, obj.w, obj.h);
-          g.endFill();
-          container.addChild(g);
-          console.log(obj.x);
 
           sceneManager.addScene(obj.name, load);
         }
