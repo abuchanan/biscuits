@@ -35,7 +35,56 @@ function World(scale) {
           }
   }]);
 
+  var listener = new Box2D.b2ContactListener();
+  var contactCallbacks = [];
+
+  Box2D.customizeVTable(listener, [{
+      original: Box2D.b2ContactListener.prototype.BeginContact,
+      replacement:
+          function (thsPtr, contactPtr) {
+              var contact = Box2D.wrapPointer( contactPtr, Box2D.b2Contact );
+              var fixtureA = contact.GetFixtureA();
+              var fixtureB = contact.GetFixtureB();
+
+              for (var i = 0; i < contactCallbacks.length; i++) {
+                contactCallbacks[i](fixtureA, fixtureB);
+              }
+          }
+  }]);
+
+  world.SetContactListener(listener);
+
+  var scheduledUpdates = [];
+
   return {
+
+    // TODO need to figure out how to encapsulate the Box2D API
+    //      while still provide what the outside code needs without
+    //      having a messy API
+
+    addEdge: function(data, x1, y1, x2, y2) {
+      x1 = x1 / scale;
+      y1 = y1 / scale;
+      x2 = x2 / scale;
+      y2 = y2 / scale;
+
+      var bodyDef = new Box2D.b2BodyDef();
+      bodyDef.set_position(new Box2D.b2Vec2(x1, y1));
+      var body = world.CreateBody(bodyDef);
+
+      var shape = new Box2D.b2EdgeShape();
+      shape.Set(new Box2D.b2Vec2(0, 0), new Box2D.b2Vec2(x2 - x1, y2 - y1));
+
+      var fixture = body.CreateFixture(shape, 0);
+      fixture.objectData = data;
+      return fixture;
+    },
+
+    addEdgeSensor: function(data, x1, y1, x2, y2) {
+      var fixture = this.addEdge(data, x1, y1, x2, y2);
+      fixture.SetSensor(true);
+      return fixture;
+    },
 
     addDynamic: function(data, x, y, w, h) {
       x = x / scale;
@@ -54,7 +103,7 @@ function World(scale) {
 
       fixture.objectData = data;
 
-      return body;
+      return fixture;
     },
 
     addStatic: function(data, x, y, w, h) {
@@ -79,11 +128,17 @@ function World(scale) {
     addSensor: function(data, x, y, w, h) {
       var fixture = this.addStatic(data, x, y, w, h);
       fixture.SetSensor(true);
+      return fixture;
     },
 
     start: function() {
       simulateIntervalId = setInterval(function() {
         world.Step(0.15, 8, 2);
+
+        while (scheduledUpdates.length > 0) {
+          var func = scheduledUpdates.pop();
+          func();
+        }
       }, 15);
     },
 
@@ -94,22 +149,12 @@ function World(scale) {
       }
     },
 
+    scheduleUpdate: function(func) {
+      scheduledUpdates.push(func);
+    },
+
     contactListener: function(callback) {
-      var listener = new Box2D.b2ContactListener();
-
-      Box2D.customizeVTable(listener, [{
-          original: Box2D.b2ContactListener.prototype.BeginContact,
-          replacement:
-              function (thsPtr, contactPtr) {
-                  var contact = Box2D.wrapPointer( contactPtr, Box2D.b2Contact );
-                  var fixtureA = contact.GetFixtureA();
-                  var fixtureB = contact.GetFixtureB();
-
-                  callback(fixtureA, fixtureB);
-              }
-      }]);
-
-      world.SetContactListener( listener );
+      contactCallbacks.push(callback);
     },
 
     query: function(x1, y1, x2, y2) {

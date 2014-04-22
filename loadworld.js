@@ -28,16 +28,71 @@ function loadWorld(mapfile, sceneManager, container) {
     var playerW = player.clip.width;
     var playerH = player.clip.height;
 
-    var body = world.addDynamic(player, 0, 0, playerW, playerH);
+    var playerFixture = world.addDynamic(player, 0, 0, playerW, playerH);
+    var body = playerFixture.GetBody();
 
     var movement = MovementHandler(body, {
       onStart: player.setDirection,
     });
 
+    function makeViewEdges(viewW, viewH) {
+
+      // TODO use chain? that way I can move the whole chain
+      var edges = [
+        // Top
+        world.addEdgeSensor({dx: 0, dy: -1 * (viewH - 33)}, 0, 0, viewW, 0),
+        // Bottom
+        world.addEdgeSensor({dx: 0, dy: viewH - 33}, 0, viewH, viewW, viewH),
+        // Left
+        world.addEdgeSensor({dx: -1 * (viewW - 33), dy: 0}, 0, 0, 0, viewH),
+        // Right
+        world.addEdgeSensor({dx: viewW - 33, dy: 0}, viewW, 0, viewW, viewH),
+      ];
+
+      world.contactListener(function(fixtureA, fixtureB) {
+
+        var dx, dy;
+
+        for (var i = 0; i < edges.length; i++) {
+          var edge = edges[i];
+
+          if (fixtureB === edge || fixtureA === edge) {
+            dx = edge.objectData.dx;
+            dy = edge.objectData.dy;
+
+            container.x += dx * -1;
+            container.y += dy * -1;
+
+            break;
+          }
+        }
+
+        if (dx || dy) {
+          world.scheduleUpdate(function() {
+            for (var i = 0; i < edges.length; i++) {
+                var body = edges[i].GetBody();
+                var pos = body.GetTransform().get_p();
+                var x = pos.get_x() + (dx / scale);
+                var y = pos.get_y() + (dy / scale);
+                body.SetTransform(new Box2D.b2Vec2(x, y), body.GetAngle());
+            }
+          });
+        }
+      });
+    }
+
+
+    // TODO need dynamic view size
+    var viewW = 320;
+    var viewH = 320;
+    makeViewEdges(viewW, viewH);
+
     // Portal handling
     // TODO player jumps through portal with the slightest overlap.
     //      would be nicer to wait until the player is overlapping more
     //      so it feels like you're *in* the portal
+    // TODO could clean up this API so that the callback is only called
+    //      if a given fixture/object is matched
     world.contactListener(function(fixtureA, fixtureB) {
         if (fixtureA.objectData.portal && fixtureB.objectData === player) {
           sceneManager.load(fixtureA.objectData.portal);
@@ -50,10 +105,10 @@ function loadWorld(mapfile, sceneManager, container) {
 
     function makeScene(playerX, playerY, playerDirection, viewX, viewY) {
         return function() {
-            world.start();
             container.visible = true;
 
-            // TODO view.position.set(viewX, viewY);
+            container.x = viewX;
+            container.y = viewY;
 
             player.setDirection(playerDirection);
             player.clip.position.x = playerX;
@@ -62,8 +117,14 @@ function loadWorld(mapfile, sceneManager, container) {
             var x = (playerX / scale) + (playerW / scale / 2);
             var y = (playerY / scale) + (playerH / scale / 2);
 
+            // TODO before I had world.start() *before* this line,
+            //      which is the wrong order, and only didn't fail because
+            //      of the 15 ms interval time. Things like this need to happen
+            //      outside of a world step, which is an important reason to 
+            //      build good encapsulation for box2d.
             body.SetTransform(new Box2D.b2Vec2(x, y), body.GetAngle());
 
+            world.start();
             // TODO container.width = 32 * 8;
 
             sceneManager.onFrame = function() {
