@@ -95,8 +95,6 @@ function loadWorld(mapfile, sceneManager, container) {
       }
     }
 
-
-
     for (var layer_i = 0; layer_i < map.objectlayers.length; layer_i++) {
       for (var obj_i = 0; obj_i < map.objectlayers[layer_i].length; obj_i++) {
         var obj = map.objectlayers[layer_i][obj_i];
@@ -121,8 +119,8 @@ function loadWorld(mapfile, sceneManager, container) {
           // TODO better default than 0, like center player in view
           var viewX = obj.viewX || 0;
           var viewY = obj.viewY || 0;
-          // TODO get player direction
-          var load = makeScene(obj.x, obj.y, 'down', viewX, viewY);
+          var direction = obj.playerDirection || 'down';
+          var load = makeScene(obj.x, obj.y, direction, viewX, viewY);
 
           sceneManager.addScene(obj.name, load);
         }
