@@ -10,7 +10,6 @@ function loadWorld(mapfile, sceneManager, container) {
   return Q.spread(reqs, function(player, Squirrel, map) {
 
     // TODO maybe loadpoint from Tiled should determine layer?
-    //var squirrel = Squirrel.create();
     var keybindings = KeyBindingsService(document);
 
     /*
@@ -123,29 +122,17 @@ function loadWorld(mapfile, sceneManager, container) {
 
           sceneManager.addScene(obj.name, load);
         }
+
+        else if (obj.type == 'squirrel') {
+          var squirrel = Squirrel.create();
+          squirrel.clip.position.x = obj.x;
+          squirrel.clip.position.y = obj.y;
+          world.addStatic(squirrel, obj.x, obj.y, obj.w, obj.h);
+          container.addChild(squirrel.clip);
+        }
       }
     }
 
     container.addChild(player.clip);
-
   });
 }
-
-            /*
-
-
-          } else {
-              //var pos = new Position(obj.x, obj.y)
-
-              if (obj.portal) {
-              }
-
-
-              if (obj.type == 'squirrel') {
-
-                  obj.render = squirrel.render.bind(squirrel);
-                  obj.isBlock = true;
-              }
-
-          }
-              */

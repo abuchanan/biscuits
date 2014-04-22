@@ -1,42 +1,26 @@
 
 function SquirrelService() {
-  return loadSpriteSheet('media/Monster-squirrel.png')
-  .then(function(spritesheet) {
+  var texture = PIXI.Texture.fromImage('media/Monster-squirrel.png');
 
-    return {
-      create: function() {
-        // TODO a simple list doesn't give fine grained control over each
-        //      frame (such as frame duraction). imploy a addFrame method
-        var squirrelSpriteAnim = new SpriteAnimation([
-          spritesheet.slice(0, 0, 30, 30),
-          spritesheet.slice(30, 30, 30, 30),
-          spritesheet.slice(0, 0, 30, 30),
-        ]);
+  var textures = [];
 
-        return squirrelSpriteAnim;
-      },
-    };
-  });
-}
-
-function SquirrelMovement(world, position) {
-  var frame = 0;
-
-  var movement = MovementHandler(position, {
-    duration: 5,
-    // TODO checking for blocks should be layer specific, i.e. I can think of
-    //      cases where the player shouldn't be block by a block that's on
-    //      another layer
-    canMove: world.isBlocked.bind(world),
-  });
-
-  return function() {
-    frame += 1;
-    movement.tick();
-
-    if (frame % 50 == 0) {
-      var move = Math.random() < 0.5 ? movement.left : movement.right;
-      move();
-    }
+  for (var i = 0; i < 8; i++) {
+    var x = i * 32;
+    var t = new PIXI.Texture(texture, new PIXI.Rectangle(x, 0, 32, 32));
+    textures.push(t);
   }
+
+  // TODO sporadic animation. a squirrel isn't a fluid animation loop.
+  return {
+    create: function() {
+
+      var clip = new PIXI.MovieClip(textures);
+      clip.animationSpeed = 0.07;
+      clip.play();
+
+      return {
+        clip: clip,
+      }
+    },
+  };
 }

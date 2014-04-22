@@ -1,3 +1,4 @@
+// TODO should be a singleton
 function Player() {
     // create a texture from an image path
     var texture = PIXI.Texture.fromImage("media/playerSprites.png");
