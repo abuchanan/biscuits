@@ -23,12 +23,9 @@ function loadWorld(mapfile, sceneManager, container) {
 
     var body = world.addDynamic(player, playerX / scale, playerY / scale, playerW / scale, playerH / scale);
     body.SetLinearDamping(2);
-    console.log(playerX / scale);
 
     var movement = MovementHandler(body, {
-      onStart: function(direction) {
-        player.direction = direction;
-      },
+      onStart: player.setDirection,
     });
 
     //var view = new WorldView(world, 20, 20);
@@ -44,16 +41,16 @@ function loadWorld(mapfile, sceneManager, container) {
     });
 
 
-    function makeScene(playerX, playerY, viewX, viewY) {
+    function makeScene(playerX, playerY, playerDirection, viewX, viewY) {
         return function() {
             world.start();
             container.visible = true;
 
             // TODO view.position.set(viewX, viewY);
 
-            // TODO not only set position, but direction
-            playerSprite.position.x = playerX;
-            playerSprite.position.y = playerY;
+            player.setDirection(playerDirection);
+            player.clip.position.x = playerX;
+            player.clip.position.y = playerY;
 
             var x = (playerX / scale) + (playerW / scale / 2);
             var y = (playerY / scale) + (playerH / scale / 2);
@@ -63,8 +60,8 @@ function loadWorld(mapfile, sceneManager, container) {
             sceneManager.render = function() {
               var pos = body.GetPosition();
 
-              playerSprite.position.x = (pos.get_x() * scale) - (playerW / 2);
-              playerSprite.position.y = (pos.get_y() * scale) - (playerH / 2)
+              player.clip.position.x = (pos.get_x() * scale) - (playerW / 2);
+              player.clip.position.y = (pos.get_y() * scale) - (playerH / 2)
             }
 
             var deregisterKeybindings = keybindings.listen(function(name) {
@@ -121,7 +118,8 @@ function loadWorld(mapfile, sceneManager, container) {
           // TODO better default than 0, like center player in view
           var viewX = obj.viewX || 0;
           var viewY = obj.viewY || 0;
-          var load = makeScene(obj.x, obj.y, viewX, viewY);
+          // TODO get player direction
+          var load = makeScene(obj.x, obj.y, 'down', viewX, viewY);
 
           g.beginFill(0xdddddd);
           g.drawRect(obj.x, obj.y, obj.w, obj.h);
@@ -134,8 +132,7 @@ function loadWorld(mapfile, sceneManager, container) {
       }
     }
 
-    var playerSprite = player.sprites.down;
-    container.addChild(playerSprite);
+    container.addChild(player.clip);
 
   });
 }
