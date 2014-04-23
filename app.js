@@ -28,6 +28,7 @@ function startBiscuits(container) {
 
 	// create a renderer instance
 	var renderer = new PIXI.WebGLRenderer(640, 640);
+	//var renderer = new PIXI.WebGLRenderer(320, 320);
   //autoDetectRenderer(400, 300);
 
 	// add the renderer view element to the DOM

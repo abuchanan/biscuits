@@ -95,57 +95,13 @@ function loadWorld(mapfile, sceneManager, container) {
       },
     });
 
-    function makeViewEdges(viewW, viewH) {
-
-      // TODO use chain? that way I can move the whole chain
-      var edges = [
-        // Top
-        world.addEdgeSensor({dx: 0, dy: -1 * (viewH - 33)}, 0, 0, viewW, 0),
-        // Bottom
-        world.addEdgeSensor({dx: 0, dy: viewH - 33}, 0, viewH, viewW, viewH),
-        // Left
-        world.addEdgeSensor({dx: -1 * (viewW - 33), dy: 0}, 0, 0, 0, viewH),
-        // Right
-        world.addEdgeSensor({dx: viewW - 33, dy: 0}, viewW, 0, viewW, viewH),
-      ];
-
-      world.contactListener(player, function(fixture) {
-
-        var dx, dy;
-
-        for (var i = 0; i < edges.length; i++) {
-          var edge = edges[i];
-
-          if (fixture === edge) {
-            dx = edge.objectData.dx;
-            dy = edge.objectData.dy;
-
-            container.x += dx * -1;
-            container.y += dy * -1;
-
-            break;
-          }
-        }
-
-        if (dx || dy) {
-          world.scheduleUpdate(function() {
-            for (var i = 0; i < edges.length; i++) {
-                var body = edges[i].GetBody();
-                var pos = body.GetTransform().get_p();
-                var x = pos.get_x() + (dx / scale);
-                var y = pos.get_y() + (dy / scale);
-                body.SetTransform(new Box2D.b2Vec2(x, y), body.GetAngle());
-            }
-          });
-        }
-      });
-    }
-
 
     // TODO need dynamic view size
     var viewW = 640;
     var viewH = 640;
-    makeViewEdges(viewW, viewH);
+    //var viewW = 320;
+    //var viewH = 320;
+    WorldView(world, container, player, viewW, viewH, scale);
 
     // Portal handling
     // TODO player jumps through portal with the slightest overlap.

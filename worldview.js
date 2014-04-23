@@ -1,58 +1,45 @@
+function WorldView(world, container, player, viewW, viewH, scale) {
 
-function WorldView(world, width, height) {
-  this.world = world;
-  this.width = width;
-  this.height = height;
-  this.position = new Position(0, 0);
-}
+  // TODO use chain? that way I can move the whole chain
+  var edges = [
+    // Top
+    world.addEdgeSensor({dx: 0, dy: -1 * (viewH - 33)}, 0, 0, viewW, 0),
+    // Bottom
+    world.addEdgeSensor({dx: 0, dy: viewH - 33}, 0, viewH, viewW, viewH),
+    // Left
+    world.addEdgeSensor({dx: -1 * (viewW - 33), dy: 0}, 0, 0, 0, viewH),
+    // Right
+    world.addEdgeSensor({dx: viewW - 33, dy: 0}, viewW, 0, viewW, viewH),
+  ];
 
-WorldView.prototype = {
+  world.contactListener(player, function(fixture) {
 
-  handlePlayerPositionChange: function(playerPosition) {
-    var playerX = playerPosition.getX();
-    var playerY = playerPosition.getY();
-    var viewX = this.position.getX();
-    var viewY = this.position.getY();
-    var viewWidth = this.width;
-    var viewHeight = this.height;
+    var dx, dy;
 
-    // Player is at the right edge
-    if (playerX == viewX + viewWidth - 1) {
-      this.shiftRight();
+    for (var i = 0; i < edges.length; i++) {
+      var edge = edges[i];
 
-    // Player is at the left edge
-    } else if (playerX == viewX) {
-      this.shiftLeft();
+      if (fixture === edge) {
+        dx = edge.objectData.dx;
+        dy = edge.objectData.dy;
 
-    // Player is at the top edge
-    } else if (playerY == viewY) {
-      this.shiftUp();
+        container.x += dx * -1;
+        container.y += dy * -1;
 
-    // Player is at the bottom edge
-    } else if (playerY == viewY + viewHeight - 1) {
-      this.shiftDown();
+        break;
+      }
     }
-  },
 
-  // TODO need to be careful about shifting out of bounds
-  shiftRight: function() {
-    this.position.setX(this.position.getX() + this.width - 2);
-  },
-  shiftLeft: function() {
-    this.position.setX(this.position.getX() - this.width + 2);
-  },
-  shiftUp: function() {
-    this.position.setY(this.position.getY() - this.height + 2);
-  },
-  shiftDown: function() {
-    this.position.setY(this.position.getY() + this.height - 2);
-  },
-
-  items: function() {
-    var viewX = this.position.getX();
-    var viewY = this.position.getY();
-    return this.world.query(viewX, viewY,
-                            viewX + this.width - 1, viewY + this.height - 1);
-  },
-
-};
+    if (dx || dy) {
+      world.scheduleUpdate(function() {
+        for (var i = 0; i < edges.length; i++) {
+            var body = edges[i].GetBody();
+            var pos = body.GetTransform().get_p();
+            var x = pos.get_x() + (dx / scale);
+            var y = pos.get_y() + (dy / scale);
+            body.SetTransform(new Box2D.b2Vec2(x, y), body.GetAngle());
+        }
+      });
+    }
+  });
+}
