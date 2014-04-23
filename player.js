@@ -36,6 +36,10 @@ function Player() {
     return {
       clip: clip,
 
+      getDirection: function() {
+        return direction;
+      },
+
       setDirection: function(value) {
         direction = value;
         clip.textures = textures[direction];

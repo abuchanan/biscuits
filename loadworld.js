@@ -222,16 +222,39 @@ function loadWorld(mapfile, sceneManager, container) {
 
               if (event == 'Use keydown') {
                 // Chest handling
-                // TODO this isn't returning the results I would expect
-                //      raycast is hitting the player object 
-                //      also, even if you ignore the player hit,
-                //      raycast is a little too specific. it requires the item
-                //      to be directly out from the player center. I think want
-                //      query instead
-                // TODO use player direction
-                var res = world.query(player.clip.position.x + 32, player.clip.position.y, player.clip.position.x + 32 + 32, player.clip.position.y + 32);
-                console.log(res);
+                switch (player.getDirection()) {
+                  case 'up':
+                    var x1 = player.clip.position.x;
+                    var y1 = player.clip.position.y - 10;
+                    var x2 = player.clip.position.x + 32;
+                    var y2 = player.clip.position.y;
+                    break;
 
+                  case 'down':
+                    var x1 = player.clip.position.x;
+                    var y1 = player.clip.position.y + 32;
+                    var x2 = player.clip.position.x + 32;
+                    var y2 = player.clip.position.y + 32 + 10;
+                    break;
+
+                  case 'left':
+                    var x1 = player.clip.position.x - 10;
+                    var y1 = player.clip.position.y;
+                    var x2 = player.clip.position.x;
+                    var y2 = player.clip.position.y + 32;
+                    break;
+
+                  case 'right':
+                    var x1 = player.clip.position.x + 32;
+                    var y1 = player.clip.position.y;
+                    var x2 = player.clip.position.x + 32 + 10;
+                    var y2 = player.clip.position.y + 32;
+                    break;
+
+                }
+                var res = world.query(x1, y1, x2, y2);
+
+                // TODO this could affect multiple objects. only want to affect one.
                 for (var i = 0; i < res.length; i++) {
                   var obj = res[i][2];
                   if (obj.chest) {

@@ -28,6 +28,7 @@ character
 
 map state
 - e.g. door X has been unlocked
+- map object Y has been picked up, or moved
 - story state
 
 
