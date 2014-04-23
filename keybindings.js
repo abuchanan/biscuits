@@ -11,17 +11,18 @@ function KeyBindingsService(document) {
 
       var removeFunctions = [];
 
-      function add(keyname) {
+      function add(keyname, eventname) {
+        eventname = eventname || keyname;
         var func = function() { callback(eventname); }
 
         var remove = shortcutjs.add(keyname, function() {
-          callback(keyname + ' keydown');
+          callback(eventname + ' keydown');
         }, {propagate: false});
 
         removeFunctions.push(remove);
 
         var remove = shortcutjs.add(keyname, function() {
-          callback(keyname + ' keyup');
+          callback(eventname + ' keyup');
         }, {type: 'keyup'});
 
         removeFunctions.push(remove);
@@ -31,6 +32,7 @@ function KeyBindingsService(document) {
       add('Down');
       add('Left');
       add('Right');
+      add('E', 'Use');
 
       return function() {
         for (var i = 0; i < removeFunctions.length; i++) {

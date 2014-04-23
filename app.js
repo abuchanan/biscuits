@@ -46,7 +46,7 @@ function startBiscuits(container) {
 
   var sceneManager = SceneManager();
 
-  var worldFiles = ['foo7.json', 'other1.json', 'bar2.json'];
+  var worldFiles = ['foo8.json', 'other1.json', 'bar2.json'];
   var worlds = [];
 
   for (var i = 0; i < worldFiles.length; i++) {

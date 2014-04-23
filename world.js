@@ -56,6 +56,25 @@ function World(scale) {
 
   var scheduledUpdates = [];
 
+
+  var raycastCallback = new Box2D.b2RayCastCallback();
+
+  Box2D.customizeVTable(raycastCallback, [{
+    original: Box2D.b2RayCastCallback.prototype.ReportFixture,
+    replacement: function(thsPtr, fixturePtr, point, normal, fraction) {
+      var ths = Box2D.wrapPointer(thsPtr, Box2D.b2RayCastCallback);
+      var fixture = Box2D.wrapPointer(fixturePtr, Box2D.b2Fixture);
+
+      ths.items.push([fixture, point, normal, fraction]);
+
+      // TODO this needs to be improved. the external code should be
+      //      able to control the returned fraction
+      return 1;
+
+      //return fraction;
+    },
+  }]);
+
   return {
 
     // TODO need to figure out how to encapsulate the Box2D API
@@ -161,7 +180,20 @@ function World(scale) {
       world.DestroyBody(fixture.GetBody());
     },
 
+    raycast: function(x1, y1, x2, y2) {
+      raycastCallback.items = [];
+      var p1 = new Box2D.b2Vec2(x1 / scale, y1 / scale);
+      var p2 = new Box2D.b2Vec2(x2 / scale, y2 / scale);
+      world.RayCast(raycastCallback, p1, p2);
+      return raycastCallback.items;
+    },
+
     query: function(x1, y1, x2, y2) {
+      x1 = x1 / scale;
+      y1 = y1 / scale;
+      x2 = x2 / scale;
+      y2 = y2 / scale;
+      
       myQueryCallback.items = []
 
       // the AABB is a tiny square around the current mouse position

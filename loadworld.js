@@ -16,9 +16,36 @@ function CoinsService() {
   }
 }
 
+function ChestService() {
+  return {
+    create: function() {
+
+      var g = new PIXI.Graphics();
+      g.beginFill(0x00FFFF);
+      // TODO how to create graphics without worrying about scale?
+      g.drawRect(0, 0, 32, 32);
+      g.endFill();
+
+      return {
+        clip: g,
+        chest: true,
+        open: function() {
+          g.clear();
+          g.beginFill(0x0000FF);
+          // TODO how to create graphics without worrying about scale?
+          g.drawRect(0, 0, 32, 32);
+          g.endFill();
+        },
+      }
+    }
+  }
+}
+
+
 function loadWorld(mapfile, sceneManager, container) {
 
   var Coins = CoinsService();
+  var Chests = ChestService();
 
   var reqs = [
     Player(),
@@ -190,7 +217,29 @@ function loadWorld(mapfile, sceneManager, container) {
               player.clip.position.y = (pos.get_y() * scale) - (playerH / 2)
             }
 
-            var deregisterKeybindings = keybindings.listen(movement);
+            var deregisterKeybindings = keybindings.listen(function(event) {
+              movement(event);
+
+              if (event == 'Use keydown') {
+                // Chest handling
+                // TODO this isn't returning the results I would expect
+                //      raycast is hitting the player object 
+                //      also, even if you ignore the player hit,
+                //      raycast is a little too specific. it requires the item
+                //      to be directly out from the player center. I think want
+                //      query instead
+                // TODO use player direction
+                var res = world.query(player.clip.position.x + 32, player.clip.position.y, player.clip.position.x + 32 + 32, player.clip.position.y + 32);
+                console.log(res);
+
+                for (var i = 0; i < res.length; i++) {
+                  var obj = res[i][2];
+                  if (obj.chest) {
+                    obj.open();
+                  }
+                }
+              }
+            });
 
             // return unload function
             return function() {
@@ -254,6 +303,14 @@ function loadWorld(mapfile, sceneManager, container) {
           coin.clip.position.y = obj.y;
           world.addStatic(coin, obj.x, obj.y, obj.w, obj.h);
           container.addChild(coin.clip);
+        }
+
+        else if (obj.type == 'chest') {
+          var chest = Chests.create();
+          chest.clip.position.x = obj.x;
+          chest.clip.position.y = obj.y;
+          world.addStatic(chest, obj.x, obj.y, obj.w, obj.h);
+          container.addChild(chest.clip);
         }
       }
     }

@@ -6,7 +6,7 @@ function MovementHandler(body, options) {
   var endCallback = options.onEnd || noop;
   var speed = options.speed || 0.5;
 
-  var current;
+  var current = noop;
 
   function makeHandler(direction, deltaX, deltaY) {
     return function() {
