@@ -47,7 +47,13 @@ function World(scale) {
               var fixtureB = contact.GetFixtureB();
 
               for (var i = 0; i < contactCallbacks.length; i++) {
-                contactCallbacks[i](fixtureA, fixtureB);
+                var match = contactCallbacks[i][0];
+                if (fixtureA.objectData === match) {
+                  contactCallbacks[i][1](fixtureB);
+                }
+                else if (fixtureB.objectData === match) {
+                  contactCallbacks[i][1](fixtureA);
+                }
               }
           }
   }]);
@@ -172,8 +178,8 @@ function World(scale) {
       scheduledUpdates.push(func);
     },
 
-    contactListener: function(callback) {
-      contactCallbacks.push(callback);
+    contactListener: function(match, callback) {
+      contactCallbacks.push([match, callback]);
     },
 
     remove: function(fixture) {

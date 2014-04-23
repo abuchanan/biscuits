@@ -109,14 +109,14 @@ function loadWorld(mapfile, sceneManager, container) {
         world.addEdgeSensor({dx: viewW - 33, dy: 0}, viewW, 0, viewW, viewH),
       ];
 
-      world.contactListener(function(fixtureA, fixtureB) {
+      world.contactListener(player, function(fixture) {
 
         var dx, dy;
 
         for (var i = 0; i < edges.length; i++) {
           var edge = edges[i];
 
-          if (fixtureB === edge || fixtureA === edge) {
+          if (fixture === edge) {
             dx = edge.objectData.dx;
             dy = edge.objectData.dy;
 
@@ -151,38 +151,24 @@ function loadWorld(mapfile, sceneManager, container) {
     // TODO player jumps through portal with the slightest overlap.
     //      would be nicer to wait until the player is overlapping more
     //      so it feels like you're *in* the portal
-    // TODO could clean up this API so that the callback is only called
-    //      if a given fixture/object is matched
-    world.contactListener(function(fixtureA, fixtureB) {
-        if (fixtureA.objectData.portal && fixtureB.objectData === player) {
-          sceneManager.load(fixtureA.objectData.portal);
-        }
-        else if (fixtureB.objectData.portal && fixtureA.objectData === player) {
-          sceneManager.load(fixtureB.objectData.portal);
-        }
+    world.contactListener(player, function(fixture) {
+      if (fixture.objectData.portal) {
+        sceneManager.load(fixture.objectData.portal);
+      }
     });
 
 
     // Coin handling
-    world.contactListener(function(fixtureA, fixtureB) {
-        if (fixtureA.objectData.coin && fixtureB.objectData === player) {
-          container.removeChild(fixtureA.objectData.clip);
+    world.contactListener(player, function(fixture) {
+      if (fixture.objectData.coin) {
+          container.removeChild(fixture.objectData.clip);
           playerCoinCount += 1;
           playerCoinCountText.setText('Player coins: ' + playerCoinCount);
 
           world.scheduleUpdate(function() {
-            world.remove(fixtureA);
+            world.remove(fixture);
           });
-        }
-        else if (fixtureB.objectData.coin && fixtureA.objectData === player) {
-          container.removeChild(fixtureB.objectData.clip);
-          playerCoinCount += 1;
-          playerCoinCountText.setText('Player coins: ' + playerCoinCount);
-
-          world.scheduleUpdate(function() {
-            world.remove(fixtureB);
-          });
-        }
+      }
     });
 
 
