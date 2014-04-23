@@ -157,6 +157,10 @@ function World(scale) {
       contactCallbacks.push(callback);
     },
 
+    remove: function(fixture) {
+      world.DestroyBody(fixture.GetBody());
+    },
+
     query: function(x1, y1, x2, y2) {
       myQueryCallback.items = []
 

@@ -1,3 +1,6 @@
+circular player physics body
+
+squirrel movement AI
 
 Load on demand:
 - worlds on demand
@@ -34,8 +37,6 @@ enemies
 
 animate view shift?
 
-animated player walk cycle
-
 animation when switching world (e.g. go in door, current scene fades out)
 
 combat calculation
@@ -69,6 +70,11 @@ inventory
 settings
 
 bridge: player on top of tile going one way, beneath tile going another
+
+
+how to load map and object state? e.g. coins are defined in the map file,
+  but the player picks some of them up and then saves the game. when the
+  map is next loaded, how do you check whether to include a coin or not?
 
 
 dev stuff:

@@ -1,5 +1,24 @@
+function CoinsService() {
+  return {
+    create: function() {
+
+      var g = new PIXI.Graphics();
+      g.beginFill(0xF0F074);
+      // TODO how to create graphics without worrying about scale?
+      g.drawRect(0, 0, 32, 32);
+      g.endFill();
+
+      return {
+        clip: g,
+        coin: true,
+      }
+    }
+  }
+}
 
 function loadWorld(mapfile, sceneManager, container) {
+
+  var Coins = CoinsService();
 
   var reqs = [
     Player(),
@@ -8,9 +27,14 @@ function loadWorld(mapfile, sceneManager, container) {
   ];
 
   return Q.spread(reqs, function(player, Squirrel, map) {
+    // TODO this function is getting huge and unmanagable.
+    //      needs to be cut up into modular handlers
 
     // TODO maybe loadpoint from Tiled should determine layer?
     var keybindings = KeyBindingsService();
+
+    var playerCoinCount = 0;
+    var playerCoinCountText = new PIXI.Text('Player coins: 0');
 
     /*
     The physics world and the renderer use a different scale.
@@ -22,6 +46,9 @@ function loadWorld(mapfile, sceneManager, container) {
     TODO clean this up and try to completely encapsulate the
          scale within World.
     */
+    // TODO better encapsulate player API. Shouldn't expose clip, clip should
+    //      be modified internally through calls like player.walk('left'),
+    //      (or something) and player should be renderable?
     var scale = 32;
     var world = World(scale);
 
@@ -105,6 +132,29 @@ function loadWorld(mapfile, sceneManager, container) {
         }
         else if (fixtureB.objectData.portal && fixtureA.objectData === player) {
           sceneManager.load(fixtureB.objectData.portal);
+        }
+    });
+
+
+    // Coin handling
+    world.contactListener(function(fixtureA, fixtureB) {
+        if (fixtureA.objectData.coin && fixtureB.objectData === player) {
+          container.removeChild(fixtureA.objectData.clip);
+          playerCoinCount += 1;
+          playerCoinCountText.setText('Player coins: ' + playerCoinCount);
+
+          world.scheduleUpdate(function() {
+            world.remove(fixtureA);
+          });
+        }
+        else if (fixtureB.objectData.coin && fixtureA.objectData === player) {
+          container.removeChild(fixtureB.objectData.clip);
+          playerCoinCount += 1;
+          playerCoinCountText.setText('Player coins: ' + playerCoinCount);
+
+          world.scheduleUpdate(function() {
+            world.remove(fixtureB);
+          });
         }
     });
 
@@ -197,9 +247,18 @@ function loadWorld(mapfile, sceneManager, container) {
           world.addStatic(squirrel, obj.x, obj.y, obj.w, obj.h);
           container.addChild(squirrel.clip);
         }
+
+        else if (obj.type == 'coin') {
+          var coin = Coins.create();
+          coin.clip.position.x = obj.x;
+          coin.clip.position.y = obj.y;
+          world.addStatic(coin, obj.x, obj.y, obj.w, obj.h);
+          container.addChild(coin.clip);
+        }
       }
     }
 
     container.addChild(player.clip);
+    container.addChild(playerCoinCountText);
   });
 }
