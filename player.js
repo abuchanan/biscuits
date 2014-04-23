@@ -35,6 +35,7 @@ function Player() {
 
     return {
       clip: clip,
+      coins: 0,
 
       getDirection: function() {
         return direction;

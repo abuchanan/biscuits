@@ -60,8 +60,7 @@ function loadWorld(mapfile, sceneManager, container) {
     // TODO maybe loadpoint from Tiled should determine layer?
     var keybindings = KeyBindingsService();
 
-    var playerCoinCount = 0;
-    var playerCoinCountText = new PIXI.Text('Player coins: 0');
+    var playerCoinCountText = new PIXI.Text('');
 
     /*
     The physics world and the renderer use a different scale.
@@ -118,8 +117,7 @@ function loadWorld(mapfile, sceneManager, container) {
     world.contactListener(player, function(fixture) {
       if (fixture.objectData.coin) {
           container.removeChild(fixture.objectData.clip);
-          playerCoinCount += 1;
-          playerCoinCountText.setText('Player coins: ' + playerCoinCount);
+          player.coins += 1;
 
           world.scheduleUpdate(function() {
             world.remove(fixture);
@@ -155,6 +153,10 @@ function loadWorld(mapfile, sceneManager, container) {
             sceneManager.onFrame = function() {
               var pos = body.GetPosition();
 
+              // TODO is it inefficient to do this on every frame? I don't know.
+              //      is it really worth an event/callback?
+              playerCoinCountText.setText('Player coins: ' + player.coins);
+
               player.clip.position.x = (pos.get_x() * scale) - (playerW / 2);
               player.clip.position.y = (pos.get_y() * scale) - (playerH / 2)
             }
@@ -163,7 +165,6 @@ function loadWorld(mapfile, sceneManager, container) {
               movement(event);
 
               if (event == 'Use keydown') {
-                // Chest handling
                 switch (player.getDirection()) {
                   case 'up':
                     var x1 = player.clip.position.x;
@@ -192,13 +193,13 @@ function loadWorld(mapfile, sceneManager, container) {
                     var x2 = player.clip.position.x + 32 + 10;
                     var y2 = player.clip.position.y + 32;
                     break;
-
                 }
                 var res = world.query(x1, y1, x2, y2);
 
                 // TODO this could affect multiple objects. only want to affect one.
                 for (var i = 0; i < res.length; i++) {
                   var obj = res[i][2];
+                  // Chest handling
                   if (obj.chest) {
                     obj.open();
                   }
