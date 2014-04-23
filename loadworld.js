@@ -32,7 +32,13 @@ function loadWorld(mapfile, sceneManager, container) {
     var body = playerFixture.GetBody();
 
     var movement = MovementHandler(body, {
-      onStart: player.setDirection,
+      onStart: function(direction) {
+        player.setDirection(direction);
+        player.clip.play();
+      },
+      onEnd: function() {
+        player.clip.gotoAndStop(0);
+      },
     });
 
     function makeViewEdges(viewW, viewH) {

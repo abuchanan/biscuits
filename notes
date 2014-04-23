@@ -70,9 +70,6 @@ settings
 
 bridge: player on top of tile going one way, beneath tile going another
 
-keybindings + movement: there is a delay between the first press, and the repeat
-   events. Need to avoid this delay by using keyup events
-
 
 dev stuff:
 - break into smaller files
