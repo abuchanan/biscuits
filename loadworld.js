@@ -29,12 +29,14 @@ function ChestService() {
       return {
         clip: g,
         chest: true,
-        open: function() {
+        open: function(player) {
           g.clear();
           g.beginFill(0x0000FF);
           // TODO how to create graphics without worrying about scale?
           g.drawRect(0, 0, 32, 32);
           g.endFill();
+
+          player.coins += 5;
         },
       }
     }
@@ -201,7 +203,7 @@ function loadWorld(mapfile, sceneManager, container) {
                   var obj = res[i][2];
                   // Chest handling
                   if (obj.chest) {
-                    obj.open();
+                    obj.open(player);
                   }
                 }
               }
