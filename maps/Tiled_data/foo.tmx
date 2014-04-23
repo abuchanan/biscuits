@@ -8,7 +8,7 @@
    eJyTZGBgkKISlgZiRSBWohJWHjVvSJmnAsRaUKxKBfNA8nJQTIw/6G2eDgMi7esOwvgYNW/UPHTzNBkQeZRSrA3EAOw2NSs=
   </data>
  </layer>
- <objectgroup name="Block layer" width="20" height="20">
+ <objectgroup name="Block layer">
   <properties>
    <property name="isBlock" value="true"/>
   </properties>
@@ -18,7 +18,7 @@
   <object x="0" y="0" width="640" height="32"/>
   <object x="224" y="224" width="128" height="128"/>
  </objectgroup>
- <objectgroup name="Objects" width="20" height="20">
+ <objectgroup name="Objects">
   <object name="portal other" type="portal" x="64" y="544" width="32" height="32">
    <properties>
     <property name="portal" value="other"/>
@@ -26,5 +26,7 @@
   </object>
   <object name="main" type="loadpoint" x="64" y="64" width="32" height="32"/>
   <object name="squirrel" type="squirrel" x="128" y="128" width="32" height="32"/>
+  <object name="coin1" type="coin" x="448" y="96" width="32" height="32"/>
+  <object name="chest1" type="chest" x="480" y="448" width="32" height="32"/>
  </objectgroup>
 </map>
