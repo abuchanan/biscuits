@@ -11,10 +11,19 @@ function KeyBindingsService(document) {
 
       var removeFunctions = [];
 
-      function add(name) {
-        var lowerName = name.toLowerCase();
-        var func = function() { callback(lowerName); }
-        var remove = shortcutjs.add(name, func, options);
+      function add(keyname) {
+        var func = function() { callback(eventname); }
+
+        var remove = shortcutjs.add(keyname, function() {
+          callback(keyname + ' keydown');
+        }, {propagate: false});
+
+        removeFunctions.push(remove);
+
+        var remove = shortcutjs.add(keyname, function() {
+          callback(keyname + ' keyup');
+        }, {type: 'keyup'});
+
         removeFunctions.push(remove);
       }
 

@@ -83,8 +83,8 @@ function loadWorld(mapfile, sceneManager, container) {
 
 
     // TODO need dynamic view size
-    var viewW = 320;
-    var viewH = 320;
+    var viewW = 640;
+    var viewH = 640;
     makeViewEdges(viewW, viewH);
 
     // Portal handling
@@ -134,9 +134,7 @@ function loadWorld(mapfile, sceneManager, container) {
               player.clip.position.y = (pos.get_y() * scale) - (playerH / 2)
             }
 
-            var deregisterKeybindings = keybindings.listen(function(name) {
-              movement[name]();
-            });
+            var deregisterKeybindings = keybindings.listen(movement);
 
             // return unload function
             return function() {

@@ -32,6 +32,11 @@ enemies
 - difficulty level
 - figuring out which enemies are in the current view
 
+animate view shift?
+
+animated player walk cycle
+
+animation when switching world (e.g. go in door, current scene fades out)
 
 combat calculation
 - weapons
@@ -54,14 +59,7 @@ AI
 sprites that cover multiple tiles
 - should work, just need proof 
 
-
-max movement speed
-- base movement time on frame rate?
-- switch from tile coordinate movement?
-
-
 planes, trains, automobiles, submarines, etc
-
 
 stage renderer, i.e. be able to switch master renderer
 - door that leads to store doesn't match viewpointloader
@@ -71,6 +69,9 @@ inventory
 settings
 
 bridge: player on top of tile going one way, beneath tile going another
+
+keybindings + movement: there is a delay between the first press, and the repeat
+   events. Need to avoid this delay by using keyup events
 
 
 dev stuff:
@@ -82,18 +83,9 @@ dev stuff:
 
 renderers
 - player
--- possibly animate in between tiles
 - monsters
 -- renderer for each monster?
 
-s/renderer/layer/
-
-
-possibly ditch tile coordinate system and use x/y coordinates
-- will affect collision detection but should be simple fix
-- will affect movement, but could be improvement
-
-animation when switching world (e.g. go in door, current scene fades out)
 
 things to define in Tiled and other ideas for objects:
 - animated tiles (squirrel)
@@ -102,8 +94,6 @@ things to define in Tiled and other ideas for objects:
 - equippable items
 - chests
 - locked doors
-
-share tilesets among multiple worlds
 
 "do action" buttons: talk to someone, attack, use magic, whatever
 
