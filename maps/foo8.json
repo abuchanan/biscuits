@@ -107,7 +107,7 @@
                  "name":"portal other",
                  "properties":
                     {
-                     "portal":"other"
+                     "portal":"stage"
                     },
                  "rotation":0,
                  "type":"portal",

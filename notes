@@ -1,44 +1,18 @@
-circular player physics body
-
-squirrel movement AI
-
-Load on demand:
-- worlds on demand
--- load Tiled json, get load points, but don't bother with sprite slicing
-   and world creation
-- chunks of large worlds on demand?
-
-conversation windows
-
-store
-
-remote weapons
-- e.g. detonate bomb
-- time bomb
-
-long distance weapons
-- e.g. bow and arrow
-
-game state
-
-character
-- name
-- items
-- health
-
-map state
-- e.g. door X has been unlocked
-- map object Y has been picked up, or moved
-- story state
-
+big things
+combat
+--------------------------------------------------------------
+weapons
+-- spells
+-- 
+-- remote weapons e.g. detonate bomb
+-- timed weapons e.g. time bomb
+-- long distance weapons e.g. bow and arrow
 
 enemies
 - difficulty level
 - figuring out which enemies are in the current view
 
-animate view shift?
-
-animation when switching world (e.g. go in door, current scene fades out)
+reaction to being hit: enemy might freeze, or become agitated, or...
 
 combat calculation
 - weapons
@@ -47,24 +21,78 @@ combat calculation
 - difficulty level
 
 damage
+- player health
+
+what happens when you die? i.e. health runs out?
+
+
+AI
+--------------------------------------------------------------
+-- movement
+
+
+
+store
+--------------------------------------------------------------
+
+
+
+state and save
+--------------------------------------------------------------
+-- character
+--- name
+--- items
+--- health
+map state
+- e.g. door X has been unlocked
+- map object Y has been picked up, or moved
+- story state
+
+how to load map and object state? e.g. coins are defined in the map file,
+  but the player picks some of them up and then saves the game. when the
+  map is next loaded, how do you check whether to include a coin or not?
+
+
+
+story/conversation
+--------------------------------------------------------------
+comic book style?
+
+story themes:
+- every place has secrets
+- unlock the secrets of the book
+-- what does the book represent?
+
+how does the story end?
+
+
+
+other
+=============================================================
+
+circular player physics body
+
+Load on demand:
+- worlds on demand
+-- load Tiled json, get load points, but don't bother with sprite slicing
+   and world creation
+- chunks of large worlds on demand?
+
+
+animate view shift?
+
+animation when switching world (e.g. go in door, current scene fades out)
+
 
 status layer
 
-saving
-
 walk through long grass, player sprite changes to match
-
-AI
-- AI might need some concept of "tick" so that every frame/cycle/tick/whatever
-  it can decide the action to take based on world state
 
 sprites that cover multiple tiles
 - should work, just need proof 
 
 planes, trains, automobiles, submarines, etc
 
-stage renderer, i.e. be able to switch master renderer
-- door that leads to store doesn't match viewpointloader
 
 world map
 inventory
@@ -73,9 +101,6 @@ settings
 bridge: player on top of tile going one way, beneath tile going another
 
 
-how to load map and object state? e.g. coins are defined in the map file,
-  but the player picks some of them up and then saves the game. when the
-  map is next loaded, how do you check whether to include a coin or not?
 
 
 dev stuff:
@@ -85,10 +110,8 @@ dev stuff:
 - grunt?
 - bower install list
 
-renderers
-- player
-- monsters
--- renderer for each monster?
+
+is pixi loading tilesets sychronously?
 
 
 things to define in Tiled and other ideas for objects:
@@ -99,7 +122,6 @@ things to define in Tiled and other ideas for objects:
 - chests
 - locked doors
 
-"do action" buttons: talk to someone, attack, use magic, whatever
 
 map load validation
 

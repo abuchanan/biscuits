@@ -43,6 +43,28 @@ function ChestService() {
   }
 }
 
+function loadStage(sceneManager, container) {
+  return Q.fcall(function() {
+    sceneManager.addScene('stage', function() {
+      container.visible = true;
+      container.
+
+      console.log('load stage');
+
+      var g = new PIXI.Graphics();
+      g.beginFill(0x00ffaa);
+      g.drawRect(0, 0, 100, 100);
+      g.endFill();
+
+      container.addChild(g);
+
+      return function() {
+        container.visible = false;
+      }
+    });
+  });
+}
+
 
 function loadWorld(mapfile, sceneManager, container) {
 

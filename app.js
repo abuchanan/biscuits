@@ -27,8 +27,9 @@ function startBiscuits(container) {
 	var stage = new PIXI.Stage(0xffffff);
 
 	// create a renderer instance
-	var renderer = new PIXI.WebGLRenderer(640, 640);
-	//var renderer = new PIXI.WebGLRenderer(320, 320);
+  var width = 640;
+  var height = 640;
+	var renderer = new PIXI.WebGLRenderer(width, height);
   //autoDetectRenderer(400, 300);
 
 	// add the renderer view element to the DOM
@@ -58,6 +59,10 @@ function startBiscuits(container) {
     var world = loadWorld(file, sceneManager, worldContainer);
     worlds.push(world);
   }
+
+  var stageContainer = new PIXI.DisplayObjectContainer();
+  masterContainer.addChild(stageContainer);
+  loadStage(sceneManager, stageContainer);
 
   Q.all(worlds).then(function() {
     //sceneManager.load('bar.main');
