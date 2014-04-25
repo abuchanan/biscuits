@@ -90,15 +90,15 @@ function Player(world, container, keybindings, w, h) {
     PlayerRenderable.prototype.constructor = PlayerRenderable;
     PlayerRenderable.prototype._renderCanvas = function(renderer) {
       updateClip();
-      clip._renderCanvas(renderer);
+      PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
     };
     PlayerRenderable.prototype._initWebGL = function(renderer) {
       updateClip();
-      clip._initWebGL(renderer);
+      PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
     };
     PlayerRenderable.prototype._renderWebGL = function(renderer) {
       updateClip();
-      clip._renderWebGL(renderer);
+      PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
     };
 
 

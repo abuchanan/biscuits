@@ -1,4 +1,29 @@
 
+function StatusLayerRenderable(player) {
+  PIXI.DisplayObjectContainer.call(this);
+  this.player = player;
+  this.coinText = new PIXI.Text('Player coins: ' + player.coins);
+  this.addChild(this.coinText);
+}
+StatusLayerRenderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+StatusLayerRenderable.prototype.constructor = StatusLayerRenderable;
+StatusLayerRenderable.prototype.update = function() {
+  this.coinText.setText('Player coins: ' + this.player.coins);
+};
+StatusLayerRenderable.prototype._renderCanvas = function(renderer) {
+  this.update();
+  PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
+};
+StatusLayerRenderable.prototype._initWebGL = function(renderer) {
+  this.update();
+  PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
+};
+StatusLayerRenderable.prototype._renderWebGL = function(renderer) {
+  this.update();
+  PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
+};
+
+
 
 function PortalService(player, world, sceneManager, container) {
 
@@ -233,10 +258,10 @@ function loadWorld(mapfile, sceneManager, container) {
     var statusLayer = new PIXI.DisplayObjectContainer();
     container.addChild(statusLayer);
 
-    var playerCoinCountText = new PIXI.Text('');
-    statusLayer.addChild(playerCoinCountText);
-
     var player = Player(world, playerLayer, keybindings, 32, 32);
+
+    var statusRenderable = new StatusLayerRenderable(player);
+    statusLayer.addChild(statusRenderable);
 
     var useable = Useable(player, world);
     // TODO we pass keybindings to player but bind externally here
