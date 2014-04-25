@@ -2,20 +2,20 @@
 
 function SceneManager() {
 
-  return {
-    _scenes: {},
-    _unload: false,
+  var unload = false;
+  var scenes = {};
 
+  return {
     // no-op
     onFrame: function() {},
     addScene: function(name, sceneFunction) {
-      this._scenes[name] = sceneFunction;
+      scenes[name] = sceneFunction;
     },
     load: function(name) {
-      if (this._unload) {
-        this._unload();
+      if (unload) {
+        unload();
       }
-      this._unload = this._scenes[name]();
+      unload = scenes[name]();
     },
   }
 }
