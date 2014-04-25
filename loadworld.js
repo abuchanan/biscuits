@@ -77,7 +77,6 @@ function loadStage(sceneManager, container) {
   return Q.fcall(function() {
     sceneManager.addScene('stage', function() {
       container.visible = true;
-      container.
 
       console.log('load stage');
 
@@ -141,10 +140,13 @@ function Useable(player, world) {
 }
 
 function Combat(player, world) {
+
+  var damage = 1;
+
   return function(eventname) {
     if (eventname == 'Sword keydown') {
-      console.log('sword');
-      // TODO duplicated with Useable
+
+        // TODO duplicated with Useable
         switch (player.getDirection()) {
           case 'up':
             var x1 = player.clip.position.x;
@@ -176,10 +178,12 @@ function Combat(player, world) {
         }
         var res = world.query(x1, y1, x2, y2);
 
-        // TODO this could affect multiple objects. only want to affect one.
+        // TODO manage whether multiple objects can be hit
         for (var i = 0; i < res.length; i++) {
           var obj = res[i][2];
-          console.log('combat hit', obj);
+          if (obj.hittable) {
+            obj.hit(damage);
+          }
         }
     }
   }

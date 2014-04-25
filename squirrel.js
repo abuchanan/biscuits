@@ -10,7 +10,6 @@ function SquirrelService(world, container) {
     textures.push(t);
   }
 
-
   // TODO sporadic animation. a squirrel isn't a fluid animation loop.
   return {
     create: function(x, y, w, h) {
@@ -24,7 +23,21 @@ function SquirrelService(world, container) {
       clip.width = w;
       clip.height = h;
 
-      world.addStatic({}, x, y, w, h);
+      var life = 10;
+
+      var squirrel = {
+        hittable: true,
+        hit: function(damage) {
+          life -= 1;
+          console.log('hit', damage, life);
+          if (life == 0) {
+            world.remove(fixture);
+            container.removeChild(clip);
+          }
+        },
+      };
+
+      var fixture = world.addStatic(squirrel, x, y, w, h);
 
       container.addChild(clip);
 
