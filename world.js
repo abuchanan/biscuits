@@ -183,7 +183,9 @@ function World(scale) {
     },
 
     remove: function(fixture) {
-      world.DestroyBody(fixture.GetBody());
+      this.scheduleUpdate(function() {
+        world.DestroyBody(fixture.GetBody());
+      });
     },
 
     raycast: function(x1, y1, x2, y2) {

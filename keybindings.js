@@ -1,44 +1,62 @@
-function KeyBindingsService(document) {
+function KeyBindingsService(target) {
 
   var shortcutjs = CreateShortcutJS();
 
-  var options = {
+  var keyDownOptions = {
     propagate: false,
+    target: target,
   };
 
-  return {
-    listen: function(callback) {
+  var keyUpOptions = {
+    target: target,
+    type: 'keyup',
+  };
 
-      var removeFunctions = [];
+  var callbacks = [];
+  var removeFunctions = [];
 
-      function add(keyname, eventname) {
-        eventname = eventname || keyname;
-        var func = function() { callback(eventname); }
+  function invoke(eventname) {
+    for (var i = 0, ii = callbacks.length; i < ii; i++) {
+      callbacks[i](eventname);
+    }
+  }
 
-        var remove = shortcutjs.add(keyname, function() {
-          callback(eventname + ' keydown');
-        }, {propagate: false});
+  function add(keyname, eventname) {
+    eventname = eventname || keyname;
 
-        removeFunctions.push(remove);
+    var removeKeyDown = shortcutjs.add(keyname, function() {
+      invoke(eventname + ' keydown');
+    }, keyDownOptions);
 
-        var remove = shortcutjs.add(keyname, function() {
-          callback(eventname + ' keyup');
-        }, {type: 'keyup'});
+    var removeKeyUp = shortcutjs.add(keyname, function() {
+      invoke(eventname + ' keyup');
+    }, keyUpOptions);
 
-        removeFunctions.push(remove);
-      }
+    removeFunctions.push(removeKeyDown);
+    removeFunctions.push(removeKeyUp);
+  }
 
+  function bind() {
       add('Up');
       add('Down');
       add('Left');
       add('Right');
       add('E', 'Use');
+      add('F', 'Sword');
+  }
 
-      return function() {
-        for (var i = 0; i < removeFunctions.length; i++) {
-          removeFunctions[i]();
-        }
+  function unbind() {
+      for (var i = 0; i < removeFunctions.length; i++) {
+        removeFunctions[i]();
       }
+  }
+
+  return {
+    enable: bind,
+    disable: unbind,
+    listen: function(callback) {
+      callbacks.push(callback);
+      // TODO support remove listener. how to handle repeated callbacks?
     },
   };
 }

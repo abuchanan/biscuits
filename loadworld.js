@@ -1,44 +1,74 @@
-function CoinsService() {
-  return {
-    create: function() {
 
-      var g = new PIXI.Graphics();
-      g.beginFill(0xF0F074);
-      // TODO how to create graphics without worrying about scale?
-      g.drawRect(0, 0, 32, 32);
-      g.endFill();
 
-      return {
-        clip: g,
-        coin: true,
-      }
+function PortalService(player, world, sceneManager, container) {
+
+  // Portal handling
+  // TODO player jumps through portal with the slightest overlap.
+  //      would be nicer to wait until the player is overlapping more
+  //      so it feels like you're *in* the portal
+  world.contactListener(player, function(fixture) {
+    var data = fixture.objectData;
+    if (data.isPortal) {
+      data.loadDestination.call(data);
     }
+  });
+
+  return {
+    create: function(dest, x, y, w, h) {
+
+        var g = new PIXI.Graphics();
+        g.beginFill(0x00ffaa);
+        g.drawRect(0, 0, w, h);
+        g.endFill();
+
+        g.position.x = x;
+        g.position.y = y;
+
+        var portal = {
+          destination: dest,
+          isPortal: true,
+          loadDestination: function() {
+            sceneManager.load(this.destination);
+          },
+        };
+
+        world.addSensor(portal, x, y, w, h);
+        container.addChild(g);
+
+        return portal;
+    },
   }
 }
 
-function ChestService() {
+function ChestService(player, world, container) {
   return {
-    create: function() {
+    create: function(x, y, w, h) {
 
       var g = new PIXI.Graphics();
       g.beginFill(0x00FFFF);
-      // TODO how to create graphics without worrying about scale?
-      g.drawRect(0, 0, 32, 32);
+      g.drawRect(0, 0, w, h);
       g.endFill();
 
-      return {
-        clip: g,
+      g.position.x = x;
+      g.position.y = y;
+
+      var chest = {
         chest: true,
-        open: function(player) {
+        useable: true,
+        use: function() {
           g.clear();
           g.beginFill(0x0000FF);
-          // TODO how to create graphics without worrying about scale?
-          g.drawRect(0, 0, 32, 32);
+          g.drawRect(0, 0, w, h);
           g.endFill();
 
           player.coins += 5;
         },
-      }
+      };
+
+      world.addStatic(chest, x, y, w, h);
+      container.addChild(g);
+
+      return chest;
     }
   }
 }
@@ -65,19 +95,106 @@ function loadStage(sceneManager, container) {
   });
 }
 
+function Useable(player, world) {
+  return function(eventname) {
+      if (eventname == 'Use keydown') {
+        switch (player.getDirection()) {
+          case 'up':
+            var x1 = player.clip.position.x;
+            var y1 = player.clip.position.y - 10;
+            var x2 = player.clip.position.x + 32;
+            var y2 = player.clip.position.y;
+            break;
+
+          case 'down':
+            var x1 = player.clip.position.x;
+            var y1 = player.clip.position.y + 32;
+            var x2 = player.clip.position.x + 32;
+            var y2 = player.clip.position.y + 32 + 10;
+            break;
+
+          case 'left':
+            var x1 = player.clip.position.x - 10;
+            var y1 = player.clip.position.y;
+            var x2 = player.clip.position.x;
+            var y2 = player.clip.position.y + 32;
+            break;
+
+          case 'right':
+            var x1 = player.clip.position.x + 32;
+            var y1 = player.clip.position.y;
+            var x2 = player.clip.position.x + 32 + 10;
+            var y2 = player.clip.position.y + 32;
+            break;
+        }
+        var res = world.query(x1, y1, x2, y2);
+
+        // TODO this could affect multiple objects. only want to affect one.
+        for (var i = 0; i < res.length; i++) {
+          var obj = res[i][2];
+          if (obj.useable) {
+            obj.use();
+          }
+        }
+      }
+  }
+}
+
+function Combat(player, world) {
+  return function(eventname) {
+    if (eventname == 'Sword keydown') {
+      console.log('sword');
+      // TODO duplicated with Useable
+        switch (player.getDirection()) {
+          case 'up':
+            var x1 = player.clip.position.x;
+            var y1 = player.clip.position.y - 10;
+            var x2 = player.clip.position.x + 32;
+            var y2 = player.clip.position.y;
+            break;
+
+          case 'down':
+            var x1 = player.clip.position.x;
+            var y1 = player.clip.position.y + 32;
+            var x2 = player.clip.position.x + 32;
+            var y2 = player.clip.position.y + 32 + 10;
+            break;
+
+          case 'left':
+            var x1 = player.clip.position.x - 10;
+            var y1 = player.clip.position.y;
+            var x2 = player.clip.position.x;
+            var y2 = player.clip.position.y + 32;
+            break;
+
+          case 'right':
+            var x1 = player.clip.position.x + 32;
+            var y1 = player.clip.position.y;
+            var x2 = player.clip.position.x + 32 + 10;
+            var y2 = player.clip.position.y + 32;
+            break;
+        }
+        var res = world.query(x1, y1, x2, y2);
+
+        // TODO this could affect multiple objects. only want to affect one.
+        for (var i = 0; i < res.length; i++) {
+          var obj = res[i][2];
+          console.log('combat hit', obj);
+        }
+    }
+  }
+}
+
 
 function loadWorld(mapfile, sceneManager, container) {
 
-  var Coins = CoinsService();
-  var Chests = ChestService();
 
   var reqs = [
     Player(),
-    SquirrelService(),
     loadMap(mapfile),
   ];
 
-  return Q.spread(reqs, function(player, Squirrel, map) {
+  return Q.spread(reqs, function(player, map) {
     // TODO this function is getting huge and unmanagable.
     //      needs to be cut up into modular handlers
 
@@ -85,6 +202,7 @@ function loadWorld(mapfile, sceneManager, container) {
     var keybindings = KeyBindingsService();
 
     var playerCoinCountText = new PIXI.Text('');
+
 
     /*
     The physics world and the renderer use a different scale.
@@ -117,6 +235,18 @@ function loadWorld(mapfile, sceneManager, container) {
         player.clip.gotoAndStop(0);
       },
     });
+    keybindings.listen(movement);
+
+    var useable = Useable(player, world);
+    keybindings.listen(useable);
+
+    var combat = Combat(player, world);
+    keybindings.listen(combat);
+
+    var Portals = PortalService(player, world, sceneManager, container);
+    var Chests = ChestService(player, world, container);
+    var Squirrels = SquirrelService(world, container);
+    var Coins = CoinsService(player, world, container);
 
 
     // TODO need dynamic view size
@@ -126,33 +256,11 @@ function loadWorld(mapfile, sceneManager, container) {
     //var viewH = 320;
     WorldView(world, container, player, viewW, viewH, scale);
 
-    // Portal handling
-    // TODO player jumps through portal with the slightest overlap.
-    //      would be nicer to wait until the player is overlapping more
-    //      so it feels like you're *in* the portal
-    world.contactListener(player, function(fixture) {
-      if (fixture.objectData.portal) {
-        sceneManager.load(fixture.objectData.portal);
-      }
-    });
-
-
-    // Coin handling
-    world.contactListener(player, function(fixture) {
-      if (fixture.objectData.coin) {
-          container.removeChild(fixture.objectData.clip);
-          player.coins += 1;
-
-          world.scheduleUpdate(function() {
-            world.remove(fixture);
-          });
-      }
-    });
-
 
     function makeScene(playerX, playerY, playerDirection, viewX, viewY) {
         return function() {
             container.visible = true;
+            keybindings.enable();
 
             container.x = viewX;
             container.y = viewY;
@@ -185,59 +293,13 @@ function loadWorld(mapfile, sceneManager, container) {
               player.clip.position.y = (pos.get_y() * scale) - (playerH / 2)
             }
 
-            var deregisterKeybindings = keybindings.listen(function(event) {
-              movement(event);
-
-              if (event == 'Use keydown') {
-                switch (player.getDirection()) {
-                  case 'up':
-                    var x1 = player.clip.position.x;
-                    var y1 = player.clip.position.y - 10;
-                    var x2 = player.clip.position.x + 32;
-                    var y2 = player.clip.position.y;
-                    break;
-
-                  case 'down':
-                    var x1 = player.clip.position.x;
-                    var y1 = player.clip.position.y + 32;
-                    var x2 = player.clip.position.x + 32;
-                    var y2 = player.clip.position.y + 32 + 10;
-                    break;
-
-                  case 'left':
-                    var x1 = player.clip.position.x - 10;
-                    var y1 = player.clip.position.y;
-                    var x2 = player.clip.position.x;
-                    var y2 = player.clip.position.y + 32;
-                    break;
-
-                  case 'right':
-                    var x1 = player.clip.position.x + 32;
-                    var y1 = player.clip.position.y;
-                    var x2 = player.clip.position.x + 32 + 10;
-                    var y2 = player.clip.position.y + 32;
-                    break;
-                }
-                var res = world.query(x1, y1, x2, y2);
-
-                // TODO this could affect multiple objects. only want to affect one.
-                for (var i = 0; i < res.length; i++) {
-                  var obj = res[i][2];
-                  // Chest handling
-                  if (obj.chest) {
-                    obj.open(player);
-                  }
-                }
-              }
-            });
-
             // return unload function
             return function() {
               world.stop();
               // TODO sceneManager should handle removing the containers from
               //      the master container?
               container.visible = false;
-              deregisterKeybindings();
+              keybindings.disable();
             }
         }
     }
@@ -258,15 +320,10 @@ function loadWorld(mapfile, sceneManager, container) {
           world.addStatic(obj, obj.x, obj.y, obj.w, obj.h);
         }
 
+        // TODO use type
+        // TODO but what if multiple types?
         else if (obj.portal) {
-
-          var g = new PIXI.Graphics();
-          g.beginFill(0x00ffaa);
-          g.drawRect(obj.x, obj.y, obj.w, obj.h);
-          g.endFill();
-          container.addChild(g);
-
-          world.addSensor(obj, obj.x, obj.y, obj.w, obj.h);
+          Portals.create(obj.portal, obj.x, obj.y, obj.w, obj.h);
         }
 
         else if (obj.type == 'loadpoint') {
@@ -280,27 +337,15 @@ function loadWorld(mapfile, sceneManager, container) {
         }
 
         else if (obj.type == 'squirrel') {
-          var squirrel = Squirrel.create();
-          squirrel.clip.position.x = obj.x;
-          squirrel.clip.position.y = obj.y;
-          world.addStatic(squirrel, obj.x, obj.y, obj.w, obj.h);
-          container.addChild(squirrel.clip);
+          Squirrels.create(obj.x, obj.y, obj.w, obj.h);
         }
 
         else if (obj.type == 'coin') {
-          var coin = Coins.create();
-          coin.clip.position.x = obj.x;
-          coin.clip.position.y = obj.y;
-          world.addStatic(coin, obj.x, obj.y, obj.w, obj.h);
-          container.addChild(coin.clip);
+          Coins.create(obj.x, obj.y, obj.w, obj.h);
         }
 
         else if (obj.type == 'chest') {
-          var chest = Chests.create();
-          chest.clip.position.x = obj.x;
-          chest.clip.position.y = obj.y;
-          world.addStatic(chest, obj.x, obj.y, obj.w, obj.h);
-          container.addChild(chest.clip);
+          Chests.create(obj.x, obj.y, obj.w, obj.h);
         }
       }
     }
@@ -308,4 +353,41 @@ function loadWorld(mapfile, sceneManager, container) {
     container.addChild(player.clip);
     container.addChild(playerCoinCountText);
   });
+}
+
+
+function CoinsService(player, world, container) {
+
+  // Coin handling
+  world.contactListener(player, function(fixture) {
+    if (fixture.objectData.coin) {
+        fixture.objectData.use();
+        world.remove(fixture);
+    }
+  });
+
+  return {
+    create: function(x, y, w, h) {
+      var value = 1;
+
+      var g = new PIXI.Graphics();
+      g.beginFill(0xF0F074);
+      g.drawRect(0, 0, w, h);
+      g.endFill();
+
+      g.position.x = x;
+      g.position.y = y;
+
+      var coin = {
+        coin: true,
+        use: function() {
+          container.removeChild(g);
+          player.coins += value;
+        },
+      };
+
+      world.addStatic(coin, x, y, w, h);
+      container.addChild(g);
+    }
+  }
 }

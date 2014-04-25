@@ -1,9 +1,10 @@
 big things
 combat
 --------------------------------------------------------------
+
 weapons
 -- spells
--- 
+-- sword
 -- remote weapons e.g. detonate bomb
 -- timed weapons e.g. time bomb
 -- long distance weapons e.g. bow and arrow
@@ -11,6 +12,10 @@ weapons
 enemies
 - difficulty level
 - figuring out which enemies are in the current view
+
+display enemy health bar
+
+display player health bar
 
 reaction to being hit: enemy might freeze, or become agitated, or...
 
@@ -64,6 +69,8 @@ story themes:
 -- what does the book represent?
 
 how does the story end?
+
+evil: all the terrors of nightmares are leaking into the real world
 
 
 
@@ -130,3 +137,16 @@ http://opengameart.org/content/oga-16x16-jrpg-sprites-tiles
 http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.png
 
 https://www.zotero.org/c.a.s.t._library/items/itemKey/SZCJ6RAH
+
+
+
+
+zelda
+=================================
+1. intro - story background
+  hidden land, golden power
+  sealed gate by seven wise men
+  should have remained sealed
+  over a long time
+  wizard came to release seal, eliminated king
+  vanished seven wise men

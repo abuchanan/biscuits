@@ -1,5 +1,5 @@
 
-function SquirrelService() {
+function SquirrelService(world, container) {
   var texture = PIXI.Texture.fromImage('media/Monster-squirrel.png');
 
   var textures = [];
@@ -10,17 +10,24 @@ function SquirrelService() {
     textures.push(t);
   }
 
+
   // TODO sporadic animation. a squirrel isn't a fluid animation loop.
   return {
-    create: function() {
+    create: function(x, y, w, h) {
 
       var clip = new PIXI.MovieClip(textures);
       clip.animationSpeed = 0.07;
       clip.play();
 
-      return {
-        clip: clip,
-      }
+      clip.position.x = x;
+      clip.position.y = y;
+      clip.width = w;
+      clip.height = h;
+
+      world.addStatic({}, x, y, w, h);
+
+      container.addChild(clip);
+
     },
   };
 }

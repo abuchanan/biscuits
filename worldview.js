@@ -1,5 +1,11 @@
 function WorldView(world, container, player, viewW, viewH, scale) {
 
+  // TODO do I really need world (Box2d physics) collisions for this?
+  //      could just check the player position.
+
+  // TODO still not sure if I want the player to stay centered in the view or not
+  //      Zelda used a combination of both. 
+
   // TODO use chain? that way I can move the whole chain
   var edges = [
     // Top
