@@ -247,16 +247,11 @@ function loadWorld(mapfile, sceneManager, container) {
     var scale = 32;
     var world = World(scale);
 
-    // TODO clean up layering code.
-    var backgroundLayer = new PIXI.DisplayObjectContainer();
-    container.addChild(backgroundLayer);
-
+    var backgroundLayer = container.newLayer();
     // TODO maybe loadpoint from Tiled should determine layer?
-    var playerLayer = new PIXI.DisplayObjectContainer();
-    container.addChild(playerLayer);
-
-    var statusLayer = new PIXI.DisplayObjectContainer();
-    container.addChild(statusLayer);
+    var objectLayer = container.newLayer();
+    var playerLayer = container.newLayer();
+    var statusLayer = container.newLayer();
 
     var player = Player(world, playerLayer, keybindings, 32, 32);
 
@@ -270,10 +265,10 @@ function loadWorld(mapfile, sceneManager, container) {
     var combat = Combat(player, world);
     keybindings.listen(combat);
 
-    var Portals = PortalService(player, world, sceneManager, container);
-    var Chests = ChestService(player, world, container);
-    var Squirrels = SquirrelService(world, container);
-    var Coins = CoinsService(player, world, container);
+    var Portals = PortalService(player, world, sceneManager, objectLayer);
+    var Chests = ChestService(player, world, objectLayer);
+    var Squirrels = SquirrelService(world, objectLayer);
+    var Coins = CoinsService(player, world, objectLayer);
 
     // TODO need dynamic view size
     var viewW = 640;

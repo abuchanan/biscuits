@@ -21,6 +21,18 @@ function SceneManager() {
 }
 
 
+function Layers() {
+  PIXI.DisplayObjectContainer.call(this);
+}
+Layers.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+Layers.prototype.constructor = Layers;
+Layers.prototype.newLayer = function() {
+  var layer = new Layers();
+  this.addChild(layer);
+  return layer;
+};
+
+
 function startBiscuits(container) {
 
 // create an new instance of a pixi stage
@@ -37,8 +49,8 @@ function startBiscuits(container) {
 
 	requestAnimFrame(animate);
 
-  var masterContainer = new PIXI.DisplayObjectContainer();
-  stage.addChild(masterContainer);
+  var masterLayer = new Layers();
+  stage.addChild(masterLayer);
 
 	function animate() {
 	    requestAnimFrame( animate );
@@ -53,16 +65,15 @@ function startBiscuits(container) {
 
   for (var i = 0; i < worldFiles.length; i++) {
     var file = worldFiles[i];
-    var worldContainer = new PIXI.DisplayObjectContainer();
-    masterContainer.addChild(worldContainer);
-    worldContainer.visible = false;
-    var world = loadWorld(file, sceneManager, worldContainer);
+    var worldLayer = masterLayer.newLayer();
+    masterLayer.addChild(worldLayer);
+    worldLayer.visible = false;
+    var world = loadWorld(file, sceneManager, worldLayer);
     worlds.push(world);
   }
 
-  var stageContainer = new PIXI.DisplayObjectContainer();
-  masterContainer.addChild(stageContainer);
-  loadStage(sceneManager, stageContainer);
+  var stageLayer = masterLayer.newLayer();
+  loadStage(sceneManager, stageLayer);
 
   Q.all(worlds).then(function() {
     //sceneManager.load('bar.main');
