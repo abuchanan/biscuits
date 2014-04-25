@@ -213,5 +213,13 @@ function World(scale) {
       return myQueryCallback.items;
     },
 
+    scale: function(x) {
+      return x / scale;
+    },
+
+    unscale: function(x) {
+      return x * scale;
+    },
+
   }
 }

@@ -97,33 +97,35 @@ function loadStage(sceneManager, container) {
 function Useable(player, world) {
   return function(eventname) {
       if (eventname == 'Use keydown') {
+        var pos = player.getPosition();
+
         switch (player.getDirection()) {
           case 'up':
-            var x1 = player.clip.position.x;
-            var y1 = player.clip.position.y - 10;
-            var x2 = player.clip.position.x + 32;
-            var y2 = player.clip.position.y;
+            var x1 = pos.x;
+            var y1 = pos.y - 10;
+            var x2 = pos.x + 32;
+            var y2 = pos.y;
             break;
 
           case 'down':
-            var x1 = player.clip.position.x;
-            var y1 = player.clip.position.y + 32;
-            var x2 = player.clip.position.x + 32;
-            var y2 = player.clip.position.y + 32 + 10;
+            var x1 = pos.x;
+            var y1 = pos.y + 32;
+            var x2 = pos.x + 32;
+            var y2 = pos.y + 32 + 10;
             break;
 
           case 'left':
-            var x1 = player.clip.position.x - 10;
-            var y1 = player.clip.position.y;
-            var x2 = player.clip.position.x;
-            var y2 = player.clip.position.y + 32;
+            var x1 = pos.x - 10;
+            var y1 = pos.y;
+            var x2 = pos.x;
+            var y2 = pos.y + 32;
             break;
 
           case 'right':
-            var x1 = player.clip.position.x + 32;
-            var y1 = player.clip.position.y;
-            var x2 = player.clip.position.x + 32 + 10;
-            var y2 = player.clip.position.y + 32;
+            var x1 = pos.x + 32;
+            var y1 = pos.y;
+            var x2 = pos.x + 32 + 10;
+            var y2 = pos.y + 32;
             break;
         }
         var res = world.query(x1, y1, x2, y2);
@@ -145,35 +147,36 @@ function Combat(player, world) {
 
   return function(eventname) {
     if (eventname == 'Sword keydown') {
+      var pos = player.getPosition();
 
         // TODO duplicated with Useable
         switch (player.getDirection()) {
           case 'up':
-            var x1 = player.clip.position.x;
-            var y1 = player.clip.position.y - 10;
-            var x2 = player.clip.position.x + 32;
-            var y2 = player.clip.position.y;
+            var x1 = pos.x;
+            var y1 = pos.y - 10;
+            var x2 = pos.x + 32;
+            var y2 = pos.y;
             break;
 
           case 'down':
-            var x1 = player.clip.position.x;
-            var y1 = player.clip.position.y + 32;
-            var x2 = player.clip.position.x + 32;
-            var y2 = player.clip.position.y + 32 + 10;
+            var x1 = pos.x;
+            var y1 = pos.y + 32;
+            var x2 = pos.x + 32;
+            var y2 = pos.y + 32 + 10;
             break;
 
           case 'left':
-            var x1 = player.clip.position.x - 10;
-            var y1 = player.clip.position.y;
-            var x2 = player.clip.position.x;
-            var y2 = player.clip.position.y + 32;
+            var x1 = pos.x - 10;
+            var y1 = pos.y;
+            var x2 = pos.x;
+            var y2 = pos.y + 32;
             break;
 
           case 'right':
-            var x1 = player.clip.position.x + 32;
-            var y1 = player.clip.position.y;
-            var x2 = player.clip.position.x + 32 + 10;
-            var y2 = player.clip.position.y + 32;
+            var x1 = pos.x + 32;
+            var y1 = pos.y;
+            var x2 = pos.x + 32 + 10;
+            var y2 = pos.y + 32;
             break;
         }
         var res = world.query(x1, y1, x2, y2);
@@ -192,21 +195,15 @@ function Combat(player, world) {
 
 function loadWorld(mapfile, sceneManager, container) {
 
-
   var reqs = [
-    Player(),
     loadMap(mapfile),
   ];
 
-  return Q.spread(reqs, function(player, map) {
-    // TODO this function is getting huge and unmanagable.
-    //      needs to be cut up into modular handlers
+  // TODO need to rethink async resource loading. PIXI changed the game,
+  //      I'm not sure if it's synchronous or not, etc. 
+  return Q.spread(reqs, function(map) {
 
-    // TODO maybe loadpoint from Tiled should determine layer?
     var keybindings = KeyBindingsService();
-
-    var playerCoinCountText = new PIXI.Text('');
-
 
     /*
     The physics world and the renderer use a different scale.
@@ -221,27 +218,28 @@ function loadWorld(mapfile, sceneManager, container) {
     // TODO better encapsulate player API. Shouldn't expose clip, clip should
     //      be modified internally through calls like player.walk('left'),
     //      (or something) and player should be renderable?
+    // TODO 32 is hard-coded
     var scale = 32;
     var world = World(scale);
 
-    var playerW = player.clip.width;
-    var playerH = player.clip.height;
+    // TODO clean up layering code.
+    var backgroundLayer = new PIXI.DisplayObjectContainer();
+    container.addChild(backgroundLayer);
 
-    var playerFixture = world.addDynamic(player, 0, 0, playerW, playerH);
-    var body = playerFixture.GetBody();
+    // TODO maybe loadpoint from Tiled should determine layer?
+    var playerLayer = new PIXI.DisplayObjectContainer();
+    container.addChild(playerLayer);
 
-    var movement = MovementHandler(body, {
-      onStart: function(direction) {
-        player.setDirection(direction);
-        player.clip.play();
-      },
-      onEnd: function() {
-        player.clip.gotoAndStop(0);
-      },
-    });
-    keybindings.listen(movement);
+    var statusLayer = new PIXI.DisplayObjectContainer();
+    container.addChild(statusLayer);
+
+    var playerCoinCountText = new PIXI.Text('');
+    statusLayer.addChild(playerCoinCountText);
+
+    var player = Player(world, playerLayer, keybindings, 32, 32);
 
     var useable = Useable(player, world);
+    // TODO we pass keybindings to player but bind externally here
     keybindings.listen(useable);
 
     var combat = Combat(player, world);
@@ -252,14 +250,12 @@ function loadWorld(mapfile, sceneManager, container) {
     var Squirrels = SquirrelService(world, container);
     var Coins = CoinsService(player, world, container);
 
-
     // TODO need dynamic view size
     var viewW = 640;
     var viewH = 640;
     //var viewW = 320;
     //var viewH = 320;
     WorldView(world, container, player, viewW, viewH, scale);
-
 
     function makeScene(playerX, playerY, playerDirection, viewX, viewY) {
         return function() {
@@ -270,32 +266,16 @@ function loadWorld(mapfile, sceneManager, container) {
             container.y = viewY;
 
             player.setDirection(playerDirection);
-            player.clip.position.x = playerX;
-            player.clip.position.y = playerY;
-
-            var x = (playerX / scale) + (playerW / scale / 2);
-            var y = (playerY / scale) + (playerH / scale / 2);
 
             // TODO before I had world.start() *before* this line,
             //      which is the wrong order, and only didn't fail because
             //      of the 15 ms interval time. Things like this need to happen
             //      outside of a world step, which is an important reason to 
             //      build good encapsulation for box2d.
-            body.SetTransform(new Box2D.b2Vec2(x, y), body.GetAngle());
+            player.setPosition(playerX, playerY);
 
             world.start();
             // TODO container.width = 32 * 8;
-
-            sceneManager.onFrame = function() {
-              var pos = body.GetPosition();
-
-              // TODO is it inefficient to do this on every frame? I don't know.
-              //      is it really worth an event/callback?
-              playerCoinCountText.setText('Player coins: ' + player.coins);
-
-              player.clip.position.x = (pos.get_x() * scale) - (playerW / 2);
-              player.clip.position.y = (pos.get_y() * scale) - (playerH / 2)
-            }
 
             // return unload function
             return function() {
@@ -312,7 +292,7 @@ function loadWorld(mapfile, sceneManager, container) {
     for (var layer_i = 0; layer_i < map.tilelayers.length; layer_i++) {
       for (var obj_i = 0; obj_i < map.tilelayers[layer_i].length; obj_i++) {
         var obj = map.tilelayers[layer_i][obj_i];
-        container.addChild(obj);
+        backgroundLayer.addChild(obj);
       }
     }
 
@@ -353,9 +333,6 @@ function loadWorld(mapfile, sceneManager, container) {
         }
       }
     }
-
-    container.addChild(player.clip);
-    container.addChild(playerCoinCountText);
   });
 }
 
