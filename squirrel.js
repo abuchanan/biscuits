@@ -12,14 +12,12 @@ function SquirrelService(world, container) {
 
 
   // http://www.goodboydigital.com/pixijs/docs/files/src_pixi_extras_CustomRenderable.js.html#
-  function Renderable(clip, fixture, w, h) {
+  function Renderable(clip, fixture) {
     PIXI.DisplayObjectContainer.call(this);
     this.renderable = true;
     this.addChild(clip);
     this.fixture = fixture;
     this.clip = clip;
-    this.w = w;
-    this.h = h;
   }
   Renderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
   Renderable.prototype.constructor = Renderable;
@@ -28,8 +26,8 @@ function SquirrelService(world, container) {
       // TODO need a cleaner way to get position
       var x = world.unscale(pos.get_x());
       var y = world.unscale(pos.get_y());
-      this.clip.position.x = x - this.w / 2;
-      this.clip.position.y = y - this.h / 2;
+      this.clip.position.x = x;
+      this.clip.position.y = y;
   }
   Renderable.prototype._renderCanvas = function(renderer) {
     this.updatePosition();
@@ -56,6 +54,8 @@ function SquirrelService(world, container) {
       clip.position.y = y;
       clip.width = w;
       clip.height = h;
+      clip.anchor.x = 0.5;
+      clip.anchor.y = 0.5;
 
       var life = 10;
 
@@ -77,6 +77,8 @@ function SquirrelService(world, container) {
       var fixture = world.addBox(x, y, w, h, squirrel, {
         mass: 80,
         linearDamping: 0.5,
+        // TODO? type: 'kinematic',
+        type: 'kinematic',
       });
 
       var renderable = new Renderable(clip, fixture, w, h);
