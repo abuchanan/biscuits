@@ -56,8 +56,9 @@ function parseObjectLayer(layer, map) {
       //var h = obj.height / map.tileheight;
 
       var pos = {
-        x: obj.x,
-        y: obj.y,
+        // TODO inconsistent with background tiles
+        x: obj.x + (obj.width / 2),
+        y: obj.y + (obj.height / 2),
         w: obj.width,
         h: obj.height,
         type: obj.type,
@@ -86,8 +87,10 @@ function parseTileLayer(map, layer, slices) {
           }
 
           var sprite = new PIXI.Sprite(slice);
-          sprite.position.x = x * map.tilewidth;
-          sprite.position.y = y * map.tileheight;
+          sprite.position.x = x * map.tilewidth + (map.tilewidth / 2);
+          sprite.position.y = y * map.tileheight + (map.tileheight / 2);
+          sprite.anchor.x = 0.5;
+          sprite.anchor.y = 0.5;
           tiles.push(sprite);
         }
     }

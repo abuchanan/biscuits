@@ -66,43 +66,47 @@ function Player(world, container, keybindings, w, h) {
     };
 
 
-    var playerFixture = world.addDynamic(player, 0, 0, w, h);
-    var body = playerFixture.GetBody();
 
 
-    function updateClip() {
-        var pos = body.GetPosition();
-        // TODO need a cleaner way to get position
-        var x = world.unscale(pos.get_x());
-        var y = world.unscale(pos.get_y());
-        clip.position.x = x - h / 2;
-        clip.position.y = y - h / 2;
-        clip.textures = textures[direction];
-    }
-
-    // http://www.goodboydigital.com/pixijs/docs/files/src_pixi_extras_CustomRenderable.js.html#
-    function PlayerRenderable(clip) {
+    function Renderable(clip, fixture, w, h) {
       PIXI.DisplayObjectContainer.call(this);
       this.renderable = true;
       this.addChild(clip);
+      this.fixture = fixture;
+      this.clip = clip;
+      this.w = w;
+      this.h = h;
     }
-    PlayerRenderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-    PlayerRenderable.prototype.constructor = PlayerRenderable;
-    PlayerRenderable.prototype._renderCanvas = function(renderer) {
-      updateClip();
+    Renderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+    Renderable.prototype.constructor = Renderable;
+    Renderable.prototype.updatePosition = function() {
+        var pos = this.fixture.GetBody().GetPosition();
+        // TODO need a cleaner way to get position
+        var x = world.unscale(pos.get_x());
+        var y = world.unscale(pos.get_y());
+        this.clip.position.x = x - this.w / 2;
+        this.clip.position.y = y - this.h / 2;
+
+        this.clip.textures = textures[direction];
+    }
+    Renderable.prototype._renderCanvas = function(renderer) {
+      this.updatePosition();
       PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
     };
-    PlayerRenderable.prototype._initWebGL = function(renderer) {
-      updateClip();
+    Renderable.prototype._initWebGL = function(renderer) {
+      this.updatePosition();
       PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
     };
-    PlayerRenderable.prototype._renderWebGL = function(renderer) {
-      updateClip();
+    Renderable.prototype._renderWebGL = function(renderer) {
+      this.updatePosition();
       PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
     };
 
 
-    var renderable = new PlayerRenderable(clip);
+    var playerFixture = world.addBox(0, 0, w, h, player);
+    var body = playerFixture.GetBody();
+
+    var renderable = new Renderable(clip, playerFixture, w, h);
     container.addChild(renderable);
 
 

@@ -17,8 +17,9 @@ function CoinsService(player, world, container) {
       g.drawRect(0, 0, w, h);
       g.endFill();
 
-      g.position.x = x;
-      g.position.y = y;
+      // TODO this doesn't have anchor. :( this is getting confusing
+      g.position.x = x - (w / 2);
+      g.position.y = y - (h / 2);
 
       var coin = {
         coin: true,
@@ -28,7 +29,7 @@ function CoinsService(player, world, container) {
         },
       };
 
-      world.addStatic(coin, x, y, w, h);
+      world.addBox(x, y, w, h, coin, {type: 'static'});
       container.addChild(g);
     }
   }

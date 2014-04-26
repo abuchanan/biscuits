@@ -10,6 +10,40 @@ function SquirrelService(world, container) {
     textures.push(t);
   }
 
+
+  // http://www.goodboydigital.com/pixijs/docs/files/src_pixi_extras_CustomRenderable.js.html#
+  function Renderable(clip, fixture, w, h) {
+    PIXI.DisplayObjectContainer.call(this);
+    this.renderable = true;
+    this.addChild(clip);
+    this.fixture = fixture;
+    this.clip = clip;
+    this.w = w;
+    this.h = h;
+  }
+  Renderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+  Renderable.prototype.constructor = Renderable;
+  Renderable.prototype.updatePosition = function() {
+      var pos = this.fixture.GetBody().GetPosition();
+      // TODO need a cleaner way to get position
+      var x = world.unscale(pos.get_x());
+      var y = world.unscale(pos.get_y());
+      this.clip.position.x = x - this.w / 2;
+      this.clip.position.y = y - this.h / 2;
+  }
+  Renderable.prototype._renderCanvas = function(renderer) {
+    this.updatePosition();
+    PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
+  };
+  Renderable.prototype._initWebGL = function(renderer) {
+    this.updatePosition();
+    PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
+  };
+  Renderable.prototype._renderWebGL = function(renderer) {
+    this.updatePosition();
+    PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
+  };
+
   // TODO sporadic animation. a squirrel isn't a fluid animation loop.
   return {
     create: function(x, y, w, h) {
@@ -30,16 +64,23 @@ function SquirrelService(world, container) {
         hit: function(damage) {
           life -= 1;
           console.log('hit', damage, life);
+
+          fixture.GetBody().SetLinearVelocity(new Box2D.b2Vec2(1, 0));
+
           if (life == 0) {
             world.remove(fixture);
-            container.removeChild(clip);
+            container.removeChild(renderable);
           }
         },
       };
 
-      var fixture = world.addStatic(squirrel, x, y, w, h);
+      var fixture = world.addBox(x, y, w, h, squirrel, {
+        mass: 80,
+        linearDamping: 0.5,
+      });
 
-      container.addChild(clip);
+      var renderable = new Renderable(clip, fixture, w, h);
+      container.addChild(renderable);
 
     },
   };

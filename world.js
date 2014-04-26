@@ -81,84 +81,87 @@ function World(scale) {
     },
   }]);
 
+
+  var stepCallbacks = [];
+
+  var defaultMass = 80;
+  var defaultLinearDamping = 0.0;
+
   return {
 
     // TODO need to figure out how to encapsulate the Box2D API
     //      while still provide what the outside code needs without
     //      having a messy API
 
-    addEdge: function(data, x1, y1, x2, y2) {
-      x1 = x1 / scale;
-      y1 = y1 / scale;
-      x2 = x2 / scale;
-      y2 = y2 / scale;
+    addEdge: function(x1, y1, x2, y2, data, options) {
 
-      var bodyDef = new Box2D.b2BodyDef();
-      bodyDef.set_position(new Box2D.b2Vec2(x1, y1));
-      var body = world.CreateBody(bodyDef);
+      var p1 = new Box2D.b2Vec2(0, 0);
+      var p2 = new Box2D.b2Vec2((x2 / scale) - (x1 / scale),
+                                (y2 / scale) - (y1 / scale));
 
       var shape = new Box2D.b2EdgeShape();
-      shape.Set(new Box2D.b2Vec2(0, 0), new Box2D.b2Vec2(x2 - x1, y2 - y1));
+      shape.Set(p1, p2);
 
-      var fixture = body.CreateFixture(shape, 0);
-      fixture.objectData = data;
-      return fixture;
+      return this.add(x1, y1, shape, data, options);
     },
 
-    addEdgeSensor: function(data, x1, y1, x2, y2) {
-      var fixture = this.addEdge(data, x1, y1, x2, y2);
-      fixture.SetSensor(true);
-      return fixture;
-    },
+    addBox: function(x, y, w, h, data, options) {
 
-    addDynamic: function(data, x, y, w, h) {
-      x = x / scale;
-      y = y / scale;
       w = w / scale || 1.0;
       h = h / scale || 1.0;
 
-      var bodyDef = new Box2D.b2BodyDef();
-      bodyDef.set_type(Box2D.b2_dynamicBody);
-      bodyDef.set_position(new Box2D.b2Vec2(x + w / 2, y + h / 2));
-      var body = world.CreateBody(bodyDef);
-
       var shape = new Box2D.b2PolygonShape();
       shape.SetAsBox(w / 2, h / 2);
-      var fixture = body.CreateFixture(shape, 80);
 
-      fixture.objectData = data;
-
-      return fixture;
+      return this.add(x, y, shape, data, options);
     },
 
-    addStatic: function(data, x, y, w, h) {
+    add: function(x, y, shape, data, options) {
+
       x = x / scale;
       y = y / scale;
-      w = w / scale || 1.0;
-      h = h / scale || 1.0;
+
+      data = data || {};
+      options = options || {};
+
+      var mass = options.mass || defaultMass;
+      var sensor = options.sensor || false;
+      var linearDamping = options.linearDamping || defaultLinearDamping;
+
+      if (options.type == 'static') {
+        var bodyType = Box2D.b2_staticBody;
+      } else if (options.type == 'kinematic') {
+        var bodyType = Box2D.b2_kinematicBody;
+      } else {
+        var bodyType = Box2D.b2_dynamicBody;
+      }
+
+      // TODO must it be static?
+      if (sensor) {
+        bodyType = Box2D.b2_staticBody;
+      }
 
       var bodyDef = new Box2D.b2BodyDef();
-      bodyDef.set_position(new Box2D.b2Vec2(x + (w / 2), y + (h / 2)));
+      bodyDef.set_type(bodyType);
+      bodyDef.set_position(new Box2D.b2Vec2(x, y));
       var body = world.CreateBody(bodyDef);
+      body.SetLinearDamping(linearDamping);
 
-      var shape = new Box2D.b2PolygonShape();
-      shape.SetAsBox(w / 2, h / 2);
-      var fixture = body.CreateFixture(shape, 0);
+      var fixture = body.CreateFixture(shape, mass);
 
       fixture.objectData = data;
+      fixture.SetSensor(sensor);
 
-      return fixture;
-    },
-
-    addSensor: function(data, x, y, w, h) {
-      var fixture = this.addStatic(data, x, y, w, h);
-      fixture.SetSensor(true);
       return fixture;
     },
 
     start: function() {
       simulateIntervalId = setInterval(function() {
         world.Step(0.15, 8, 2);
+
+        for (var i = 0, ii = stepCallbacks.length; i < ii; i++) {
+          stepCallbacks[i]();
+        }
 
         while (scheduledUpdates.length > 0) {
           var func = scheduledUpdates.pop();
@@ -172,6 +175,10 @@ function World(scale) {
         clearInterval(simulateIntervalId);
         simulateIntervalId = false;
       }
+    },
+
+    onStep: function(callback) {
+      stepCallbacks.push(callback);
     },
 
     scheduleUpdate: function(func) {

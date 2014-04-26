@@ -20,8 +20,8 @@ function PortalService(player, world, sceneManager, container) {
         g.drawRect(0, 0, w, h);
         g.endFill();
 
-        g.position.x = x;
-        g.position.y = y;
+        g.position.x = x - (w / 2);
+        g.position.y = y - (h / 2);
 
         var portal = {
           destination: dest,
@@ -31,7 +31,7 @@ function PortalService(player, world, sceneManager, container) {
           },
         };
 
-        world.addSensor(portal, x, y, w, h);
+        world.addBox(x, y, w, h, portal, {sensor: true});
         container.addChild(g);
 
         return portal;

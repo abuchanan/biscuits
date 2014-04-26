@@ -7,16 +7,28 @@ function WorldView(world, container, player, viewW, viewH, scale) {
   //      Zelda used a combination of both. 
 
   // TODO use chain? that way I can move the whole chain
-  var edges = [
-    // Top
-    world.addEdgeSensor({dx: 0, dy: -1 * (viewH - 33)}, 0, 0, viewW, 0),
-    // Bottom
-    world.addEdgeSensor({dx: 0, dy: viewH - 33}, 0, viewH, viewW, viewH),
-    // Left
-    world.addEdgeSensor({dx: -1 * (viewW - 33), dy: 0}, 0, 0, 0, viewH),
-    // Right
-    world.addEdgeSensor({dx: viewW - 33, dy: 0}, viewW, 0, viewW, viewH),
-  ];
+  var edges = [];
+
+  // Top
+  var o = {dx: 0, dy: -1 * (viewH - 33)};
+  var e = world.addEdge(0, 0, viewW, 0, o, {sensor: true});
+  edges.push(e);
+
+  // Bottom
+  var o = {dx: 0, dy: viewH - 33}
+  var e = world.addEdge(0, viewH, viewW, viewH, o, {sensor: true});
+  edges.push(e);
+
+  // Left
+  var o = {dx: -1 * (viewW - 33), dy: 0};
+  var e = world.addEdge(0, 0, 0, viewH, o, {sensor: true});
+  edges.push(e);
+
+  // Right
+  var o = {dx: viewW - 33, dy: 0};
+  var e = world.addEdge(viewW, 0, viewW, viewH, o, {sensor: true});
+  edges.push(e);
+
 
   world.contactListener(player, function(fixture) {
 

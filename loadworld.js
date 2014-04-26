@@ -124,7 +124,7 @@ function loadWorld(mapfile, sceneManager, container) {
         var obj = map.objectlayers[layer_i][obj_i];
 
         if (obj.isBlock) {
-          world.addStatic(obj, obj.x, obj.y, obj.w, obj.h);
+          world.addBox(obj.x, obj.y, obj.w, obj.h, obj, {type: 'static'});
         }
 
         // TODO use type

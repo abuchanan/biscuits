@@ -7,8 +7,9 @@ function ChestService(player, world, container) {
       g.drawRect(0, 0, w, h);
       g.endFill();
 
-      g.position.x = x;
-      g.position.y = y;
+      // TODO this doesn't have anchor. :( 
+      g.position.x = x - (w / 2);
+      g.position.y = y - (h / 2);
 
       var isOpen = false;
 
@@ -29,7 +30,7 @@ function ChestService(player, world, container) {
         },
       };
 
-      world.addStatic(chest, x, y, w, h);
+      world.addBox(x, y, w, h, chest, {type: 'static'});
       container.addChild(g);
 
       return chest;
