@@ -75,11 +75,24 @@ function SquirrelService(world, container) {
       };
 
       var fixture = world.addBox(x, y, w, h, squirrel, {
-        mass: 80,
-        linearDamping: 0.5,
-        // TODO? type: 'kinematic',
-        type: 'kinematic',
+        collisionCategories: ['NPC'],
       });
+
+      // TODO can an NPC only have one movement going at a time?
+
+      world.onPreStep(function(timestep) {
+        if (destination) {
+        }
+      });
+
+      var g = new PIXI.Graphics();
+      g.beginFill(0x00ffaa);
+      g.drawRect(0, 0, w, h);
+      g.endFill();
+      g.position.x = x + 250 - (w / 2);
+      g.position.y = y - (h / 2);
+
+      container.addChild(g);
 
       var renderable = new Renderable(clip, fixture, w, h);
       container.addChild(renderable);

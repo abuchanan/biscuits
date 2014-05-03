@@ -1,3 +1,4 @@
+// TODO allow listening to a specific event? could be more efficient?
 function KeyBindingsService(target) {
 
   var shortcutjs = CreateShortcutJS();

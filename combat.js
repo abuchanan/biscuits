@@ -42,7 +42,8 @@ function Combat(player, world) {
         // TODO manage whether multiple objects can be hit
         for (var i = 0; i < res.length; i++) {
           var obj = res[i][2];
-          if (obj.hittable) {
+          // TODO obj should always be defined?
+          if (obj && obj.hittable) {
             obj.hit(damage);
           }
         }

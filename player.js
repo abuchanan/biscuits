@@ -103,7 +103,9 @@ function Player(world, container, keybindings, w, h) {
     };
 
 
-    var playerFixture = world.addBox(0, 0, w, h, player);
+    var playerFixture = world.addBox(0, 0, w, h, player, {
+      collisionCategories: ['player'],
+    });
     var body = playerFixture.GetBody();
 
     var renderable = new Renderable(clip, playerFixture, w, h);
@@ -118,6 +120,7 @@ function Player(world, container, keybindings, w, h) {
       onEnd: function() {
         clip.gotoAndStop(0);
       },
+      speed: 3,
     });
 
     keybindings.listen(movement);

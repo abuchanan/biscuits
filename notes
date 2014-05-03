@@ -1,4 +1,102 @@
 big things
+
+collision and physics
+--------------------------------------------------------------
+decide how collisions should work. is box2d going to be too complicated?
+seems like it has a lot of potential to produce overly complex, unwanted results
+(like the player bouncing off a squirrel and not stopping)
+
+- for now at least, box2d is saving me a ton of work related to collision detectino
+  and resolution. possibly in the future it would be better to drop box2d, but for
+  now it's ok.
+
+should a player collide with a squirrel? should a player be able to accelerate
+a squirrel? should i fix this within a physics world, or is the physics world the
+root of the problem?
+
+if they are going to collide, the dynamics of the collision need to be defined.
+i suspect this will be a burden, and probably the dynamics i would imagine
+will not match the laws of physics, so again the physics engine will be getting
+in the way. so, if i really want them to collide, i need to be prepared to 
+put in a lot of work either on a custom collision engine, or tweaking box2d
+physics. so far, physics from box2d have defaulted to providing pretty
+terrible interactions between dynamic bodies.
+
+so, it's probably better if they don't collide dynamically.
+that's a constraint i'm willing to accept in order to allow me to focus on other,
+more interesting goals (story, map, art, etc)
+
+that leaves the question, do they collide at all?
+
+- it's pretty weird when a player is blocked by a squirrel. plus, it could lead
+  to issues with map movement where the player can't get somewhere because a
+  squirrel blocks the path.
+
+
+within physics options:
+- kinematic body
+-- the problem here: if you make a squirrel a kinematic body, and a monster a
+   kinematic body too, then they can't collide with eachother.
+   maybe that's not a problem though.
+-- looks like in zelda link to the past, the player isn't blocked by NPCs and
+   NPCs aren't blocked by each other.
+--- kinematic bodies doesn't actually handle part of this, because the player
+    (a dynamic body) still collides with kinematic bodies
+
+-- but if kinematic, can i still query for combat hit? how will i know when the
+   player bumped into a monster (triggering health loss)? looks like kinematic
+   bodies should still collide with dynamic bodies?
+
+- what about NPCs colliding with moveable parts of the map?
+
+
+- collision filtering
+-- this might be better than kinematic bodies
+-- but how to handle health loss when a player bumps into a monster?
+--- sensor?
+
+- custom presolve/post solve something or other
+
+a great conceptual example of this is having a game with two players.
+the players should be able to collide with everything else, but they should
+not be able to push each other around.
+
+
+
+npc movement
+--------------------------------------------------------------
+
+how to move to a exact point
+
+- if moving via setting linear velocity, what happens when the
+  npc will move _past_ the destination point in the next time
+  step if it's moving at the same velocity?
+-- if the onstep callback happens before the box2d step (onPreStep?)
+   then we can pass the current timestep delta to the callback,
+   and using that information it can detect that it is about to move
+   past the destination and adjust the velocity for that time step
+   to make it exactly hit that destination.
+
+
+pathfinding
+
+- here i'm hitting another big obstacle. how does an NPC move while
+  also allowing for the possibility that its path may become blocked
+  during its movement? seems like there are a couple options: either
+  I constrain the game so that NPCs can move without worrying about
+  colliding with other dynamic bodies, or I figure out a pathfinding
+  algorithm to use.
+
+  - i could go back to tile-based constraints. this would really simplify
+    movement, collision detection, etc. but the tradeoff is a that you
+    lose a certain feel of movement and interactivity.
+  - i could possibly make it so that NPC don't collide with anything that
+    isn't static. this might turn out to give an unrealistic feel though.
+  - i could go all out. get a good pathfinding algorithm, allow NPCs to
+    collide. the tradeoff is the amount of work involved (likely a LOT more)
+
+
+
 combat
 --------------------------------------------------------------
 
@@ -77,6 +175,11 @@ evil: all the terrors of nightmares are leaking into the real world
 other
 =============================================================
 
+special rendering, like a flashlight in the dark
+
+throwing jars, e.g. zelda
+
+
 circular player physics body
 
 Load on demand:
@@ -138,8 +241,13 @@ http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.p
 
 https://www.zotero.org/c.a.s.t._library/items/itemKey/SZCJ6RAH
 
+https://github.com/sole/tween.js/
 
-
+http://www.wolverinesoft.org/read/article/14/collision-detection-and-response
+http://katyscode.wordpress.com/2013/01/18/2d-platform-games-collision-detection-for-dummies/
+http://www.metanetsoftware.com/technique.html
+http://www.metanetsoftware.com/technique/tutorialB.html
+http://www.wildbunny.co.uk/blog/2011/03/25/speculative-contacts-an-continuous-collision-engine-approach-part-1/
 
 zelda
 =================================

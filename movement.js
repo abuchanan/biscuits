@@ -11,13 +11,6 @@ function MovementHandler(body, options) {
   function makeHandler(direction, deltaX, deltaY) {
     return function() {
       startCallback(direction);
-
-      // TODO am I losing anything major by setting linear velocity directly?
-      //      I thought it'd be interesting to use the physics engine to do
-      //      something like put the player on ice and have movement change,
-      //      but I'm not sure if I'm losing that ability here. Anyway, maybe
-      //      ice movement would be a separate MovementHandler class, e.g.
-      //      IceMovementHandler
       body.SetLinearVelocity(new Box2D.b2Vec2(deltaX * speed, deltaY * speed));
     }
   }
@@ -44,6 +37,8 @@ function MovementHandler(body, options) {
         current = up;
         break;
 
+      // TODO ugh....another bug here when keyup event happens during a different window
+      //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
       case 'Up keyup':
         keyup(up);
         break;

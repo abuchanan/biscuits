@@ -2,6 +2,7 @@
 function World(scale) {
   var gravity = new Box2D.b2Vec2(0.0, 0.0);
   var world = new Box2D.b2World(gravity);
+  var currentTime = 0;
 
   var simulateIntervalId;
 
@@ -81,8 +82,14 @@ function World(scale) {
     },
   }]);
 
+  var groundDef = new Box2D.b2BodyDef();
+  groundDef.set_type(Box2D.b2_staticBody);
+  groundDef.set_position(new Box2D.b2Vec2(0, 0));
+  var ground = world.CreateBody(groundDef);
+
 
   var stepCallbacks = [];
+  var preStepCallbacks = [];
 
   var defaultMass = 80;
   var defaultLinearDamping = 0.0;
@@ -125,8 +132,11 @@ function World(scale) {
       options = options || {};
 
       var mass = options.mass || defaultMass;
+      console.log(sensor, options);
       var sensor = options.sensor || false;
       var linearDamping = options.linearDamping || defaultLinearDamping;
+      var collisionGroup = options.collisionGroup || 0;
+      var collisionCategories = options.collisionCategories || false;
 
       if (options.type == 'static') {
         var bodyType = Box2D.b2_staticBody;
@@ -143,31 +153,102 @@ function World(scale) {
 
       var bodyDef = new Box2D.b2BodyDef();
       bodyDef.set_type(bodyType);
+      bodyDef.set_fixedRotation(true);
       bodyDef.set_position(new Box2D.b2Vec2(x, y));
       var body = world.CreateBody(bodyDef);
       body.SetLinearDamping(linearDamping);
 
+      /*
+      var frictionJointDef = new Box2D.b2FrictionJointDef();
+      frictionJointDef.get_localAnchorA().SetZero();
+      frictionJointDef.get_localAnchorB().SetZero();
+      frictionJointDef.set_bodyA(ground);
+      frictionJointDef.set_bodyB(body);
+      frictionJointDef.set_collideConnected(true);
+      frictionJointDef.set_maxForce(2);
+
+      world.CreateJoint(frictionJointDef);
+      */
+
+
       var fixture = body.CreateFixture(shape, mass);
+      //fixture.SetFriction(0.9);
 
       fixture.objectData = data;
       fixture.SetSensor(sensor);
+      fixture.GetFilterData().set_groupIndex(collisionGroup);
+
+      // TODO addCategory helper
+      var categories = {
+        // TODO maybe player item should always just be a sensor
+        'playerItem': parseInt('0000000000000010', 2),
+        'NPC':        parseInt('0000000000000100', 2),
+        'player':     parseInt('0000000000001000', 2),
+        'block':      parseInt('0000000000000001', 2),
+      };
+
+      var masks = {
+        'NPC': categories['block'],
+        'player': categories['playerItem'] | categories['block'],
+        'playerItem': categories['player'] | categories['block'],
+      };
+
+      if (collisionCategories) {
+        var categoryBits = 0;
+        var maskBits = 0;
+
+        for (var i = 0; i < collisionCategories.length; i++) {
+          var b = categories[collisionCategories[i]];
+          if (b !== undefined) {
+            categoryBits = categoryBits | b;
+          }
+
+          var m = masks[collisionCategories[i]];
+          if (m !== undefined) {
+            maskBits = maskBits | m;
+          }
+        }
+
+        fixture.GetFilterData().set_categoryBits(categoryBits);
+        fixture.GetFilterData().set_maskBits(maskBits);
+
+        /*
+        var waypointShape = new Box2D.b2PolygonShape();
+        waypointShape.SetAsBox(0.01, 0.01);
+        var waypointFixture = body.CreateFixture(waypointShape, 0);
+        waypointFixture.waypoint = 'waypoint';
+        waypointFixture.GetFilterData().set_categoryBits(0);
+        waypointFixture.GetFilterData().set_maskBits(0);
+        waypointFixture.GetFilterData().set_groupIndex(-1000);
+
+        fixture.waypointFixture = waypointFixture;
+        */
+      }
 
       return fixture;
     },
 
     start: function() {
+      var timeStep_s = 0.015;
+      var timeStep_ms = timeStep_s * 1000;
+
       simulateIntervalId = setInterval(function() {
-        world.Step(0.15, 8, 2);
+        for (var i = 0, ii = preStepCallbacks.length; i < ii; i++) {
+          preStepCallbacks[i](timeStep_s, currentTime);
+        }
+
+        world.Step(timeStep_s, 4, 4);
+        currentTime += timeStep_s;
 
         for (var i = 0, ii = stepCallbacks.length; i < ii; i++) {
-          stepCallbacks[i]();
+          stepCallbacks[i](timeStep_s, currentTime);
         }
 
         while (scheduledUpdates.length > 0) {
           var func = scheduledUpdates.pop();
           func();
         }
-      }, 15);
+      }, timeStep_ms);
     },
 
     stop: function() {
@@ -175,6 +256,10 @@ function World(scale) {
         clearInterval(simulateIntervalId);
         simulateIntervalId = false;
       }
+    },
+
+    onPreStep: function(callback) {
+      preStepCallbacks.push(callback);
     },
 
     onStep: function(callback) {

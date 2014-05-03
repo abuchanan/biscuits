@@ -29,7 +29,11 @@ function CoinsService(player, world, container) {
         },
       };
 
-      world.addBox(x, y, w, h, coin, {type: 'static'});
+      world.addBox(x, y, w, h, coin, {
+        type: 'static',
+        collisionCategories: ['playerItem'],
+        sensor: true,
+      });
       container.addChild(g);
     }
   }
