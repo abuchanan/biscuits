@@ -1,9 +1,7 @@
 // TODO should be a singleton
 // TODO this is a mess. position is a hodgepodge between the world and
 //      the clip renderable, not to mention PlayerRenderable
-
-function Player(world, container, keybindings, w, h) {
-
+function loadPlayerTextures() {
     // create a texture from an image path
     var texture = PIXI.Texture.fromImage("media/playerSprites.png");
 
@@ -27,14 +25,13 @@ function Player(world, container, keybindings, w, h) {
       'up': parts.slice(10, 15),
       'down': parts.slice(15, 20),
     };
+    
+    return textures;
+}
 
-    var clip = new PIXI.MovieClip(textures['down']);
+function Player(world, keybindings, w, h) {
 
-    // TODO scale player sprite images in actual image file
-    clip.width = w;
-    clip.height = h;
-    clip.animationSpeed = 0.1;
-
+    var body = world.add(0, 0, w, h);
 
     var direction = 'down';
 
@@ -50,80 +47,93 @@ function Player(world, container, keybindings, w, h) {
       },
 
       getPosition: function() {
-        return {x: clip.position.x, y: clip.position.y};
+        return body.getPosition();
       },
 
       setPosition: function(x, y) {
-          clip.position.x = x;
-          clip.position.y = y;
+        var objs = world.query(x, y, w, h);
+        var blocked = false;
+        for (var i = 0; i < objs.length; i++) {
+          if (objs[i] !== body && objs[i].isBlock) {
+            blocked = true;
+            break;
+          }
+        }
 
-          // TODO need a better way to set transform
-          var worldX = world.scale(x) + world.scale(w) / 2;
-          var worldY = world.scale(y) + world.scale(h) / 2;
+        if (!blocked) {
+          body.setPosition(x, y);
+        }
+      },
 
-          body.SetTransform(new Box2D.b2Vec2(worldX, worldY), body.GetAngle());
+      getMovementState: function() {
+        return movement.getState();
       },
     };
 
+    var movement = MovementHandler(player);
 
-
-
-    function Renderable(clip, fixture, w, h) {
-      PIXI.DisplayObjectContainer.call(this);
-      this.renderable = true;
-      this.addChild(clip);
-      this.fixture = fixture;
-      this.clip = clip;
-      this.w = w;
-      this.h = h;
-    }
-    Renderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-    Renderable.prototype.constructor = Renderable;
-    Renderable.prototype.updatePosition = function() {
-        var pos = this.fixture.GetBody().GetPosition();
-        // TODO need a cleaner way to get position
-        var x = world.unscale(pos.get_x());
-        var y = world.unscale(pos.get_y());
-        this.clip.position.x = x - this.w / 2;
-        this.clip.position.y = y - this.h / 2;
-
-        this.clip.textures = textures[direction];
-    }
-    Renderable.prototype._renderCanvas = function(renderer) {
-      this.updatePosition();
-      PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
-    };
-    Renderable.prototype._initWebGL = function(renderer) {
-      this.updatePosition();
-      PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
-    };
-    Renderable.prototype._renderWebGL = function(renderer) {
-      this.updatePosition();
-      PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
-    };
-
-
-    var playerFixture = world.addBox(0, 0, w, h, player, {
-      collisionCategories: ['player'],
+    keybindings.listen(function(eventname) {
+      movement.handleEvent(eventname);
     });
-    var body = playerFixture.GetBody();
-
-    var renderable = new Renderable(clip, playerFixture, w, h);
-    container.addChild(renderable);
-
-
-    var movement = MovementHandler(body, {
-      onStart: function(direction) {
-        player.setDirection(direction);
-        clip.play();
-      },
-      onEnd: function() {
-        clip.gotoAndStop(0);
-      },
-      speed: 3,
-    });
-
-    keybindings.listen(movement);
 
     return player;
 }
+
+
+function PlayerRenderable(player, w, h, scale) {
+  var textures = loadPlayerTextures();
+  PIXI.DisplayObjectContainer.call(this);
+  this.renderable = true;
+  this.textures = textures;
+
+  // TODO fuuuck that was a mysterious bug
+  //this.scale = scale;
+  this.worldFuuuScale = scale;
+
+  var clip = new PIXI.MovieClip(textures['down']);
+  // TODO scale player sprite images in actual image file
+  // TODO world vs renderer scaling
+  clip.width = w * scale;
+  clip.height = h * scale;
+  clip.animationSpeed = 0.1;
+
+  this.addChild(clip);
+
+  this.clip = clip;
+  this.player = player;
+}
+PlayerRenderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+PlayerRenderable.prototype.constructor = PlayerRenderable;
+PlayerRenderable.prototype.walk = function() {
+  this.clip.play();
+};
+PlayerRenderable.prototype.stop = function() {
+  this.clip.gotoAndStop(0);
+};
+PlayerRenderable.prototype.updatePosition = function() {
+    var pos = this.player.getPosition();
+
+    // TODO
+    var renderX = pos.x * this.worldFuuuScale;
+    var renderY = pos.y * this.worldFuuuScale;
+
+    this.clip.position.x = renderX;
+    this.clip.position.y = renderY;
+
+    this.clip.textures = this.textures[this.player.getDirection()];
+
+    // TODO
+    this.clip.gotoAndStop(0);
+}
+PlayerRenderable.prototype._renderCanvas = function(renderer) {
+  this.updatePosition();
+  PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
+};
+PlayerRenderable.prototype._initWebGL = function(renderer) {
+  this.updatePosition();
+  PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
+};
+PlayerRenderable.prototype._renderWebGL = function(renderer) {
+  this.updatePosition();
+  PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
+};
