@@ -2,10 +2,6 @@ function MovementHandler(player, options) {
 
   // TODO configureable speed
 
-  var changeCallback = options.onChange || false;
-
-
-
   function makeHandler(direction, deltaX, deltaY, timeout) {
     return {
       direction: direction,
@@ -37,7 +33,10 @@ function MovementHandler(player, options) {
       deltaY: 0,
       timeout: 0,
       getCurrentPosition: function() {
-        return 0;
+        return {
+          percent: 0,
+          position: player.getPosition(),
+        }
       },
     };
     var state = stop;
@@ -62,20 +61,18 @@ function MovementHandler(player, options) {
       var oldstate = state;
       state = nextState;
       move();
-      if (oldstate !== state) {
-        changeCallback(state);
-      }
     }
 
-    changeCallback(stop);
 
     return {
+      getState: function() {
+        return state;
+      },
       start: function(moveDef) {
         if (moveDef && state !== moveDef) {
           if (state === stop) {
             state = moveDef;
             move();
-            changeCallback(moveDef);
           } else {
             nextState = moveDef;
           }
@@ -99,6 +96,9 @@ function MovementHandler(player, options) {
   var right = makeHandler('right', 1, 0, defaultDuration);
 
   return {
+    getState: function() {
+      return statehandler.getState();
+    },
     handleEvent: function(eventname) {
 
       // TODO this is all broken. shouldn't be able to change direction until
