@@ -1,73 +1,154 @@
-function MovementHandler(body, options) {
+function MovementHandler(player, options) {
 
-  function noop() {}
+  // TODO configureable speed
 
-  var startCallback = options.onStart || noop;
-  var endCallback = options.onEnd || noop;
-  var speed = options.speed || 0.5;
+  var changeCallback = options.onChange || false;
 
-  var current = noop;
 
-  function makeHandler(direction, deltaX, deltaY) {
-    return function() {
-      startCallback(direction);
-      body.SetLinearVelocity(new Box2D.b2Vec2(deltaX * speed, deltaY * speed));
+
+  function makeHandler(direction, deltaX, deltaY, timeout) {
+    return {
+      direction: direction,
+      deltaX: deltaX,
+      deltaY: deltaY,
+      timeout: timeout,
+      getCurrentPosition: function() {
+        var time = new Date().getTime();
+        var percent = (time - this.start) / timeout;
+        var pos = {
+          x: (this.newPos.x - this.oldPos.x) * percent,
+          y: (this.newPos.y - this.oldPos.y) * percent,
+        };
+        return {
+          percent: percent,
+          position: pos,
+        }
+      },
+    };
+  }
+
+  function StateHandler() {
+
+    var intervalId;
+    var stop = {
+      direction: false,
+      start: 0,
+      deltaX: 0,
+      deltaY: 0,
+      timeout: 0,
+      getCurrentPosition: function() {
+        return 0;
+      },
+    };
+    var state = stop;
+    var nextState = stop;
+
+    function move() {
+      if (state !== stop) {
+        player.setDirection(state.direction);
+        var pos = player.getPosition();
+        state.oldPos = pos;
+        player.setPosition(pos.x + state.deltaX, pos.y + state.deltaY);
+        state.newPos = player.getPosition();
+        state.start = new Date().getTime();
+
+        // TODO accurate timer
+        intervalId = setTimeout(callback, state.timeout);
+        nextState = state;
+      }
     }
-  }
 
-  function stop() {
-    body.SetLinearVelocity(new Box2D.b2Vec2(0, 0));
-  }
-
-  var up = makeHandler('up', 0, -1);
-  var down = makeHandler('down', 0, 1);
-  var left = makeHandler('left', -1, 0);
-  var right = makeHandler('right', 1, 0);
-
-  function keyup(d) {
-    if (current === d) {
-      current = stop;
-      endCallback();
+    function callback() {
+      var oldstate = state;
+      state = nextState;
+      move();
+      if (oldstate !== state) {
+        changeCallback(state);
+      }
     }
+
+    changeCallback(stop);
+
+    return {
+      start: function(moveDef) {
+        if (moveDef && state !== moveDef) {
+          if (state === stop) {
+            state = moveDef;
+            move();
+            changeCallback(moveDef);
+          } else {
+            nextState = moveDef;
+          }
+        }
+      },
+      stop: function(moveDef) {
+        if (nextState === moveDef) {
+          nextState = stop;
+        }
+      },
+    };
   }
 
-  return function(eventname) {
-    switch (eventname) {
-      case 'Up keydown':
-        current = up;
-        break;
+  var statehandler = StateHandler();
+
+  var defaultDuration = 150;
+
+  var up = makeHandler('up', 0, -1, defaultDuration);
+  var down = makeHandler('down', 0, 1, defaultDuration);
+  var left = makeHandler('left', -1, 0, defaultDuration);
+  var right = makeHandler('right', 1, 0, defaultDuration);
+
+  return {
+    handleEvent: function(eventname) {
+
+      // TODO this is all broken. shouldn't be able to change direction until
+      //      the current movement finishes.
+      function keydown(move) {
+        statehandler.start(move);
+      }
+
+      function keyup(move) {
+        statehandler.stop(move);
+      }
 
       // TODO ugh....another bug here when keyup event happens during a different window
       //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
-      case 'Up keyup':
-        keyup(up);
-        break;
+      //      window focus/blur events?
+      switch (eventname) {
+        case 'Up keydown':
+          keydown(up);
+          break;
 
-      case 'Down keydown':
-        current = down;
-        break;
+        case 'Down keydown':
+          keydown(down);
+          break;
 
-      case 'Down keyup':
-        keyup(down)
-        break;
+        case 'Left keydown':
+          keydown(left);
+          break;
 
-      case 'Left keydown':
-        current = left;
-        break;
+        case 'Right keydown':
+          keydown(right);
+          break;
 
-      case 'Left keyup':
-        keyup(left);
-        break;
+        case 'Right keyup':
+          keyup(right);
+          break;
 
-      case 'Right keydown':
-        current = right;
-        break;
+        case 'Left keyup':
+          keyup(left);
+          break;
 
-      case 'Right keyup':
-        keyup(right);
-        break;
+        case 'Up keyup':
+          keyup(up);
+          break;
+
+        case 'Down keyup':
+          keyup(down);
+          break;
+      }
+
+
     }
-
-    current();
-  }
+  };
 }
