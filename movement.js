@@ -11,9 +11,17 @@ function MovementHandler(player, options) {
       getCurrentPosition: function() {
         var time = new Date().getTime();
         var percent = (time - this.start) / timeout;
+
+        if (percent < 0) {
+          percent = 0;
+        }
+        else if (percent > 1) {
+          percent = 1;
+        }
+
         var pos = {
-          x: (this.newPos.x - this.oldPos.x) * percent,
-          y: (this.newPos.y - this.oldPos.y) * percent,
+          x: this.oldPos.x + ((this.newPos.x - this.oldPos.x) * percent),
+          y: this.oldPos.y + ((this.newPos.y - this.oldPos.y) * percent),
         };
         return {
           percent: percent,
