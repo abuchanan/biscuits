@@ -1,40 +1,88 @@
+'use strict';
+
 function loadSquirrelTextures() {
-  var texture = PIXI.Texture.fromImage('media/Monster-squirrel.png');
 
-  var textures = [];
+    var imgSrc = "media/squirrel-glued/squirrel-pieces.png";
+    var jsonSrc = "media/squirrel-glued/squirrel-pieces.json";
 
-  for (var i = 0; i < 8; i++) {
-    var x = i * 32;
-    var t = new PIXI.Texture(texture, new PIXI.Rectangle(x, 0, 32, 32));
-    textures.push(t);
-  }
+    return loadSpriteSheet(imgSrc, jsonSrc).then(function(parts) {
 
-  return textures;
+      function getSequence(prefix, length) {
+        var seq = [];
+        for (var i = 0; i < length; i++) {
+          var name = prefix + '-' + i;
+          seq.push(parts[name]);
+        }
+        return seq;
+      }
+
+      return {
+        'idle-up': getSequence('idle-up', 8),
+        'idle-down': getSequence('idle-down', 8),
+        'idle-left': getSequence('idle-left', 8),
+        'idle-right': getSequence('idle-right', 8),
+        'move-up': getSequence('move-up', 3),
+        'move-down': getSequence('move-down', 3),
+        'move-left': getSequence('move-left', 3),
+        'move-right': getSequence('move-right', 3),
+      };
+    });
 }
 
 function SquirrelService(world, player, container) {
 
+  // TODO
+  var Actions = ActionsService();
+
+  // TODO need to figure out async loading in services
+  var texturesLoader = loadSquirrelTextures();
+
   function Renderer(squirrel) {
-    var textures = loadSquirrelTextures();
-    var layer = container.newLayer();
+    texturesLoader.then(function(textures) {
+        var clip = new PIXI.MovieClip(textures['idle-left']);
+        clip.width = squirrel.w;
+        clip.height = squirrel.h;
+        clip.animationSpeed = 0.07;
+        clip.play();
+        container.addChild(clip);
 
-    var clip = new PIXI.MovieClip(textures);
-    clip.width = squirrel.w;
-    clip.height = squirrel.h;
-    clip.animationSpeed = 0.07;
-    clip.gotoAndPlay(0);
-    clip.play();
-    layer.addChild(clip);
+        // TODO need deregistration function
+        container.addFrameListener(function() {
+          var state = squirrel.getMovementState();
 
-    layer.addFrameListener(function() {
-      var state = squirrel.getMovementState();
-      var percentComplete = state.getPercentComplete();
-      var pos = state.getPositionAt(percentComplete);
-      this.position.x = pos.x;
-      this.position.y = pos.y;
+          if (state) {
+            // TODO s/direction/name/
+            var percentComplete = state.getPercentComplete();
+            var pos = state.moveDef.getPositionAt(percentComplete);
+            clip.position.x = pos.x;
+            clip.position.y = pos.y;
+
+            var textureName = 'move-' + state.moveDef.direction;
+            clip.textures = textures[textureName];
+
+            var i = Math.floor(percentComplete * clip.textures.length);
+            //clip.gotoAndStop(i);
+
+          } else {
+            var pos = squirrel.getPosition();
+            clip.position.x = pos.x;
+            clip.position.y = pos.y;
+
+            var textureName = 'idle-' + squirrel.getDirection();
+            clip.textures = textures[textureName];
+            clip.play();
+          }
+
+        });
     });
+
+    // TODO this doesn't play nice with async
+    return function() {
+      container.removeChild(clip);
+    };
   }
 
+      // TODO this is all one big hack!
   function Pathfinder(squirrel) {
       var movement = squirrel.getMovementHandler();
       var checkInterval;
@@ -72,12 +120,24 @@ function SquirrelService(world, player, container) {
             }
         }
       }
-      nextMove();
 
-      squirrel.walkUp.onEnd = nextMove;
-      squirrel.walkDown.onEnd = nextMove;
-      squirrel.walkLeft.onEnd = nextMove;
-      squirrel.walkRight.onEnd = nextMove;
+      // TODO
+      squirrel.walkUp.endCallback = nextMove;
+      squirrel.walkDown.endCallback = nextMove;
+      squirrel.walkLeft.endCallback = nextMove;
+      squirrel.walkRight.endCallback = nextMove;
+
+      return {
+        start: function() {
+          nextMove();
+        },
+        stop: function() {
+          movement.stopAll();
+          if (checkInterval) {
+            clearInterval(checkInterval);
+          }
+        },
+      };
   }
 
 
@@ -98,11 +158,11 @@ function SquirrelService(world, player, container) {
         hittable: true,
         hit: function(damage) {
           life -= 1;
-          console.log('hit', damage, life);
+          console.log('hit', damage, life, body.getID());
 
           if (life == 0) {
-            body.remove();
-            container.removeChild(renderable);
+            console.log('dead');
+            this.destroy();
           }
         },
         getDirection: function() {
@@ -126,27 +186,38 @@ function SquirrelService(world, player, container) {
         getMovementHandler: function() {
           return movement;
         },
+        start: function() {
+          pathfinder.start();
+        },
+        destroy: function() {
+            body.remove();
+            destroyRenderer();
+            pathfinder.stop();
+            var idx = squirrels.indexOf(this);
+            squirrels.splice(idx, 1);
+        },
       };
-      Renderer(squirrel);
+      var destroyRenderer = Renderer(squirrel);
 
       var body = world.add(x, y, w, h);
       body.data = squirrel;
 
-      var movement = MovementHandler(squirrel)
-      // TODO these shouldn't be instance specific
-      squirrel.walkUp = movement.makeMovement('up', 0, -1, 250);
-      squirrel.walkDown = movement.makeMovement('down', 0, 1, 250);
-      squirrel.walkLeft = movement.makeMovement('left', -1, 0, 250);
-      squirrel.walkRight = movement.makeMovement('right', 1, 0, 250);
+      // TODO these shouldn't be instance specific?
+      squirrel.walkUp = Actions.makeMovement(squirrel, 'up', 0, -1, 250);
+      squirrel.walkDown = Actions.makeMovement(squirrel, 'down', 0, 1, 250);
+      squirrel.walkLeft = Actions.makeMovement(squirrel, 'left', -1, 0, 250);
+      squirrel.walkRight = Actions.makeMovement(squirrel, 'right', 1, 0, 250);
+
+      var movement = Actions.makeStateHandler();
+
+      var pathfinder = Pathfinder(squirrel);
 
       squirrels.push(squirrel);
     },
 
     start: function() {
-      // TODO this is all one big hack!
       for (var i = 0; i < squirrels.length; i++) {
-        var squirrel = squirrels[i];
-        Pathfinder(squirrel);
+        squirrels[i].start();
       }
     },
   };

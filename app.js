@@ -53,6 +53,12 @@ function startBiscuits(container) {
 
 // create an new instance of a pixi stage
 	var stage = new PIXI.Stage(0xffffff);
+  var meter = new FPSMeter({
+    top: 'auto',
+    left: 'auto',
+    bottom: '5px',
+    right: '5px',
+  });
 
 	// create a renderer instance
   var width = 640;
@@ -71,6 +77,7 @@ function startBiscuits(container) {
 	function animate() {
 	    requestAnimFrame( animate );
       masterLayer.invokeFrameListeners();
+      meter.tick();
 	    renderer.render(stage);
 	}
 

@@ -1,15 +1,21 @@
 
-function Combat(player) {
+function Combat(player, world) {
 
   // TODO configurable damage
   var damage = 1;
 
   return function(eventname) {
     if (eventname == 'Sword keydown') {
+        // TODO swinging a sword or any other action needs to be spaced out
+        //      just like walking
 
         // TODO this probably isn't the best query. the player should
         //      be able to hit an object it's standing *on top* of
-        var res = player.queryImmediateFront();
+        // TODO weapons will differ in their query area
+        var frontRect = player.immediateFrontRect();
+        var playerAreaRect = player.getRect();
+
+        var res = world.queryMany([frontRect, playerAreaRect]);
 
         // TODO manage whether multiple objects can be hit
         for (var i = 0; i < res.length; i++) {
