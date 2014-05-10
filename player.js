@@ -114,14 +114,19 @@ PlayerRenderable.prototype.stop = function() {
   this.clip.gotoAndStop(0);
 };
 PlayerRenderable.prototype.updatePosition = function() {
-    var pos = this.player.getPosition();
+    var state = this.player.getMovementState();
+    var percentComplete = state.getPercentComplete();
+    var pos = state.getPositionAt(percentComplete);
     this.clip.position.x = pos.x;
     this.clip.position.y = pos.y;
 
-    this.clip.textures = this.textures[this.player.getDirection()];
+    // TODO s/direction/name/
+    var textureName = state.direction || this.player.getDirection();
+    this.clip.textures = this.textures[textureName];
 
     // TODO
-    this.clip.gotoAndStop(0);
+    var i = Math.floor(percentComplete * this.clip.textures.length);
+    this.clip.gotoAndStop(i);
 }
 PlayerRenderable.prototype._renderCanvas = function(renderer) {
   this.updatePosition();

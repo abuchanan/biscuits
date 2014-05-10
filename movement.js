@@ -8,7 +8,7 @@ function MovementHandler(player, options) {
       deltaX: deltaX,
       deltaY: deltaY,
       timeout: timeout,
-      getCurrentPosition: function() {
+      getPercentComplete: function() {
         var time = new Date().getTime();
         var percent = (time - this.start) / timeout;
 
@@ -18,15 +18,13 @@ function MovementHandler(player, options) {
         else if (percent > 1) {
           percent = 1;
         }
-
-        var pos = {
+        return percent;
+      },
+      getPositionAt: function(percent) {
+        return {
           x: this.oldPos.x + ((this.newPos.x - this.oldPos.x) * percent),
           y: this.oldPos.y + ((this.newPos.y - this.oldPos.y) * percent),
         };
-        return {
-          percent: percent,
-          position: pos,
-        }
       },
     };
   }
@@ -40,11 +38,11 @@ function MovementHandler(player, options) {
       deltaX: 0,
       deltaY: 0,
       timeout: 0,
-      getCurrentPosition: function() {
-        return {
-          percent: 0,
-          position: player.getPosition(),
-        }
+      getPercentComplete: function() {
+        return 1;
+      },
+      getPositionAt: function(percent) {
+        return player.getPosition();
       },
     };
     var state = stop;
