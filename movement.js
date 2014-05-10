@@ -70,10 +70,8 @@ function MovementHandler(player, options) {
     }
 
     function callback() {
-      if (state !== nextState) {
-        if (state.onEnd) {
-          state.onEnd();
-        }
+      if (state.onEnd) {
+        state.onEnd();
       }
       state = nextState;
       move();
@@ -99,6 +97,9 @@ function MovementHandler(player, options) {
           nextState = stop;
         }
       },
+      stopAll: function() {
+        nextState = stop;
+      },
     };
   }
 
@@ -115,6 +116,9 @@ function MovementHandler(player, options) {
     },
     stop: function(move) {
       statehandler.stop(move);
+    },
+    stopAll: function() {
+      statehandler.stopAll();
     },
   };
 }
