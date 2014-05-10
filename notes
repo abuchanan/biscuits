@@ -1,0 +1,250 @@
+big things
+
+collision and physics
+--------------------------------------------------------------
+decide how collisions should work. is box2d going to be too complicated?
+seems like it has a lot of potential to produce overly complex, unwanted results
+(like the player bouncing off a squirrel and not stopping)
+
+- for now at least, box2d is saving me a ton of work related to collision detectino
+  and resolution. possibly in the future it would be better to drop box2d, but for
+  now it's ok.
+
+should a player collide with a squirrel?
+- undecided. leaning towards no.
+- it's pretty weird when a player is blocked by a squirrel. plus, it could lead
+  to issues with map movement where the player can't get somewhere because a
+  squirrel blocks the path.
+
+should a player be able to accelerate a squirrel?
+- no.
+
+- should an NPC collide with other NPCs?
+
+- should an NPC collide with a moving part of the map, say a moving boulder,
+  or a moving wall?
+
+
+within physics options:
+- kinematic body
+-- the problem here: if you make a squirrel a kinematic body, and a monster a
+   kinematic body too, then they can't collide with eachother.
+   maybe that's not a problem though.
+-- looks like in zelda link to the past, the player isn't blocked by NPCs and
+   NPCs aren't blocked by each other.
+--- kinematic bodies doesn't actually handle part of this, because the player
+    (a dynamic body) still collides with kinematic bodies
+
+-- but if kinematic, can i still query for combat hit? how will i know when the
+   player bumped into a monster (triggering health loss)? looks like kinematic
+   bodies should still collide with dynamic bodies?
+
+
+- collision filtering
+-- this might be better than kinematic bodies
+-- but how to handle health loss when a player bumps into a monster?
+--- sensor?
+
+- custom presolve/post solve something or other
+
+a great conceptual example of this is having a game with two players.
+the players should be able to collide with everything else, but they should
+not be able to push each other around.
+
+
+
+npc movement
+--------------------------------------------------------------
+
+how to move to a exact point
+
+- if moving via setting linear velocity, what happens when the
+  npc will move _past_ the destination point in the next time
+  step if it's moving at the same velocity?
+-- if the onstep callback happens before the box2d step (onPreStep?)
+   then we can pass the current timestep delta to the callback,
+   and using that information it can detect that it is about to move
+   past the destination and adjust the velocity for that time step
+   to make it exactly hit that destination.
+
+
+pathfinding
+
+- here i'm hitting another big obstacle. how does an NPC move while
+  also allowing for the possibility that its path may become blocked
+  during its movement? seems like there are a couple options: either
+  I constrain the game so that NPCs can move without worrying about
+  colliding with other dynamic bodies, or I figure out a pathfinding
+  algorithm to use.
+
+  - i could go back to tile-based constraints. this would really simplify
+    movement, collision detection, etc. but the tradeoff is a that you
+    lose a certain feel of movement and interactivity.
+  - i could possibly make it so that NPC don't collide with anything that
+    isn't static. this might turn out to give an unrealistic feel though.
+  - i could go all out. get a good pathfinding algorithm, allow NPCs to
+    collide. the tradeoff is the amount of work involved (likely a LOT more)
+
+
+
+combat
+--------------------------------------------------------------
+
+weapons
+-- spells
+-- sword
+-- remote weapons e.g. detonate bomb
+-- timed weapons e.g. time bomb
+-- long distance weapons e.g. bow and arrow
+
+enemies
+- difficulty level
+- figuring out which enemies are in the current view
+
+display enemy health bar
+
+display player health bar
+
+reaction to being hit: enemy might freeze, or become agitated, or...
+
+combat calculation
+- weapons
+- level
+- enemy level
+- difficulty level
+
+damage
+- player health
+
+what happens when you die? i.e. health runs out?
+
+
+AI
+--------------------------------------------------------------
+-- movement
+
+
+
+store
+--------------------------------------------------------------
+
+
+
+state and save
+--------------------------------------------------------------
+-- character
+--- name
+--- items
+--- health
+map state
+- e.g. door X has been unlocked
+- map object Y has been picked up, or moved
+- story state
+
+how to load map and object state? e.g. coins are defined in the map file,
+  but the player picks some of them up and then saves the game. when the
+  map is next loaded, how do you check whether to include a coin or not?
+
+
+
+story/conversation
+--------------------------------------------------------------
+comic book style?
+
+story themes:
+- every place has secrets
+- unlock the secrets of the book
+-- what does the book represent?
+
+how does the story end?
+
+evil: all the terrors of nightmares are leaking into the real world
+
+
+
+other
+=============================================================
+
+special rendering, like a flashlight in the dark
+
+throwing jars, e.g. zelda
+
+
+circular player physics body
+
+Load on demand:
+- worlds on demand
+-- load Tiled json, get load points, but don't bother with sprite slicing
+   and world creation
+- chunks of large worlds on demand?
+
+
+animate view shift?
+
+animation when switching world (e.g. go in door, current scene fades out)
+
+
+status layer
+
+walk through long grass, player sprite changes to match
+
+sprites that cover multiple tiles
+- should work, just need proof 
+
+planes, trains, automobiles, submarines, etc
+
+
+world map
+inventory
+settings
+
+bridge: player on top of tile going one way, beneath tile going another
+
+
+
+
+dev stuff:
+- break into smaller files
+- angular?
+- unit test framework
+- grunt?
+- bower install list
+
+
+is pixi loading tilesets sychronously?
+
+
+things to define in Tiled and other ideas for objects:
+- animated tiles (squirrel)
+- monsters
+- moveable objects
+- equippable items
+- chests
+- locked doors
+
+
+map load validation
+
+http://opengameart.org/content/tiled-terrains
+http://opengameart.org/content/oga-16x16-jrpg-sprites-tiles
+http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.png
+
+https://www.zotero.org/c.a.s.t._library/items/itemKey/SZCJ6RAH
+
+https://github.com/sole/tween.js/
+
+http://www.wolverinesoft.org/read/article/14/collision-detection-and-response
+http://katyscode.wordpress.com/2013/01/18/2d-platform-games-collision-detection-for-dummies/
+http://www.metanetsoftware.com/technique.html
+http://www.metanetsoftware.com/technique/tutorialB.html
+http://www.wildbunny.co.uk/blog/2011/03/25/speculative-contacts-an-continuous-collision-engine-approach-part-1/
+
+zelda
+=================================
+1. intro - story background
+  hidden land, golden power
+  sealed gate by seven wise men
+  should have remained sealed
+  over a long time
+  wizard came to release seal, eliminated king
+  vanished seven wise men

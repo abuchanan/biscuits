@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="20" height="20" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="tmw_desert_spacing2" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="../../../Volumes/Tiled 0.9.1/examples/tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="20" height="20">
+  <data encoding="base64" compression="zlib">
+   eJyTZGBgkKISlgZiRSBWohJWHjVvSJnHhYZHzRte8Ttq3tA3TxOItaiEtYEYAJDDM6E=
+  </data>
+ </layer>
+ <objectgroup name="Block layer" width="20" height="20">
+  <properties>
+   <property name="isBlock" value="true"/>
+  </properties>
+  <object x="0" y="608" width="640" height="32"/>
+  <object x="0" y="0" width="32" height="640"/>
+  <object x="608" y="0" width="32" height="640"/>
+  <object x="0" y="0" width="640" height="32"/>
+ </objectgroup>
+ <objectgroup name="Objects" width="20" height="20">
+  <object name="portal main-b" type="portal" x="64" y="544" width="32" height="32">
+   <properties>
+    <property name="portal" value="main"/>
+   </properties>
+  </object>
+  <object name="other" type="loadpoint" x="64" y="64" width="32" height="32"/>
+  <object name="squirrel" type="squirrel" x="480" y="480" width="32" height="32"/>
+ </objectgroup>
+</map>
