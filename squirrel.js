@@ -1,6 +1,7 @@
+'use strict';
+
 function loadSquirrelTextures() {
   var texture = PIXI.Texture.fromImage('media/Monster-squirrel.png');
-
   var textures = [];
 
   for (var i = 0; i < 8; i++) {
@@ -8,33 +9,36 @@ function loadSquirrelTextures() {
     var t = new PIXI.Texture(texture, new PIXI.Rectangle(x, 0, 32, 32));
     textures.push(t);
   }
-
   return textures;
 }
 
 function SquirrelService(world, player, container) {
 
-  function Renderer(squirrel) {
-    var textures = loadSquirrelTextures();
-    var layer = container.newLayer();
+  var textures = loadSquirrelTextures();
 
+  function Renderer(squirrel) {
     var clip = new PIXI.MovieClip(textures);
     clip.width = squirrel.w;
     clip.height = squirrel.h;
     clip.animationSpeed = 0.07;
-    clip.gotoAndPlay(0);
     clip.play();
-    layer.addChild(clip);
+    container.addChild(clip);
 
-    layer.addFrameListener(function() {
+    // TODO need deregistration function
+    container.addFrameListener(function() {
       var state = squirrel.getMovementState();
       var percentComplete = state.getPercentComplete();
       var pos = state.getPositionAt(percentComplete);
-      this.position.x = pos.x;
-      this.position.y = pos.y;
+      clip.position.x = pos.x;
+      clip.position.y = pos.y;
     });
+
+    return function() {
+      container.removeChild(clip);
+    };
   }
 
+      // TODO this is all one big hack!
   function Pathfinder(squirrel) {
       var movement = squirrel.getMovementHandler();
       var checkInterval;
@@ -72,12 +76,23 @@ function SquirrelService(world, player, container) {
             }
         }
       }
-      nextMove();
 
       squirrel.walkUp.onEnd = nextMove;
       squirrel.walkDown.onEnd = nextMove;
       squirrel.walkLeft.onEnd = nextMove;
       squirrel.walkRight.onEnd = nextMove;
+
+      return {
+        start: function() {
+          nextMove();
+        },
+        stop: function() {
+          movement.stopAll();
+          if (checkInterval) {
+            clearInterval(checkInterval);
+          }
+        },
+      };
   }
 
 
@@ -98,11 +113,11 @@ function SquirrelService(world, player, container) {
         hittable: true,
         hit: function(damage) {
           life -= 1;
-          console.log('hit', damage, life);
+          console.log('hit', damage, life, body.getID());
 
           if (life == 0) {
-            body.remove();
-            container.removeChild(renderable);
+            console.log('dead');
+            this.destroy();
           }
         },
         getDirection: function() {
@@ -126,27 +141,38 @@ function SquirrelService(world, player, container) {
         getMovementHandler: function() {
           return movement;
         },
+        start: function() {
+          pathfinder.start();
+        },
+        destroy: function() {
+            body.remove();
+            destroyRenderer();
+            pathfinder.stop();
+            var idx = squirrels.indexOf(this);
+            squirrels.splice(idx, 1);
+        },
       };
-      Renderer(squirrel);
+      var destroyRenderer = Renderer(squirrel);
 
       var body = world.add(x, y, w, h);
       body.data = squirrel;
 
-      var movement = MovementHandler(squirrel)
+
+      var movement = MovementHandler(squirrel);
       // TODO these shouldn't be instance specific
       squirrel.walkUp = movement.makeMovement('up', 0, -1, 250);
       squirrel.walkDown = movement.makeMovement('down', 0, 1, 250);
       squirrel.walkLeft = movement.makeMovement('left', -1, 0, 250);
       squirrel.walkRight = movement.makeMovement('right', 1, 0, 250);
 
+      var pathfinder = Pathfinder(squirrel);
+
       squirrels.push(squirrel);
     },
 
     start: function() {
-      // TODO this is all one big hack!
       for (var i = 0; i < squirrels.length; i++) {
-        var squirrel = squirrels[i];
-        Pathfinder(squirrel);
+        squirrels[i].start();
       }
     },
   };
