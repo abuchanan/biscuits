@@ -1,16 +1,20 @@
 function MovementHandler(player, options) {
 
   // TODO configureable speed
+  var defaultDuration = 150;
 
-  function makeHandler(direction, deltaX, deltaY, timeout) {
+  function makeMovement(direction, deltaX, deltaY, duration) {
+    duration = duration || defaultDuration;
+
     return {
+      // TODO getter
       direction: direction,
       deltaX: deltaX,
       deltaY: deltaY,
-      timeout: timeout,
+      duration: duration,
       getPercentComplete: function() {
         var time = new Date().getTime();
-        var percent = (time - this.start) / timeout;
+        var percent = (time - this.start) / duration;
 
         if (percent < 0) {
           percent = 0;
@@ -37,7 +41,7 @@ function MovementHandler(player, options) {
       start: 0,
       deltaX: 0,
       deltaY: 0,
-      timeout: 0,
+      duration: 0,
       getPercentComplete: function() {
         return 1;
       },
@@ -58,7 +62,7 @@ function MovementHandler(player, options) {
         state.start = new Date().getTime();
 
         // TODO accurate timer
-        intervalId = setTimeout(callback, state.timeout);
+        intervalId = setTimeout(callback, state.duration);
         nextState = state;
       }
     }
@@ -94,67 +98,17 @@ function MovementHandler(player, options) {
 
   var statehandler = StateHandler();
 
-  var defaultDuration = 150;
-
-  var up = makeHandler('up', 0, -1, defaultDuration);
-  var down = makeHandler('down', 0, 1, defaultDuration);
-  var left = makeHandler('left', -1, 0, defaultDuration);
-  var right = makeHandler('right', 1, 0, defaultDuration);
 
   return {
     getState: function() {
       return statehandler.getState();
     },
-    handleEvent: function(eventname) {
-
-      // TODO this is all broken. shouldn't be able to change direction until
-      //      the current movement finishes.
-      function keydown(move) {
-        statehandler.start(move);
-      }
-
-      function keyup(move) {
-        statehandler.stop(move);
-      }
-
-      // TODO ugh....another bug here when keyup event happens during a different window
-      //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
-      //      window focus/blur events?
-      switch (eventname) {
-        case 'Up keydown':
-          keydown(up);
-          break;
-
-        case 'Down keydown':
-          keydown(down);
-          break;
-
-        case 'Left keydown':
-          keydown(left);
-          break;
-
-        case 'Right keydown':
-          keydown(right);
-          break;
-
-        case 'Right keyup':
-          keyup(right);
-          break;
-
-        case 'Left keyup':
-          keyup(left);
-          break;
-
-        case 'Up keyup':
-          keyup(up);
-          break;
-
-        case 'Down keyup':
-          keyup(down);
-          break;
-      }
-
-
-    }
+    makeMovement: makeMovement,
+    start: function(move) {
+      statehandler.start(move);
+    },
+    stop: function(move) {
+      statehandler.stop(move);
+    },
   };
 }

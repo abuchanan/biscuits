@@ -75,8 +75,32 @@ function Player(world, keybindings, w, h) {
 
     var movement = MovementHandler(player);
 
+    var walkUp = movement.makeMovement('up', 0, -1);
+    var walkDown = movement.makeMovement('down', 0, 1);
+    var walkLeft = movement.makeMovement('left', -1, 0);
+    var walkRight = movement.makeMovement('right', 1, 0);
+
+    var keymap = {};
+
+    function bindMove(keyName, move) {
+      keymap[keyName + ' keydown'] = movement.start.bind(movement, move);
+      keymap[keyName + ' keyup'] = movement.stop.bind(movement, move);
+    }
+
+    // TODO when keyup event happens during a different window
+    //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
+    //      window focus/blur events?
+
+    bindMove('Up', walkUp);
+    bindMove('Down', walkDown);
+    bindMove('Left', walkLeft);
+    bindMove('Right', walkRight);
+
     keybindings.listen(function(eventname) {
-      movement.handleEvent(eventname);
+      var handler = keymap[eventname];
+      if (handler) {
+        handler();
+      }
     });
 
     return player;
