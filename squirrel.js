@@ -1,5 +1,4 @@
-
-function SquirrelService(world, container) {
+function loadSquirrelTextures() {
   var texture = PIXI.Texture.fromImage('media/Monster-squirrel.png');
 
   var textures = [];
@@ -10,24 +9,34 @@ function SquirrelService(world, container) {
     textures.push(t);
   }
 
+  return textures;
+}
 
-  // http://www.goodboydigital.com/pixijs/docs/files/src_pixi_extras_CustomRenderable.js.html#
-  function Renderable(clip, fixture) {
+function SquirrelService(world, container) {
+
+  function Renderable(squirrel) {
     PIXI.DisplayObjectContainer.call(this);
     this.renderable = true;
+    this.textures = loadSquirrelTextures();
+
+    var clip = new PIXI.MovieClip(this.textures);
+    clip.width = squirrel.w;
+    clip.height = squirrel.h;
+    clip.animationSpeed = 0.07;
+    clip.gotoAndPlay(0);
+    clip.play();
+
     this.addChild(clip);
-    this.fixture = fixture;
-    this.clip = clip;
+    this.squirrel = squirrel;
   }
   Renderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
   Renderable.prototype.constructor = Renderable;
   Renderable.prototype.updatePosition = function() {
-      var pos = this.fixture.GetBody().GetPosition();
-      // TODO need a cleaner way to get position
-      var x = world.unscale(pos.get_x());
-      var y = world.unscale(pos.get_y());
-      this.clip.position.x = x;
-      this.clip.position.y = y;
+      var state = this.squirrel.getMovementState();
+      var percentComplete = state.getPercentComplete();
+      var pos = state.getPositionAt(percentComplete);
+      this.position.x = pos.x;
+      this.position.y = pos.y;
   }
   Renderable.prototype._renderCanvas = function(renderer) {
     this.updatePosition();
@@ -44,59 +53,71 @@ function SquirrelService(world, container) {
 
   // TODO sporadic animation. a squirrel isn't a fluid animation loop.
   return {
+
     create: function(x, y, w, h) {
 
-      var clip = new PIXI.MovieClip(textures);
-      clip.animationSpeed = 0.07;
-      clip.play();
-
-      clip.position.x = x;
-      clip.position.y = y;
-      clip.width = w;
-      clip.height = h;
-      clip.anchor.x = 0.5;
-      clip.anchor.y = 0.5;
-
       var life = 10;
+      var direction = 'down';
 
       var squirrel = {
+        w: w,
+        h: h,
+
         hittable: true,
         hit: function(damage) {
           life -= 1;
           console.log('hit', damage, life);
 
-          fixture.GetBody().SetLinearVelocity(new Box2D.b2Vec2(1, 0));
-
           if (life == 0) {
-            world.remove(fixture);
-            container.removeChild(renderable);
+            // TODO world.remove(fixture);
+            //      container.removeChild(renderable);
           }
+        },
+        getDirection: function() {
+          return direction;
+        },
+
+        setDirection: function(value) {
+          direction = value;
+        },
+
+        getPosition: function() {
+          return body.getPosition();
+        },
+
+        setPosition: function(x, y) {
+          body.setPosition(x, y);
+        },
+        getMovementState: function() {
+          return movement.getState();
         },
       };
 
-      var fixture = world.addBox(x, y, w, h, squirrel, {
-        collisionCategories: ['NPC'],
-      });
+      var body = world.add(x, y, w, h);
+      body.data = squirrel;
 
-      // TODO can an NPC only have one movement going at a time?
+      var movement = MovementHandler(squirrel)
+      var walkUp = movement.makeMovement('up', 0, -1);
+      var walkDown = movement.makeMovement('down', 0, 1);
+      var walkLeft = movement.makeMovement('left', -1, 0);
+      var walkRight = movement.makeMovement('right', 1, 0);
 
-      world.onPreStep(function(timestep) {
-        if (destination) {
-        }
-      });
+      var walkCount = 0;
+      function walkTest() {
+        movement.start(walkRight);
+        walkCount++;
 
-      var g = new PIXI.Graphics();
-      g.beginFill(0x00ffaa);
-      g.drawRect(0, 0, w, h);
-      g.endFill();
-      g.position.x = x + 250 - (w / 2);
-      g.position.y = y - (h / 2);
+        setTimeout(function() {
+          movement.stop(walkRight);
+          if (walkCount < 5) {
+            setTimeout(walkTest, 700);
+          }
+        }, 300);
+      }
+      setTimeout(walkTest, 700);
 
-      container.addChild(g);
-
-      var renderable = new Renderable(clip, fixture, w, h);
+      var renderable = new Renderable(squirrel);
       container.addChild(renderable);
-
     },
   };
 }

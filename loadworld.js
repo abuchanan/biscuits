@@ -73,7 +73,7 @@ function loadWorld(mapfile, sceneManager, container) {
     //      necessary?
     //var Portals = PortalService(player, world, sceneManager, objectLayer);
     var Chests = ChestService(player, world, objectLayer);
-    //var Squirrels = SquirrelService(world, objectLayer);
+    var Squirrels = SquirrelService(world, objectLayer);
     var Coins = CoinsService(player, world, objectLayer);
 
     // TODO need dynamic view size
@@ -143,11 +143,9 @@ function loadWorld(mapfile, sceneManager, container) {
           sceneManager.addScene(obj.name, load);
         }
 
-        /*
         else if (obj.type == 'squirrel') {
           Squirrels.create(obj.x, obj.y, obj.w, obj.h);
         }
-        */
 
         else if (obj.type == 'coin') {
           Coins.create(obj.x, obj.y, obj.w, obj.h);
