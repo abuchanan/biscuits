@@ -36,13 +36,14 @@ function loadWorld(mapfile, sceneManager, container) {
     var keybindings = KeyBindingsService();
 
     // TODO
-    var size = 32 / scale * 20;
+    var size = 32 / scale * map.mapData.width;
     var world = World(size, size);
 
-    var backgroundLayer = container.newLayer();
+    var worldViewLayer = container.newLayer();
+    var backgroundLayer = worldViewLayer.newLayer();
     // TODO maybe loadpoint from Tiled should determine layer?
-    var objectLayer = container.newLayer();
-    var playerLayer = container.newLayer();
+    var objectLayer = worldViewLayer.newLayer();
+    var playerLayer = worldViewLayer.newLayer();
 
     objectLayer.scale.x = scale;
     objectLayer.scale.y = scale;
@@ -69,8 +70,8 @@ function loadWorld(mapfile, sceneManager, container) {
       var pos = state.getPositionAt(percentComplete);
 
       // TODO hardcoded dimensions
-      container.x = 320 - Math.floor(pos.x * scale);
-      container.y = 320 - Math.floor(pos.y * scale);
+      worldViewLayer.x = 320 - Math.floor(pos.x * scale);
+      worldViewLayer.y = 320 - Math.floor(pos.y * scale);
     });
 
     var combat = Combat(player, world);

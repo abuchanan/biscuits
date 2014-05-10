@@ -35,6 +35,51 @@ function SquirrelService(world, player, container) {
     });
   }
 
+  function Pathfinder(squirrel) {
+      var movement = squirrel.getMovementHandler();
+      var checkInterval;
+      var maxPath = 10;
+
+      function nextMove() {
+
+        var pos = squirrel.getPosition();
+        var playerPos = player.getPosition();
+        var path = world.findPath(pos.x, pos.y, playerPos.x, playerPos.y);
+
+        if (path.length > 1 && path.length < maxPath) {
+          clearInterval(checkInterval);
+          checkInterval = false;
+
+          var dx = path[1][0] - pos.x;
+          var dy = path[1][1] - pos.y;
+
+          // TODO need to figure out how to integrate this cleanly with MovementHandler
+          if (dy == -1) {
+            movement.start(squirrel.walkUp);
+          } else if (dy == 1) {
+            movement.start(squirrel.walkDown);
+          } else if (dx == -1) {
+            movement.start(squirrel.walkLeft);
+          } else if (dx == 1) {
+            movement.start(squirrel.walkRight);
+          }
+
+        } else {
+            movement.stopAll();
+
+            if (!checkInterval) {
+              checkInterval = setInterval(nextMove, 500);
+            }
+        }
+      }
+      nextMove();
+
+      squirrel.walkUp.onEnd = nextMove;
+      squirrel.walkDown.onEnd = nextMove;
+      squirrel.walkLeft.onEnd = nextMove;
+      squirrel.walkRight.onEnd = nextMove;
+  }
+
 
   var squirrels = [];
 
@@ -101,47 +146,7 @@ function SquirrelService(world, player, container) {
       // TODO this is all one big hack!
       for (var i = 0; i < squirrels.length; i++) {
         var squirrel = squirrels[i];
-        var movement = squirrel.getMovementHandler();
-        var checkInterval;
-
-        function nextMove() {
-
-          var pos = squirrel.getPosition();
-          var playerPos = player.getPosition();
-          var path = world.findPath(pos.x, pos.y, playerPos.x, playerPos.y);
-
-          if (path.length > 1) {
-            clearInterval(checkInterval);
-            checkInterval = false;
-
-            var dx = path[1][0] - pos.x;
-            var dy = path[1][1] - pos.y;
-
-            // TODO need to figure out how to integrate this cleanly with MovementHandler
-            if (dy == -1) {
-              movement.start(squirrel.walkUp);
-            } else if (dy == 1) {
-              movement.start(squirrel.walkDown);
-            } else if (dx == -1) {
-              movement.start(squirrel.walkLeft);
-            } else if (dx == 1) {
-              movement.start(squirrel.walkRight);
-            }
-
-          } else {
-              movement.stopAll();
-
-              if (!checkInterval) {
-                checkInterval = setInterval(nextMove, 500);
-              }
-          }
-        }
-        nextMove();
-
-        squirrel.walkUp.onEnd = nextMove;
-        squirrel.walkDown.onEnd = nextMove;
-        squirrel.walkLeft.onEnd = nextMove;
-        squirrel.walkRight.onEnd = nextMove;
+        Pathfinder(squirrel);
       }
     },
   };

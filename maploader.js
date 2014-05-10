@@ -50,7 +50,7 @@ function parseObjectLayer(layer, map, worldScale) {
   for (var i = 0; i < layer.objects.length; i++) {
       var obj = layer.objects[i];
 
-
+      // TODO catch bad coordinates
       var pos = {
         // TODO inconsistent with background tiles
         x: obj.x / worldScale,
@@ -100,6 +100,8 @@ function parseMap(map, worldScale) {
   var data = {
     tilelayers: [],
     objectlayers: [],
+    // TODO cleaner
+    mapData: map,
   };
 
   for (var layer_i = 0; layer_i < map.layers.length; layer_i++) {

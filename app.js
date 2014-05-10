@@ -77,7 +77,7 @@ function startBiscuits(container) {
   var sceneManager = SceneManager();
 
   var worldFiles = [
-    'maps/foo8.json',
+    'maps/foo9.json',
     //'maps/other1.json',
     //'maps/bar2.json',
   ];
