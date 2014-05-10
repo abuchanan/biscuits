@@ -1,40 +1,33 @@
 function CoinsService(player, world, container) {
 
-  // Coin handling
-  world.contactListener(player, function(fixture) {
-    if (fixture.objectData.coin) {
-        fixture.objectData.use();
-        world.remove(fixture);
-    }
-  });
-
   return {
     create: function(x, y, w, h) {
+      // TODO configurable value
       var value = 1;
 
       var g = new PIXI.Graphics();
       g.beginFill(0xF0F074);
-      g.drawRect(0, 0, w, h);
+      g.drawRect(x, y, w, h);
       g.endFill();
-
-      // TODO this doesn't have anchor. :( this is getting confusing
-      g.position.x = x - (w / 2);
-      g.position.y = y - (h / 2);
+      container.addChild(g);
 
       var coin = {
         coin: true,
-        use: function() {
-          container.removeChild(g);
-          player.coins += value;
-        },
       };
 
-      world.addBox(x, y, w, h, coin, {
-        type: 'static',
-        collisionCategories: ['playerItem'],
-        sensor: true,
-      });
-      container.addChild(g);
+      var worldObj = world.add(x, y, w, h);
+      worldObj.data = coin;
+
+      worldObj.onCollision = function(obj) {
+        if (obj.data === player) {
+          worldObj.remove();
+          player.coins += value;
+          container.removeChild(g);
+        }
+      };
+
+      // TODO even need to return coin?
+      return coin;
     }
   }
 }

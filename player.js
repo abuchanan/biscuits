@@ -107,6 +107,7 @@ function Player(world, keybindings, w, h) {
         return world.query(x1, y1, w1, h1);
       },
     };
+    body.data = player;
 
     var movement = MovementHandler(player);
 

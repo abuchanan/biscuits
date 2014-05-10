@@ -74,7 +74,7 @@ function loadWorld(mapfile, sceneManager, container) {
     //var Portals = PortalService(player, world, sceneManager, objectLayer);
     var Chests = ChestService(player, world, objectLayer);
     //var Squirrels = SquirrelService(world, objectLayer);
-    //var Coins = CoinsService(player, world, objectLayer);
+    var Coins = CoinsService(player, world, objectLayer);
 
     // TODO need dynamic view size
     // TODO I think I want to ditch the whole shifting view thing
@@ -147,11 +147,11 @@ function loadWorld(mapfile, sceneManager, container) {
         else if (obj.type == 'squirrel') {
           Squirrels.create(obj.x, obj.y, obj.w, obj.h);
         }
+        */
 
         else if (obj.type == 'coin') {
           Coins.create(obj.x, obj.y, obj.w, obj.h);
         }
-        */
 
         else if (obj.type == 'chest') {
           Chests.create(obj.x, obj.y, obj.w, obj.h);

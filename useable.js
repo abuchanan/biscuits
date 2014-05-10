@@ -8,8 +8,8 @@ function Useable(player, world) {
         // TODO this could affect multiple objects. only want to affect one.
         for (var i = 0; i < res.length; i++) {
           var obj = res[i];
-          if (obj.useable) {
-            obj.use();
+          if (obj.data && obj.data.useable) {
+            obj.data.use();
           }
         }
       }

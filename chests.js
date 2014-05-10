@@ -1,15 +1,13 @@
 function ChestService(player, world, container) {
+  // TODO separate chest renderable from chest service?
   return {
     create: function(x, y, w, h) {
 
       var g = new PIXI.Graphics();
       g.beginFill(0x00FFFF);
-      g.drawRect(0, 0, w, h);
+      g.drawRect(x, y, w, h);
       g.endFill();
-
-      // TODO this doesn't have anchor. :( 
-      g.position.x = x - (w / 2);
-      g.position.y = y - (h / 2);
+      container.addChild(g);
 
       var isOpen = false;
 
@@ -22,7 +20,7 @@ function ChestService(player, world, container) {
 
             g.clear();
             g.beginFill(0x0000FF);
-            g.drawRect(0, 0, w, h);
+            g.drawRect(x, y, w, h);
             g.endFill();
 
             player.coins += 5;
@@ -30,9 +28,10 @@ function ChestService(player, world, container) {
         },
       };
 
-      world.addBox(x, y, w, h, chest, {type: 'static'});
-      container.addChild(g);
-
+      // TODO need better way to add data to a world object?
+      var worldObj = world.add(x, y, w, h);
+      worldObj.isBlock = true;
+      worldObj.data = chest;
       return chest;
     }
   }
