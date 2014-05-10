@@ -31,6 +31,9 @@ function Player(world, keybindings, w, h) {
 
     var body = world.add(0, 0, w, h);
 
+    // TODO
+    var Actions = ActionsService();
+
     var direction = 'down';
 
     var player = {
@@ -115,12 +118,12 @@ function Player(world, keybindings, w, h) {
     };
     body.data = player;
 
-    var movement = MovementHandler(player);
+    var walkUp = Actions.makeMovement(player, 'up', 0, -1);
+    var walkDown = Actions.makeMovement(player, 'down', 0, 1);
+    var walkLeft = Actions.makeMovement(player, 'left', -1, 0);
+    var walkRight = Actions.makeMovement(player, 'right', 1, 0);
 
-    var walkUp = movement.makeMovement('up', 0, -1);
-    var walkDown = movement.makeMovement('down', 0, 1);
-    var walkLeft = movement.makeMovement('left', -1, 0);
-    var walkRight = movement.makeMovement('right', 1, 0);
+    var movement = Actions.makeStateHandler();
 
     var keymap = {};
 
@@ -151,29 +154,38 @@ function Player(world, keybindings, w, h) {
 
 function PlayerRenderer(player, container) {
   var textures = loadPlayerTextures();
-  var layer = container.newLayer();
 
   var clip = new PIXI.MovieClip(textures['down']);
   // TODO scale player sprite images in actual image file
   clip.width = player.w;
   clip.height = player.h;
   clip.animationSpeed = 0.1;
+  container.addChild(clip);
 
-  layer.addChild(clip);
-
-  layer.addFrameListener(function() {
+  container.addFrameListener(function() {
     var state = player.getMovementState();
-    var percentComplete = state.getPercentComplete();
-    var pos = state.getPositionAt(percentComplete);
-    this.position.x = pos.x;
-    this.position.y = pos.y;
 
-    // TODO s/direction/name/
-    var textureName = state.direction || player.getDirection();
-    clip.textures = textures[textureName];
+    if (state) {
+      // TODO s/direction/name/
+      var percentComplete = state.getPercentComplete();
+      var pos = state.moveDef.getPositionAt(percentComplete);
+      clip.position.x = pos.x;
+      clip.position.y = pos.y;
 
-    // TODO
-    var i = Math.floor(percentComplete * clip.textures.length);
-    clip.gotoAndStop(i);
+      var textureName = state.moveDef.direction;
+      clip.textures = textures[textureName];
+
+      var i = Math.floor(percentComplete * clip.textures.length);
+      clip.gotoAndStop(i);
+
+    } else {
+      var pos = player.getPosition();
+      clip.position.x = pos.x;
+      clip.position.y = pos.y;
+
+      var textureName = player.getDirection();
+      clip.textures = textures[textureName];
+      clip.gotoAndStop(0);
+    }
   });
 }

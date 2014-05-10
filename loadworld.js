@@ -56,8 +56,10 @@ function loadWorld(mapfile, sceneManager, container) {
     //      at least 32 should no be hard-coded
     var player = Player(world, keybindings, 32 / scale, 32 / scale);
 
+    // TODO player should probably manage its own renderer
     PlayerRenderer(player, playerLayer);
 
+    // TODO this is a status layer service, not just a renderer.
     StatusLayerRenderer(player, container);
 
     var useable = Useable(player, world);
@@ -66,8 +68,12 @@ function loadWorld(mapfile, sceneManager, container) {
 
     container.addFrameListener(function() {
       var state = player.getMovementState();
-      var percentComplete = state.getPercentComplete();
-      var pos = state.getPositionAt(percentComplete);
+      if (state) {
+        var percentComplete = state.getPercentComplete();
+        var pos = state.moveDef.getPositionAt(percentComplete);
+      } else {
+        var pos = player.getPosition();
+      }
 
       // TODO hardcoded dimensions
       worldViewLayer.x = 320 - Math.floor(pos.x * scale);
@@ -95,6 +101,7 @@ function loadWorld(mapfile, sceneManager, container) {
 
             // TODO load order is tricky. if this is called before the player
             //      position is set, then everything is broken
+            // TODO lots of other services need start/stop. combat, etc
             Squirrels.start();
 
             // return unload function

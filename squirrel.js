@@ -16,6 +16,10 @@ function SquirrelService(world, player, container) {
 
   var textures = loadSquirrelTextures();
 
+  // TODO
+  var Actions = ActionsService();
+
+
   function Renderer(squirrel) {
     var clip = new PIXI.MovieClip(textures);
     clip.width = squirrel.w;
@@ -27,8 +31,13 @@ function SquirrelService(world, player, container) {
     // TODO need deregistration function
     container.addFrameListener(function() {
       var state = squirrel.getMovementState();
-      var percentComplete = state.getPercentComplete();
-      var pos = state.getPositionAt(percentComplete);
+      if (state) {
+        var percentComplete = state.getPercentComplete();
+        var pos = state.moveDef.getPositionAt(percentComplete);
+      } else {
+        var pos = squirrel.getPosition();
+      }
+
       clip.position.x = pos.x;
       clip.position.y = pos.y;
     });
@@ -77,10 +86,11 @@ function SquirrelService(world, player, container) {
         }
       }
 
-      squirrel.walkUp.onEnd = nextMove;
-      squirrel.walkDown.onEnd = nextMove;
-      squirrel.walkLeft.onEnd = nextMove;
-      squirrel.walkRight.onEnd = nextMove;
+      // TODO
+      squirrel.walkUp.endCallback = nextMove;
+      squirrel.walkDown.endCallback = nextMove;
+      squirrel.walkLeft.endCallback = nextMove;
+      squirrel.walkRight.endCallback = nextMove;
 
       return {
         start: function() {
@@ -157,13 +167,13 @@ function SquirrelService(world, player, container) {
       var body = world.add(x, y, w, h);
       body.data = squirrel;
 
+      // TODO these shouldn't be instance specific?
+      squirrel.walkUp = Actions.makeMovement(squirrel, 'up', 0, -1, 250);
+      squirrel.walkDown = Actions.makeMovement(squirrel, 'down', 0, 1, 250);
+      squirrel.walkLeft = Actions.makeMovement(squirrel, 'left', -1, 0, 250);
+      squirrel.walkRight = Actions.makeMovement(squirrel, 'right', 1, 0, 250);
 
-      var movement = MovementHandler(squirrel);
-      // TODO these shouldn't be instance specific
-      squirrel.walkUp = movement.makeMovement('up', 0, -1, 250);
-      squirrel.walkDown = movement.makeMovement('down', 0, 1, 250);
-      squirrel.walkLeft = movement.makeMovement('left', -1, 0, 250);
-      squirrel.walkRight = movement.makeMovement('right', 1, 0, 250);
+      var movement = Actions.makeStateHandler();
 
       var pathfinder = Pathfinder(squirrel);
 
