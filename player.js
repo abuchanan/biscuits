@@ -142,13 +142,9 @@ function Player(world, keybindings, w, h) {
 }
 
 
-function PlayerRenderable(player) {
-  var textures = this.textures = loadPlayerTextures();
-
-  PIXI.DisplayObjectContainer.call(this);
-
-  // TODO needed?
-  this.renderable = true;
+function PlayerRenderer(player, container) {
+  var textures = loadPlayerTextures();
+  var layer = container.newLayer();
 
   var clip = new PIXI.MovieClip(textures['down']);
   // TODO scale player sprite images in actual image file
@@ -156,46 +152,21 @@ function PlayerRenderable(player) {
   clip.height = player.h;
   clip.animationSpeed = 0.1;
 
-  this.addChild(clip);
+  layer.addChild(clip);
 
-  this.clip = clip;
-  this.player = player;
-}
-// TODO a downside of subclassing the PIXI code is that it's easy
-//      to accidentally clobber one of the PIXI attributes in a subclass,
-//      leading to a very mysterious bug. is there a better way?
-PlayerRenderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-PlayerRenderable.prototype.constructor = PlayerRenderable;
-PlayerRenderable.prototype.walk = function() {
-  this.clip.play();
-};
-PlayerRenderable.prototype.stop = function() {
-  this.clip.gotoAndStop(0);
-};
-PlayerRenderable.prototype.updatePosition = function() {
-    var state = this.player.getMovementState();
+  layer.addFrameListener(function() {
+    var state = player.getMovementState();
     var percentComplete = state.getPercentComplete();
     var pos = state.getPositionAt(percentComplete);
     this.position.x = pos.x;
     this.position.y = pos.y;
 
     // TODO s/direction/name/
-    var textureName = state.direction || this.player.getDirection();
-    this.clip.textures = this.textures[textureName];
+    var textureName = state.direction || player.getDirection();
+    clip.textures = textures[textureName];
 
     // TODO
-    var i = Math.floor(percentComplete * this.clip.textures.length);
-    this.clip.gotoAndStop(i);
+    var i = Math.floor(percentComplete * clip.textures.length);
+    clip.gotoAndStop(i);
+  });
 }
-PlayerRenderable.prototype._renderCanvas = function(renderer) {
-  this.updatePosition();
-  PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
-};
-PlayerRenderable.prototype._initWebGL = function(renderer) {
-  this.updatePosition();
-  PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
-};
-PlayerRenderable.prototype._renderWebGL = function(renderer) {
-  this.updatePosition();
-  PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
-};

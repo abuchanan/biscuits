@@ -14,42 +14,27 @@ function loadSquirrelTextures() {
 
 function SquirrelService(world, player, container) {
 
-  function Renderable(squirrel) {
-    PIXI.DisplayObjectContainer.call(this);
-    this.renderable = true;
-    this.textures = loadSquirrelTextures();
+  function Renderer(squirrel) {
+    var textures = loadSquirrelTextures();
+    var layer = container.newLayer();
 
-    var clip = new PIXI.MovieClip(this.textures);
+    var clip = new PIXI.MovieClip(textures);
     clip.width = squirrel.w;
     clip.height = squirrel.h;
     clip.animationSpeed = 0.07;
     clip.gotoAndPlay(0);
     clip.play();
+    layer.addChild(clip);
 
-    this.addChild(clip);
-    this.squirrel = squirrel;
-  }
-  Renderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-  Renderable.prototype.constructor = Renderable;
-  Renderable.prototype.updatePosition = function() {
-      var state = this.squirrel.getMovementState();
+    layer.addFrameListener(function() {
+      var state = squirrel.getMovementState();
       var percentComplete = state.getPercentComplete();
       var pos = state.getPositionAt(percentComplete);
       this.position.x = pos.x;
       this.position.y = pos.y;
+    });
   }
-  Renderable.prototype._renderCanvas = function(renderer) {
-    this.updatePosition();
-    PIXI.DisplayObjectContainer.prototype._renderCanvas.call(this, renderer);
-  };
-  Renderable.prototype._initWebGL = function(renderer) {
-    this.updatePosition();
-    PIXI.DisplayObjectContainer.prototype._initWebGL.call(this, renderer);
-  };
-  Renderable.prototype._renderWebGL = function(renderer) {
-    this.updatePosition();
-    PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
-  };
+
 
   var squirrels = [];
 
@@ -97,6 +82,7 @@ function SquirrelService(world, player, container) {
           return movement;
         },
       };
+      Renderer(squirrel);
 
       var body = world.add(x, y, w, h);
       body.data = squirrel;
@@ -107,10 +93,6 @@ function SquirrelService(world, player, container) {
       squirrel.walkDown = movement.makeMovement('down', 0, 1, 250);
       squirrel.walkLeft = movement.makeMovement('left', -1, 0, 250);
       squirrel.walkRight = movement.makeMovement('right', 1, 0, 250);
-
-
-      var renderable = new Renderable(squirrel);
-      container.addChild(renderable);
 
       squirrels.push(squirrel);
     },

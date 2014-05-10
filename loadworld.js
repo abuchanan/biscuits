@@ -55,15 +55,23 @@ function loadWorld(mapfile, sceneManager, container) {
     //      at least 32 should no be hard-coded
     var player = Player(world, keybindings, 32 / scale, 32 / scale);
 
-    var playerRenderable = new PlayerRenderable(player);
-    playerLayer.addChild(playerRenderable);
+    PlayerRenderer(player, playerLayer);
 
-    var statusRenderable = new StatusLayerRenderable(player);
-    statusLayer.addChild(statusRenderable);
+    StatusLayerRenderer(player, container);
 
     var useable = Useable(player, world);
     // TODO we pass keybindings to player but bind externally here
     keybindings.listen(useable);
+
+    container.addFrameListener(function() {
+      var state = player.getMovementState();
+      var percentComplete = state.getPercentComplete();
+      var pos = state.getPositionAt(percentComplete);
+
+      // TODO hardcoded dimensions
+      container.x = 320 - Math.floor(pos.x * scale);
+      container.y = 320 - Math.floor(pos.y * scale);
+    });
 
     var combat = Combat(player, world);
     keybindings.listen(combat);
@@ -76,20 +84,10 @@ function loadWorld(mapfile, sceneManager, container) {
     var Squirrels = SquirrelService(world, player, objectLayer);
     var Coins = CoinsService(player, world, objectLayer);
 
-    // TODO need dynamic view size
-    // TODO I think I want to ditch the whole shifting view thing
-    //      just keep the player centered instead
-    var viewW = 640;
-    var viewH = 640;
-    //WorldView(world, container, player, viewW, viewH, scale);
-
     function makeScene(playerX, playerY, playerDirection, viewX, viewY) {
         return function() {
             container.visible = true;
             keybindings.enable();
-
-            container.x = viewX;
-            container.y = viewY;
 
             player.setDirection(playerDirection);
             player.setPosition(playerX, playerY);

@@ -6,8 +6,6 @@ function SceneManager() {
   var scenes = {};
 
   return {
-    // no-op
-    onFrame: function() {},
     addScene: function(name, sceneFunction) {
       scenes[name] = sceneFunction;
     },
@@ -23,6 +21,7 @@ function SceneManager() {
 
 function Layers() {
   PIXI.DisplayObjectContainer.call(this);
+  this._frameListeners = [];
 }
 Layers.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 Layers.prototype.constructor = Layers;
@@ -30,6 +29,23 @@ Layers.prototype.newLayer = function() {
   var layer = new Layers();
   this.addChild(layer);
   return layer;
+};
+Layers.prototype.invokeFrameListeners = function() {
+  var listeners = this._frameListeners;
+  for (var i = 0, ii = listeners.length; i < ii; i++) {
+    listeners[i].call(this);
+  }
+
+  var children = this.children;
+  for (var i = 0, ii = children.length; i < ii; i++) {
+    var child = children[i];
+    if (child.invokeFrameListeners) {
+      child.invokeFrameListeners();
+    }
+  }
+};
+Layers.prototype.addFrameListener = function(callback) {
+  this._frameListeners.push(callback);
 };
 
 
@@ -42,7 +58,7 @@ function startBiscuits(container) {
   var width = 640;
   var height = 640;
 	var renderer = new PIXI.WebGLRenderer(width, height);
-  //autoDetectRenderer(400, 300);
+  // TODO autoDetectRenderer(400, 300);
 
 	// add the renderer view element to the DOM
 	container.appendChild(renderer.view);
@@ -54,7 +70,7 @@ function startBiscuits(container) {
 
 	function animate() {
 	    requestAnimFrame( animate );
-      sceneManager.onFrame();
+      masterLayer.invokeFrameListeners();
 	    renderer.render(stage);
 	}
 
