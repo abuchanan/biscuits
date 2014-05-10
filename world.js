@@ -35,6 +35,35 @@ function World(gridWidth, gridHeight) {
   return {
     query: query,
 
+    queryMany: function(rects) {
+      var hits = {};
+
+      for (var ri = 0; ri < rects.length; ri++) {
+        var rect = rects[ri];
+        var x = rect[0];
+        var y = rect[1];
+        var w = rect[2];
+        var h = rect[3];
+
+        for (var ix = x; ix < x + w; ix++) {
+          for (var iy = y; iy < y + h; iy++) {
+            var cell = grid[ix][iy];
+            for (var i = 0; i < cell.length; i++) {
+              var o = cell[i];
+              hits[o.getID()] = o;
+            }
+          }
+        }
+      }
+
+      var objects = [];
+      for (var k in hits) {
+        objects.push(hits[k]);
+      }
+
+      return objects;
+    },
+
     findPath: function(x1, y1, x2, y2) {
       // TODO this is obviously grossly inefficient and should be optimized
       var pfGrid = new PF.Grid(gridWidth, gridHeight);

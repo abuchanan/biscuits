@@ -34,6 +34,7 @@ function Player(world, keybindings, w, h) {
     var direction = 'down';
 
     var player = {
+      // TODO getters
       w: w,
       h: h,
 
@@ -70,7 +71,13 @@ function Player(world, keybindings, w, h) {
         return movement.getState();
       },
 
-      queryImmediateFront: function(distance) {
+      getRect: function() {
+        var pos = body.getPosition();
+        return [pos.x, pos.y, w, h];
+      },
+
+      // TODO extract from player. this is useful for anything
+      immediateFrontRect: function(distance) {
         distance = distance || 1;
         var pos = body.getPosition();
 
@@ -103,7 +110,7 @@ function Player(world, keybindings, w, h) {
             var h1 = h;
             break;
         }
-        return world.query(x1, y1, w1, h1);
+        return [x1, y1, w1, h1];
       },
     };
     body.data = player;
