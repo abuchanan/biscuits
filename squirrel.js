@@ -69,8 +69,8 @@ function SquirrelService(world, container) {
           console.log('hit', damage, life);
 
           if (life == 0) {
-            // TODO world.remove(fixture);
-            //      container.removeChild(renderable);
+            body.remove();
+            container.removeChild(renderable);
           }
         },
         getDirection: function() {

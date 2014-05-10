@@ -65,8 +65,8 @@ function loadWorld(mapfile, sceneManager, container) {
     // TODO we pass keybindings to player but bind externally here
     keybindings.listen(useable);
 
-    //var combat = Combat(player, world);
-    //keybindings.listen(combat);
+    var combat = Combat(player, world);
+    keybindings.listen(combat);
 
     // TODO I kind of want to ditch portals as much as possible,
     //      give everything a very fluid feeling. when are they absolutely
