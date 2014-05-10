@@ -1,0 +1,114 @@
+grid: W x H
+
+needs:
+- query all items in sub-grid rectangle
+  grid.query(x, y, w, h)
+
+- grid query can ignore certain layers or categories?
+-- collision handler is separate from grid query
+
+- add object to grid. object occupies a rectangle
+  gridobj = grid.add(x, y, w, h)
+  gridobj.customData = 'foo'
+
+- grid objects can move
+  gridobj.setPosition(x, y)
+
+- grid has layers?
+
+- grid objects can change size?
+
+
+objects needed in grid:
+- walls
+- player
+- NPCs
+- portals
+- items (coins, weapons, etc)
+
+
+behaviors related to grid:
+- player hits portal
+- player swings sword
+- player casts long-range spell
+- player moves
+- player opens chest
+- NPC moves
+- invisible wall activated/deactivated
+- item picked up by player (removed from grid/world)
+- grid view rendering
+- NPC plans path for patrol
+- NPC plans path towards player
+
+- two objects on same tile. which is rendered first? layers?
+-- objects are not ordered. ordering must be imposed outside grid?
+
+
+background tiles are not stored in the world grid.
+
+query must be fast. changing position is hopefully fast too.
+an object takes up multiple positions. quadtree/rtree/etc?
+
+regular grid:
+- at 20px width/height, this is a manageable number of cells for the
+  active part of the world grid
+- what happens when a body moves?
+-- if a moving body takes up many grid cells, you have to loop through
+   all those and remove, then loop through again to add
+
+- A* needs a grid?
+-- no, A* can operate on a quadtree at least. don't think rtree is possible
+-- Need to learn A* and how to implement on a quadtree?
+-- A* on quadtree doesn't match game movement: no diagonals.
+
+- how to store rectangles in quadtree?
+-- store in every overlapped node
+
+- navmesh might allow better control over NPC movement?
+  e.g. don't bother walking in path of moving wall, just walk around edge
+
+
+rtree to store entire world, so it's fast to know what objects are on screen
+then a regular grid or quadtree to manage on screen objects?
+
+
+spatial data structures, pathfinding, and other resources
+==========================================
+http://www.gamedev.net/page/resources/_/technical/artificial-intelligence/generating-2d-navmeshes-r3393
+
+http://blog.notdot.net/2009/11/Damn-Cool-Algorithms-Spatial-indexing-with-Quadtrees-and-Hilbert-Curves
+
+
+http://theory.stanford.edu/~amitp/GameProgramming/
+
+http://www.raywenderlich.com/4946/introduction-to-a-pathfinding
+
+http://www.policyalmanac.org/games/aStarTutorial.htm
+
+
+
+
+key down
+reset movement loop, start
+- start time
+- duration
+- getPositionAt(time) returns position at time along curve
+  renderer uses this to get position
+- how does movement loop relate to grid position?
+- does player occupy both the cell they're coming from and the cell they're going to
+  during movement?
+
+function Interpolated(duration) {
+  return {
+    loop: false,
+    start: function() {},
+    reset: function() {},
+    setValue: function(value) {},
+    getValueAt: function(time) {
+    },
+  }
+}
+
+key up
+-- if current loop is active, set that it should stop at the end
+   basically, movement.loop = false

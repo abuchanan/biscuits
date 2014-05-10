@@ -6,6 +6,7 @@ function WorldView(world, container, player, viewW, viewH, scale) {
   // TODO still not sure if I want the player to stay centered in the view or not
   //      Zelda used a combination of both. 
 
+  /*
   // TODO use chain? that way I can move the whole chain
   var edges = [];
 
@@ -60,4 +61,5 @@ function WorldView(world, container, player, viewW, viewH, scale) {
       });
     }
   });
+  */
 }

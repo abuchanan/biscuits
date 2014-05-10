@@ -10,27 +10,19 @@ seems like it has a lot of potential to produce overly complex, unwanted results
   and resolution. possibly in the future it would be better to drop box2d, but for
   now it's ok.
 
-should a player collide with a squirrel? should a player be able to accelerate
-a squirrel? should i fix this within a physics world, or is the physics world the
-root of the problem?
-
-if they are going to collide, the dynamics of the collision need to be defined.
-i suspect this will be a burden, and probably the dynamics i would imagine
-will not match the laws of physics, so again the physics engine will be getting
-in the way. so, if i really want them to collide, i need to be prepared to 
-put in a lot of work either on a custom collision engine, or tweaking box2d
-physics. so far, physics from box2d have defaulted to providing pretty
-terrible interactions between dynamic bodies.
-
-so, it's probably better if they don't collide dynamically.
-that's a constraint i'm willing to accept in order to allow me to focus on other,
-more interesting goals (story, map, art, etc)
-
-that leaves the question, do they collide at all?
-
+should a player collide with a squirrel?
+- undecided. leaning towards no.
 - it's pretty weird when a player is blocked by a squirrel. plus, it could lead
   to issues with map movement where the player can't get somewhere because a
   squirrel blocks the path.
+
+should a player be able to accelerate a squirrel?
+- no.
+
+- should an NPC collide with other NPCs?
+
+- should an NPC collide with a moving part of the map, say a moving boulder,
+  or a moving wall?
 
 
 within physics options:
@@ -46,8 +38,6 @@ within physics options:
 -- but if kinematic, can i still query for combat hit? how will i know when the
    player bumped into a monster (triggering health loss)? looks like kinematic
    bodies should still collide with dynamic bodies?
-
-- what about NPCs colliding with moveable parts of the map?
 
 
 - collision filtering

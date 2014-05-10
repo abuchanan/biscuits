@@ -1,3 +1,5 @@
+// TODO this code is pretty ugly. 'twas written without care.
+//      be a good lad and clean this shit up!
 function MovementHandler(player, options) {
 
   // TODO configureable speed
@@ -68,7 +70,11 @@ function MovementHandler(player, options) {
     }
 
     function callback() {
-      var oldstate = state;
+      if (state !== nextState) {
+        if (state.onEnd) {
+          state.onEnd();
+        }
+      }
       state = nextState;
       move();
     }

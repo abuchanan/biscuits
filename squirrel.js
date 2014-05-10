@@ -152,7 +152,7 @@ function SquirrelService(world, player, container) {
 
           }
         }
-        setInterval(nextMove, 500);
+        setInterval(nextMove, 350);
       }
     },
   };

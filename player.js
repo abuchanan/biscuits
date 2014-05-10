@@ -1,6 +1,3 @@
-// TODO should be a singleton
-// TODO this is a mess. position is a hodgepodge between the world and
-//      the clip renderable, not to mention PlayerRenderable
 function loadPlayerTextures() {
     // create a texture from an image path
     var texture = PIXI.Texture.fromImage("media/playerSprites.png");
@@ -29,6 +26,7 @@ function loadPlayerTextures() {
     return textures;
 }
 
+// TODO should be a singleton?
 function Player(world, keybindings, w, h) {
 
     var body = world.add(0, 0, w, h);
@@ -178,8 +176,8 @@ PlayerRenderable.prototype.updatePosition = function() {
     var state = this.player.getMovementState();
     var percentComplete = state.getPercentComplete();
     var pos = state.getPositionAt(percentComplete);
-    this.clip.position.x = pos.x;
-    this.clip.position.y = pos.y;
+    this.position.x = pos.x;
+    this.position.y = pos.y;
 
     // TODO s/direction/name/
     var textureName = state.direction || this.player.getDirection();
