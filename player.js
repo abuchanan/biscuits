@@ -71,6 +71,41 @@ function Player(world, keybindings, w, h) {
       getMovementState: function() {
         return movement.getState();
       },
+
+      queryImmediateFront: function() {
+        var pos = body.getPosition();
+
+        switch (direction) {
+          case 'up':
+            var x1 = pos.x;
+            var y1 = pos.y - 1;
+            var w1 = w;
+            var h1 = 1;
+            break;
+
+          case 'down':
+            var x1 = pos.x;
+            var y1 = pos.y + h;
+            var w1 = w;
+            var h1 = 1;
+            break;
+
+          case 'left':
+            var x1 = pos.x - 1;
+            var y1 = pos.y;
+            var w1 = 1;
+            var h1 = h;
+            break;
+
+          case 'right':
+            var x1 = pos.x + w;
+            var y1 = pos.y;
+            var w1 = 1;
+            var h1 = h;
+            break;
+        }
+        return world.query(x1, y1, w1, h1);
+      },
     };
 
     var movement = MovementHandler(player);

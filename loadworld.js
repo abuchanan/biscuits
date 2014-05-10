@@ -61,9 +61,9 @@ function loadWorld(mapfile, sceneManager, container) {
     var statusRenderable = new StatusLayerRenderable(player);
     statusLayer.addChild(statusRenderable);
 
-    //var useable = Useable(player, world);
+    var useable = Useable(player, world);
     // TODO we pass keybindings to player but bind externally here
-    //keybindings.listen(useable);
+    keybindings.listen(useable);
 
     //var combat = Combat(player, world);
     //keybindings.listen(combat);
@@ -72,7 +72,7 @@ function loadWorld(mapfile, sceneManager, container) {
     //      give everything a very fluid feeling. when are they absolutely
     //      necessary?
     //var Portals = PortalService(player, world, sceneManager, objectLayer);
-    //var Chests = ChestService(player, world, objectLayer);
+    var Chests = ChestService(player, world, objectLayer);
     //var Squirrels = SquirrelService(world, objectLayer);
     //var Coins = CoinsService(player, world, objectLayer);
 
@@ -151,11 +151,11 @@ function loadWorld(mapfile, sceneManager, container) {
         else if (obj.type == 'coin') {
           Coins.create(obj.x, obj.y, obj.w, obj.h);
         }
+        */
 
         else if (obj.type == 'chest') {
           Chests.create(obj.x, obj.y, obj.w, obj.h);
         }
-        */
       }
     }
   });
