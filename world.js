@@ -11,30 +11,70 @@ function World(gridWidth, gridHeight) {
     }
   }
 
+  function query(x, y, w, h) {
+    var hits = {};
+
+    for (var ix = x; ix < x + w; ix++) {
+      for (var iy = y; iy < y + h; iy++) {
+        var cell = grid[ix][iy];
+        for (var i = 0; i < cell.length; i++) {
+          var o = cell[i];
+          hits[o.getID()] = o;
+        }
+      }
+    }
+
+    var objects = [];
+    for (var k in hits) {
+      objects.push(hits[k]);
+    }
+
+    return objects;
+  }
+
   return {
+    query: query,
+
     add: function(x, y, w, h) {
 
-      currentX = x;
-      currentY = y;
-
+      var currentX, currentY;
       var ID = currentObjectID++;
-      var currentCells = [];
 
-      function setCells(x, y, w, h) {
-        if (currentCells.length > 0) {
-          for (var i = 0; i < currentCells.length; i++) {
-            var cell = currentCells[i];
+      function remove() {
+
+        for (var ix = currentX; ix < currentX + w; ix++) {
+          for (var iy = currentY; iy < currentY + h; iy++) {
+            var cell = grid[ix][iy];
             var i = cell.indexOf(obj);
-            cell.splice(i, 1);
+            if (i != -1) {
+              cell.splice(i, 1);
+            }
           }
-
-          currentCells = [];
         }
+      }
+
+      function setCells(x, y) {
+        remove();
 
         for (var ix = x; ix < x + w; ix++) {
           for (var iy = y; iy < y + h; iy++) {
             var cell = grid[ix][iy];
             cell.push(obj);
+          }
+        }
+
+        currentX = x;
+        currentY = y;
+
+        var collisions = query(x, y, w, h);
+
+        for (var i = 0, ii = collisions.length; i < ii; i++) {
+          var collision = collisions[i];
+          if (obj.onCollision && collision !== obj) {
+            obj.onCollision(collision);
+          }
+          else if (collision.onCollision) {
+            collision.onCollision(obj);
           }
         }
       }
@@ -47,37 +87,14 @@ function World(gridWidth, gridHeight) {
           return {x: currentX, y: currentY};
         },
         setPosition: function(x, y) {
-          setCells(x, y, w, h);
-          currentX = x;
-          currentY = y;
+          setCells(x, y);
         },
+        remove: remove,
       };
 
-      setCells(x, y, w, h);
+      setCells(x, y);
 
       return obj;
     },
-
-    query: function(x, y, w, h) {
-      var hits = {};
-
-      for (var ix = x; ix < x + w; ix++) {
-        for (var iy = y; iy < y + h; iy++) {
-          var cell = grid[ix][iy];
-          for (var i = 0; i < cell.length; i++) {
-            var o = cell[i];
-            hits[o.getID()] = o;
-          }
-        }
-      }
-
-      var objects = [];
-      for (var k in hits) {
-        objects.push(hits[k]);
-      }
-
-      return objects;
-    },
-
   };
 }
