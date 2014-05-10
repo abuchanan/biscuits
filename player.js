@@ -1,29 +1,76 @@
-function loadPlayerTextures() {
-    // create a texture from an image path
-    var texture = PIXI.Texture.fromImage("media/playerSprites.png");
+function loadSpriteSheet(imageSrc, jsonSrc) {
+  var deferred = Q.defer();
 
-    var parts = [];
-    var size = 90;
+  // create a texture from an image path
+  var texture = PIXI.Texture.fromImage(imageSrc);
 
-    for (var y = 0; y < 4; y++) {
-      for (var x = 0; x < 5; x++) {
+  var req = new XMLHttpRequest();
+  req.onload = function() {
+    var d = JSON.parse(this.responseText);
+    var data = {};
 
-        var r = new PIXI.Rectangle(x * size, y * size, size, size);
-        var part = new PIXI.Texture(texture, r);
-        parts.push(part);
-      }
+    for (var i = 0; i < d.frames.length; i++) {
+      var frame = d.frames[i];
+      var x = frame.frame.x * -1;
+      var y = frame.frame.y * -1;
+      var w = frame.frame.w;
+      var h = frame.frame.h;
+
+      var r = new PIXI.Rectangle(x, y, w, h);
+      var part = new PIXI.Texture(texture, r);
+      var name = frame.filename.replace('.png', '');
+      data[name] = part;
     }
 
-    // TODO a better way to import all this that isn't hard-coded.
-    //      some sort of asset packing + json definition
-    var textures = {
-      'left': parts.slice(0, 5),
-      'right': parts.slice(5, 10).reverse(),
-      'up': parts.slice(10, 15),
-      'down': parts.slice(15, 20),
-    };
-    
-    return textures;
+    deferred.resolve(data);
+  };
+  // TODO if this request fails, the whole app will hang
+  req.responseType = 'application/json';
+  req.overrideMimeType('application/json');
+  req.open('get', jsonSrc, true);
+  req.send();
+
+  return deferred.promise;
+}
+
+
+function loadPlayerTextures() {
+    var imgSrc = "media/player-sprite-glued/player-sprite-pieces.png";
+    var jsonSrc = "media/player-sprite-glued/player-sprite-pieces.json";
+
+    return loadSpriteSheet(imgSrc, jsonSrc).then(function(parts) {
+
+      return {
+        'up': [
+          parts['up-0'],
+          parts['up-1'],
+          parts['up-2'],
+          parts['up-3'],
+          parts['up-4'],
+        ],
+        'down': [
+          parts['down-0'],
+          parts['down-1'],
+          parts['down-2'],
+          parts['down-3'],
+          parts['down-4'],
+        ],
+        'right': [
+          parts['right-0'],
+          parts['right-1'],
+          parts['right-2'],
+          parts['right-1'],
+          parts['right-3'],
+        ],
+        'left': [
+          parts['left-0'],
+          parts['left-1'],
+          parts['left-2'],
+          parts['left-1'],
+          parts['left-3'],
+        ],
+      };
+    });
 }
 
 // TODO should be a singleton?
@@ -153,39 +200,41 @@ function Player(world, keybindings, w, h) {
 
 
 function PlayerRenderer(player, container) {
-  var textures = loadPlayerTextures();
+  // TODO really need to figure out async usage convention
+  loadPlayerTextures().then(function(textures) {
 
-  var clip = new PIXI.MovieClip(textures['down']);
-  // TODO scale player sprite images in actual image file
-  clip.width = player.w;
-  clip.height = player.h;
-  clip.animationSpeed = 0.1;
-  container.addChild(clip);
+    var clip = new PIXI.MovieClip(textures['down']);
+    // TODO scale player sprite images in actual image file
+    clip.width = player.w;
+    clip.height = player.h;
+    clip.animationSpeed = 0.1;
+    container.addChild(clip);
 
-  container.addFrameListener(function() {
-    var state = player.getMovementState();
+    container.addFrameListener(function() {
+      var state = player.getMovementState();
 
-    if (state) {
-      // TODO s/direction/name/
-      var percentComplete = state.getPercentComplete();
-      var pos = state.moveDef.getPositionAt(percentComplete);
-      clip.position.x = pos.x;
-      clip.position.y = pos.y;
+      if (state) {
+        // TODO s/direction/name/
+        var percentComplete = state.getPercentComplete();
+        var pos = state.moveDef.getPositionAt(percentComplete);
+        clip.position.x = pos.x;
+        clip.position.y = pos.y;
 
-      var textureName = state.moveDef.direction;
-      clip.textures = textures[textureName];
+        var textureName = state.moveDef.direction;
+        clip.textures = textures[textureName];
 
-      var i = Math.floor(percentComplete * clip.textures.length);
-      clip.gotoAndStop(i);
+        var i = Math.floor(percentComplete * clip.textures.length);
+        clip.play();
 
-    } else {
-      var pos = player.getPosition();
-      clip.position.x = pos.x;
-      clip.position.y = pos.y;
+      } else {
+        var pos = player.getPosition();
+        clip.position.x = pos.x;
+        clip.position.y = pos.y;
 
-      var textureName = player.getDirection();
-      clip.textures = textures[textureName];
-      clip.gotoAndStop(0);
-    }
+        var textureName = player.getDirection();
+        clip.textures = textures[textureName];
+        clip.gotoAndStop(0);
+      }
+    });
   });
 }

@@ -1,47 +1,82 @@
 'use strict';
 
 function loadSquirrelTextures() {
-  var texture = PIXI.Texture.fromImage('media/Monster-squirrel.png');
-  var textures = [];
 
-  for (var i = 0; i < 8; i++) {
-    var x = i * 32;
-    var t = new PIXI.Texture(texture, new PIXI.Rectangle(x, 0, 32, 32));
-    textures.push(t);
-  }
-  return textures;
+    var imgSrc = "media/squirrel-glued/squirrel-pieces.png";
+    var jsonSrc = "media/squirrel-glued/squirrel-pieces.json";
+
+    return loadSpriteSheet(imgSrc, jsonSrc).then(function(parts) {
+
+      function getSequence(prefix, length) {
+        var seq = [];
+        for (var i = 0; i < length; i++) {
+          var name = prefix + '-' + i;
+          seq.push(parts[name]);
+        }
+        return seq;
+      }
+
+      return {
+        'idle-up': getSequence('idle-up', 8),
+        'idle-down': getSequence('idle-down', 8),
+        'idle-left': getSequence('idle-left', 8),
+        'idle-right': getSequence('idle-right', 8),
+        'move-up': getSequence('move-up', 3),
+        'move-down': getSequence('move-down', 3),
+        'move-left': getSequence('move-left', 3),
+        'move-right': getSequence('move-right', 3),
+      };
+    });
 }
 
 function SquirrelService(world, player, container) {
 
-  var textures = loadSquirrelTextures();
-
   // TODO
   var Actions = ActionsService();
 
+  // TODO need to figure out async loading in services
+  var texturesLoader = loadSquirrelTextures();
 
   function Renderer(squirrel) {
-    var clip = new PIXI.MovieClip(textures);
-    clip.width = squirrel.w;
-    clip.height = squirrel.h;
-    clip.animationSpeed = 0.07;
-    clip.play();
-    container.addChild(clip);
+    texturesLoader.then(function(textures) {
+        var clip = new PIXI.MovieClip(textures['idle-left']);
+        clip.width = squirrel.w;
+        clip.height = squirrel.h;
+        clip.animationSpeed = 0.07;
+        clip.play();
+        container.addChild(clip);
 
-    // TODO need deregistration function
-    container.addFrameListener(function() {
-      var state = squirrel.getMovementState();
-      if (state) {
-        var percentComplete = state.getPercentComplete();
-        var pos = state.moveDef.getPositionAt(percentComplete);
-      } else {
-        var pos = squirrel.getPosition();
-      }
+        // TODO need deregistration function
+        container.addFrameListener(function() {
+          var state = squirrel.getMovementState();
 
-      clip.position.x = pos.x;
-      clip.position.y = pos.y;
+          if (state) {
+            // TODO s/direction/name/
+            var percentComplete = state.getPercentComplete();
+            var pos = state.moveDef.getPositionAt(percentComplete);
+            clip.position.x = pos.x;
+            clip.position.y = pos.y;
+
+            var textureName = 'move-' + state.moveDef.direction;
+            clip.textures = textures[textureName];
+
+            var i = Math.floor(percentComplete * clip.textures.length);
+            //clip.gotoAndStop(i);
+
+          } else {
+            var pos = squirrel.getPosition();
+            clip.position.x = pos.x;
+            clip.position.y = pos.y;
+
+            var textureName = 'idle-' + squirrel.getDirection();
+            clip.textures = textures[textureName];
+            clip.play();
+          }
+
+        });
     });
 
+    // TODO this doesn't play nice with async
     return function() {
       container.removeChild(clip);
     };
