@@ -36,6 +36,9 @@ function Player(world, keybindings, w, h) {
     var direction = 'down';
 
     var player = {
+      w: w,
+      h: h,
+
       coins: 0,
 
       getDirection: function() {
@@ -80,21 +83,18 @@ function Player(world, keybindings, w, h) {
 }
 
 
-function PlayerRenderable(player, w, h, scale) {
-  var textures = loadPlayerTextures();
-  PIXI.DisplayObjectContainer.call(this);
-  this.renderable = true;
-  this.textures = textures;
+function PlayerRenderable(player) {
+  var textures = this.textures = loadPlayerTextures();
 
-  // TODO fuuuck that was a mysterious bug
-  //this.scale = scale;
-  this.worldFuuuScale = scale;
+  PIXI.DisplayObjectContainer.call(this);
+
+  // TODO needed?
+  this.renderable = true;
 
   var clip = new PIXI.MovieClip(textures['down']);
   // TODO scale player sprite images in actual image file
-  // TODO world vs renderer scaling
-  clip.width = w * scale;
-  clip.height = h * scale;
+  clip.width = player.w;
+  clip.height = player.h;
   clip.animationSpeed = 0.1;
 
   this.addChild(clip);
@@ -102,6 +102,9 @@ function PlayerRenderable(player, w, h, scale) {
   this.clip = clip;
   this.player = player;
 }
+// TODO a downside of subclassing the PIXI code is that it's easy
+//      to accidentally clobber one of the PIXI attributes in a subclass,
+//      leading to a very mysterious bug. is there a better way?
 PlayerRenderable.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 PlayerRenderable.prototype.constructor = PlayerRenderable;
 PlayerRenderable.prototype.walk = function() {
@@ -112,13 +115,8 @@ PlayerRenderable.prototype.stop = function() {
 };
 PlayerRenderable.prototype.updatePosition = function() {
     var pos = this.player.getPosition();
-
-    // TODO
-    var renderX = pos.x * this.worldFuuuScale;
-    var renderY = pos.y * this.worldFuuuScale;
-
-    this.clip.position.x = renderX;
-    this.clip.position.y = renderY;
+    this.clip.position.x = pos.x;
+    this.clip.position.y = pos.y;
 
     this.clip.textures = this.textures[this.player.getDirection()];
 

@@ -22,9 +22,11 @@ function loadStage(sceneManager, container) {
 
 
 function loadWorld(mapfile, sceneManager, container) {
+  // TODO use PIXI SpriteBatch?
+  var scale = 16;
 
   var reqs = [
-    loadMap(mapfile),
+    loadMap(mapfile, scale),
   ];
 
   // TODO need to rethink async resource loading. PIXI changed the game,
@@ -33,52 +35,53 @@ function loadWorld(mapfile, sceneManager, container) {
 
     var keybindings = KeyBindingsService();
 
-    /*
-    The physics world and the renderer use a different scale.
-
-    Box2D (the physics engine) recommends a scale (meters) that doesn't match
-    the renderer's scale (pixels). Because of this, we have to convert between
-    the two scales, which (unfortunately) shows a bit here in this code.
-
-    TODO clean this up and try to completely encapsulate the
-         scale within World.
-    */
-    // TODO better encapsulate player API. Shouldn't expose clip, clip should
-    //      be modified internally through calls like player.walk('left'),
-    //      (or something) and player should be renderable?
-    // TODO 32 is hard-coded
-    var scale = 32;
-    var world = World(scale);
+    // TODO
+    var size = 32 / scale * 20;
+    var world = World(size, size);
 
     var backgroundLayer = container.newLayer();
     // TODO maybe loadpoint from Tiled should determine layer?
     var objectLayer = container.newLayer();
     var playerLayer = container.newLayer();
+
+    objectLayer.scale.x = scale;
+    objectLayer.scale.y = scale;
+    playerLayer.scale.x = scale;
+    playerLayer.scale.y = scale;
+
     var statusLayer = container.newLayer();
 
-    var player = Player(world, playerLayer, keybindings, 32, 32);
+    // TODO should player w/h be dynamic?
+    //      at least 32 should no be hard-coded
+    var player = Player(world, keybindings, 32 / scale, 32 / scale);
+
+    var playerRenderable = new PlayerRenderable(player);
+    playerLayer.addChild(playerRenderable);
 
     var statusRenderable = new StatusLayerRenderable(player);
     statusLayer.addChild(statusRenderable);
 
-    var useable = Useable(player, world);
+    //var useable = Useable(player, world);
     // TODO we pass keybindings to player but bind externally here
-    keybindings.listen(useable);
+    //keybindings.listen(useable);
 
-    var combat = Combat(player, world);
-    keybindings.listen(combat);
+    //var combat = Combat(player, world);
+    //keybindings.listen(combat);
 
-    var Portals = PortalService(player, world, sceneManager, objectLayer);
-    var Chests = ChestService(player, world, objectLayer);
-    var Squirrels = SquirrelService(world, objectLayer);
-    var Coins = CoinsService(player, world, objectLayer);
+    // TODO I kind of want to ditch portals as much as possible,
+    //      give everything a very fluid feeling. when are they absolutely
+    //      necessary?
+    //var Portals = PortalService(player, world, sceneManager, objectLayer);
+    //var Chests = ChestService(player, world, objectLayer);
+    //var Squirrels = SquirrelService(world, objectLayer);
+    //var Coins = CoinsService(player, world, objectLayer);
 
     // TODO need dynamic view size
+    // TODO I think I want to ditch the whole shifting view thing
+    //      just keep the player centered instead
     var viewW = 640;
     var viewH = 640;
-    //var viewW = 320;
-    //var viewH = 320;
-    WorldView(world, container, player, viewW, viewH, scale);
+    //WorldView(world, container, player, viewW, viewH, scale);
 
     function makeScene(playerX, playerY, playerDirection, viewX, viewY) {
         return function() {
@@ -89,22 +92,15 @@ function loadWorld(mapfile, sceneManager, container) {
             container.y = viewY;
 
             player.setDirection(playerDirection);
-
-            // TODO before I had world.start() *before* this line,
-            //      which is the wrong order, and only didn't fail because
-            //      of the 15 ms interval time. Things like this need to happen
-            //      outside of a world step, which is an important reason to 
-            //      build good encapsulation for box2d.
             player.setPosition(playerX, playerY);
-
-            world.start();
-            // TODO container.width = 32 * 8;
 
             // return unload function
             return function() {
               world.stop();
               // TODO sceneManager should handle removing the containers from
               //      the master container?
+              //      But what if the scene doesn't have a PIXI renderer?
+              //      They why pass in container?
               container.visible = false;
               keybindings.disable();
             }
@@ -115,6 +111,7 @@ function loadWorld(mapfile, sceneManager, container) {
     for (var layer_i = 0; layer_i < map.tilelayers.length; layer_i++) {
       for (var obj_i = 0; obj_i < map.tilelayers[layer_i].length; obj_i++) {
         var obj = map.tilelayers[layer_i][obj_i];
+        // TODO need a background manager so we can lazy load things offscreen
         backgroundLayer.addChild(obj);
       }
     }
@@ -124,14 +121,17 @@ function loadWorld(mapfile, sceneManager, container) {
         var obj = map.objectlayers[layer_i][obj_i];
 
         if (obj.isBlock) {
-          world.addBox(obj.x, obj.y, obj.w, obj.h, obj, {type: 'static'});
+          var obj = world.add(obj.x, obj.y, obj.w, obj.h);
+          obj.isBlock = true;
         }
 
+        /*
         // TODO use type
         // TODO but what if multiple types?
         else if (obj.portal) {
           Portals.create(obj.portal, obj.x, obj.y, obj.w, obj.h);
         }
+        */
 
         else if (obj.type == 'loadpoint') {
           // TODO better default than 0, like center player in view
@@ -143,6 +143,7 @@ function loadWorld(mapfile, sceneManager, container) {
           sceneManager.addScene(obj.name, load);
         }
 
+        /*
         else if (obj.type == 'squirrel') {
           Squirrels.create(obj.x, obj.y, obj.w, obj.h);
         }
@@ -154,6 +155,7 @@ function loadWorld(mapfile, sceneManager, container) {
         else if (obj.type == 'chest') {
           Chests.create(obj.x, obj.y, obj.w, obj.h);
         }
+        */
       }
     }
   });

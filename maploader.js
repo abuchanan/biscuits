@@ -44,23 +44,19 @@ function parseTileset(tileset) {
     return slices;
 }
 
-function parseObjectLayer(layer, map) {
+function parseObjectLayer(layer, map, worldScale) {
   var all = [];
 
   for (var i = 0; i < layer.objects.length; i++) {
       var obj = layer.objects[i];
 
-      //var x = obj.x / map.tilewidth;
-      //var y = obj.y / map.tileheight;
-      //var w = obj.width / map.tilewidth;
-      //var h = obj.height / map.tileheight;
 
       var pos = {
         // TODO inconsistent with background tiles
-        x: obj.x,
-        y: obj.y,
-        w: obj.width,
-        h: obj.height,
+        x: obj.x / worldScale,
+        y: obj.y / worldScale,
+        w: obj.width / worldScale,
+        h: obj.height / worldScale,
         type: obj.type,
         name: obj.name,
       };
@@ -97,7 +93,7 @@ function parseTileLayer(map, layer, slices) {
   return tiles;
 }
 
-function parseMap(map) {
+function parseMap(map, worldScale) {
 
   // TODO parse all tilesets
   var tileset = parseTileset(map.tilesets[0]);
@@ -114,7 +110,7 @@ function parseMap(map) {
         data.tilelayers.push(tilelayer);
 
       } else if (layer.type = 'objectgroup') {
-        var objectlayer = parseObjectLayer(layer, map);
+        var objectlayer = parseObjectLayer(layer, map, worldScale);
         data.objectlayers.push(objectlayer);
       }
   }
@@ -122,12 +118,12 @@ function parseMap(map) {
   return data;
 }
 
-function loadMap(src) {
+function loadMap(src, worldScale) {
   var deferred = Q.defer();
   var req = new XMLHttpRequest();
   req.onload = function() {
     var d = JSON.parse(this.responseText);
-    var data = parseMap(d);
+    var data = parseMap(d, worldScale);
     deferred.resolve(data);
   };
   // TODO if this request fails, the whole app will hang
