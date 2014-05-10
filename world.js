@@ -35,6 +35,28 @@ function World(gridWidth, gridHeight) {
   return {
     query: query,
 
+    findPath: function(x1, y1, x2, y2) {
+      // TODO this is obviously grossly inefficient and should be optimized
+      var pfGrid = new PF.Grid(gridWidth, gridHeight);
+
+      for (var x = 0; x < gridWidth; x++) {
+        for (var y = 0; y < gridHeight; y++) {
+          var cell = grid[x][y];
+          var walkable = true;
+          for (var i = 0; i < cell.length; i++) {
+            if (cell[i].isBlock) {
+              walkable = false;
+            }
+          }
+          pfGrid.setWalkableAt(x, y, walkable);
+        }
+      }
+
+      var finder = new PF.AStarFinder();
+      var path = finder.findPath(x1, y1, x2, y2, pfGrid);
+      return path;
+    },
+
     add: function(x, y, w, h) {
 
       var currentX, currentY;

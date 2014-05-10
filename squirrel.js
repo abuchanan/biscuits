@@ -12,7 +12,7 @@ function loadSquirrelTextures() {
   return textures;
 }
 
-function SquirrelService(world, container) {
+function SquirrelService(world, player, container) {
 
   function Renderable(squirrel) {
     PIXI.DisplayObjectContainer.call(this);
@@ -50,6 +50,8 @@ function SquirrelService(world, container) {
     this.updatePosition();
     PIXI.DisplayObjectContainer.prototype._renderWebGL.call(this, renderer);
   };
+
+  var squirrels = [];
 
   // TODO sporadic animation. a squirrel isn't a fluid animation loop.
   return {
@@ -91,33 +93,67 @@ function SquirrelService(world, container) {
         getMovementState: function() {
           return movement.getState();
         },
+        getMovementHandler: function() {
+          return movement;
+        },
       };
 
       var body = world.add(x, y, w, h);
       body.data = squirrel;
 
       var movement = MovementHandler(squirrel)
-      var walkUp = movement.makeMovement('up', 0, -1);
-      var walkDown = movement.makeMovement('down', 0, 1);
-      var walkLeft = movement.makeMovement('left', -1, 0);
-      var walkRight = movement.makeMovement('right', 1, 0);
+      // TODO these shouldn't be instance specific
+      squirrel.walkUp = movement.makeMovement('up', 0, -1);
+      squirrel.walkDown = movement.makeMovement('down', 0, 1);
+      squirrel.walkLeft = movement.makeMovement('left', -1, 0);
+      squirrel.walkRight = movement.makeMovement('right', 1, 0);
 
-      var walkCount = 0;
-      function walkTest() {
-        movement.start(walkRight);
-        walkCount++;
-
-        setTimeout(function() {
-          movement.stop(walkRight);
-          if (walkCount < 5) {
-            setTimeout(walkTest, 700);
-          }
-        }, 300);
-      }
-      setTimeout(walkTest, 700);
 
       var renderable = new Renderable(squirrel);
       container.addChild(renderable);
+
+      squirrels.push(squirrel);
+    },
+
+    start: function() {
+      // TODO this is all one big hack!
+      for (var i = 0; i < squirrels.length; i++) {
+        var squirrel = squirrels[i];
+        var movement = squirrel.getMovementHandler();
+
+        function nextMove() {
+
+          var pos = squirrel.getPosition();
+          var playerPos = player.getPosition();
+          var path = world.findPath(pos.x, pos.y, playerPos.x, playerPos.y);
+
+          if (path.length > 1) {
+
+            var dx = path[1][0] - pos.x;
+            var dy = path[1][1] - pos.y;
+
+            // TODO need to figure out how to integrate this cleanly with MovementHandler
+            if (dy == -1) {
+              // TODO but really, I don't want to call stop(), I want
+              //      to know when the current movement ends
+              movement.start(squirrel.walkUp);
+              // TODO maybe better to pass onEnd callback to stop?
+              movement.stop(squirrel.walkUp);
+            } else if (dy == 1) {
+              movement.start(squirrel.walkDown);
+              movement.stop(squirrel.walkDown);
+            } else if (dx == -1) {
+              movement.start(squirrel.walkLeft);
+              movement.stop(squirrel.walkLeft);
+            } else if (dx == 1) {
+              movement.start(squirrel.walkRight);
+              movement.stop(squirrel.walkRight);
+            }
+
+          }
+        }
+        setInterval(nextMove, 500);
+      }
     },
   };
 }

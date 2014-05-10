@@ -73,7 +73,7 @@ function loadWorld(mapfile, sceneManager, container) {
     //      necessary?
     //var Portals = PortalService(player, world, sceneManager, objectLayer);
     var Chests = ChestService(player, world, objectLayer);
-    var Squirrels = SquirrelService(world, objectLayer);
+    var Squirrels = SquirrelService(world, player, objectLayer);
     var Coins = CoinsService(player, world, objectLayer);
 
     // TODO need dynamic view size
@@ -93,6 +93,10 @@ function loadWorld(mapfile, sceneManager, container) {
 
             player.setDirection(playerDirection);
             player.setPosition(playerX, playerY);
+
+            // TODO load order is tricky. if this is called before the player
+            //      position is set, then everything is broken
+            Squirrels.start();
 
             // return unload function
             return function() {
