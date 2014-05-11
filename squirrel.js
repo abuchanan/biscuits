@@ -38,8 +38,10 @@ function SquirrelService(world, player, container) {
   var texturesLoader = loadSquirrelTextures();
 
   function Renderer(squirrel) {
+    var clip;
+
     texturesLoader.then(function(textures) {
-        var clip = new PIXI.MovieClip(textures['idle-left']);
+        clip = new PIXI.MovieClip(textures['idle-left']);
         clip.width = squirrel.w;
         clip.height = squirrel.h;
         clip.animationSpeed = 0.07;
@@ -60,9 +62,6 @@ function SquirrelService(world, player, container) {
             var textureName = 'move-' + state.moveDef.direction;
             clip.textures = textures[textureName];
 
-            var i = Math.floor(percentComplete * clip.textures.length);
-            //clip.gotoAndStop(i);
-
           } else {
             var pos = squirrel.getPosition();
             clip.position.x = pos.x;
@@ -70,15 +69,15 @@ function SquirrelService(world, player, container) {
 
             var textureName = 'idle-' + squirrel.getDirection();
             clip.textures = textures[textureName];
-            clip.play();
           }
 
         });
     });
 
-    // TODO this doesn't play nice with async
     return function() {
-      container.removeChild(clip);
+      if (clip) {
+        container.removeChild(clip);
+      }
     };
   }
 
