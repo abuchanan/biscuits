@@ -12,33 +12,37 @@ Tile.prototype = {
 }
 
 
-function parseTileset(tileset) {
-
-    // TODO figure out how global vs local tile IDs works
-    var tileID = tileset.firstgid;
-    var tileX = tileset.margin;
-    var tileY = tileset.margin;
-
-    var texture = PIXI.Texture.fromImage(tileset.image);
-
+function parseTileset(tilesets) {
     var slices = {};
-    var maxX = tileset.imagewidth - tileset.margin - tileset.tilewidth;
 
-    while (tileY < tileset.imageheight) {
+    for (var i = 0; i < tilesets.length; i++) {
+      var tileset = tilesets[i];
+      console.log(tileset.name);
+      // TODO figure out how global vs local tile IDs works
+      var tileID = tileset.firstgid;
+      var tileX = tileset.margin;
+      var tileY = tileset.margin;
 
-        var r = new PIXI.Rectangle(tileX, tileY, tileset.tilewidth, tileset.tileheight);
-        var slice = new PIXI.Texture(texture, r);
+      var texture = PIXI.Texture.fromImage(tileset.image);
 
-        slices[tileID] = slice;
+      var maxX = tileset.imagewidth - tileset.margin - tileset.tilewidth;
 
-        if (tileX == maxX) {
-          tileX = tileset.margin;
-          tileY += tileset.tileheight + tileset.spacing;
-        } else {
-          tileX += tileset.tilewidth + tileset.spacing;
-        }
+      while (tileY < tileset.imageheight) {
 
-        tileID += 1;
+          var r = new PIXI.Rectangle(tileX, tileY, tileset.tilewidth, tileset.tileheight);
+          var slice = new PIXI.Texture(texture, r);
+
+          slices[tileID] = slice;
+
+          if (tileX == maxX) {
+            tileX = tileset.margin;
+            tileY += tileset.tileheight + tileset.spacing;
+          } else {
+            tileX += tileset.tilewidth + tileset.spacing;
+          }
+
+          tileID += 1;
+      }
     }
 
     return slices;
@@ -96,7 +100,7 @@ function parseTileLayer(map, layer, slices) {
 function parseMap(map, worldScale) {
 
   // TODO parse all tilesets
-  var tileset = parseTileset(map.tilesets[0]);
+  var tileset = parseTileset(map.tilesets);
   var data = {
     tilelayers: [],
     objectlayers: [],
