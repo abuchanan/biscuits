@@ -1,11 +1,8 @@
 
-function Combat(player, world) {
+function SwordCombat(player, world, damage) {
+  damage = damage || 1;
 
-  // TODO configurable damage
-  var damage = 1;
-
-  return function(eventname) {
-    if (eventname == 'Sword keydown') {
+  return function() {
         // TODO swinging a sword or any other action needs to be spaced out
         //      just like walking
 
@@ -24,6 +21,5 @@ function Combat(player, world) {
             obj.data.hit(damage);
           }
         }
-    }
   }
 }

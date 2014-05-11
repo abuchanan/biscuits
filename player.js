@@ -170,6 +170,10 @@ function Player(world, keybindings, w, h) {
     var walkLeft = Actions.makeMovement(player, 'left', -1, 0);
     var walkRight = Actions.makeMovement(player, 'right', 1, 0);
 
+    // TODO holding down button should swing sword repeatedly?
+    var swordCombat = SwordCombat(player, world);
+    var swingSword = Actions.makeAction(350, swordCombat);
+
     var movement = Actions.makeStateHandler();
 
     var keymap = {};
@@ -187,6 +191,7 @@ function Player(world, keybindings, w, h) {
     bindMove('Down', walkDown);
     bindMove('Left', walkLeft);
     bindMove('Right', walkRight);
+    bindMove('Sword', swingSword);
 
     keybindings.listen(function(eventname) {
       var handler = keymap[eventname];
@@ -216,15 +221,17 @@ function PlayerRenderer(player, container) {
       if (state) {
         // TODO s/direction/name/
         var percentComplete = state.getPercentComplete();
-        var pos = state.moveDef.getPositionAt(percentComplete);
-        clip.position.x = pos.x;
-        clip.position.y = pos.y;
 
-        var textureName = state.moveDef.direction;
-        clip.textures = textures[textureName];
+        if (state.moveDef.isMoving) {
+          var pos = state.moveDef.getPositionAt(percentComplete);
+          clip.position.x = pos.x;
+          clip.position.y = pos.y;
 
-        var i = Math.floor(percentComplete * clip.textures.length);
-        clip.play();
+          var textureName = state.moveDef.direction;
+          clip.textures = textures[textureName];
+
+          clip.play();
+        }
 
       } else {
         var pos = player.getPosition();

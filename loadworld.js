@@ -68,7 +68,7 @@ function loadWorld(mapfile, sceneManager, container) {
 
     container.addFrameListener(function() {
       var state = player.getMovementState();
-      if (state) {
+      if (state && state.moveDef.isMoving) {
         var percentComplete = state.getPercentComplete();
         var pos = state.moveDef.getPositionAt(percentComplete);
       } else {
@@ -79,9 +79,6 @@ function loadWorld(mapfile, sceneManager, container) {
       worldViewLayer.x = 320 - Math.floor(pos.x * scale);
       worldViewLayer.y = 320 - Math.floor(pos.y * scale);
     });
-
-    var combat = Combat(player, world);
-    keybindings.listen(combat);
 
     // TODO I kind of want to ditch portals as much as possible,
     //      give everything a very fluid feeling. when are they absolutely

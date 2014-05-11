@@ -19,6 +19,7 @@ function ActionsService() {
 
     var action = makeAction(duration, doMove);
     return _.extend(action, {
+      isMoving: true,
       // TODO getter
       direction: direction,
       deltaX: deltaX,
