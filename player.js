@@ -35,8 +35,8 @@ function loadSpriteSheet(imageSrc, jsonSrc) {
 
 
 function loadPlayerTextures() {
-    var imgSrc = "media/player-sprite-glued/player-sprite-pieces.png";
-    var jsonSrc = "media/player-sprite-glued/player-sprite-pieces.json";
+    var imgSrc = "media/player-glued/player-pieces.png";
+    var jsonSrc = "media/player-glued/player-pieces.json";
 
     return loadSpriteSheet(imgSrc, jsonSrc).then(function(parts) {
 
@@ -68,6 +68,18 @@ function loadPlayerTextures() {
           parts['left-2'],
           parts['left-1'],
           parts['left-3'],
+        ],
+        'sword-up': [
+          parts['sword-up-0'],
+        ],
+        'sword-down': [
+          parts['sword-down-0'],
+        ],
+        'sword-left': [
+          parts['sword-left-0'],
+        ],
+        'sword-right': [
+          parts['sword-right-0'],
         ],
       };
     });
@@ -165,14 +177,14 @@ function Player(world, keybindings, w, h) {
     };
     body.data = player;
 
-    var walkUp = Actions.makeMovement(player, 'up', 0, -1);
-    var walkDown = Actions.makeMovement(player, 'down', 0, 1);
-    var walkLeft = Actions.makeMovement(player, 'left', -1, 0);
-    var walkRight = Actions.makeMovement(player, 'right', 1, 0);
+    var walkUp = Actions.makeMovement(player, 'walk', 'up', 0, -1);
+    var walkDown = Actions.makeMovement(player, 'walk', 'down', 0, 1);
+    var walkLeft = Actions.makeMovement(player, 'walk', 'left', -1, 0);
+    var walkRight = Actions.makeMovement(player, 'walk', 'right', 1, 0);
 
     // TODO holding down button should swing sword repeatedly?
     var swordCombat = SwordCombat(player, world);
-    var swingSword = Actions.makeAction(350, swordCombat);
+    var swingSword = Actions.makeAction('sword', 350, swordCombat);
 
     var movement = Actions.makeStateHandler();
 
@@ -229,7 +241,11 @@ function PlayerRenderer(player, container) {
 
           var textureName = state.moveDef.direction;
           clip.textures = textures[textureName];
+          clip.play();
 
+        } else {
+          var textureName = state.moveDef.name + '-' + player.getDirection();
+          clip.textures = textures[textureName];
           clip.play();
         }
 

@@ -102,13 +102,13 @@ function SquirrelService(world, player, container) {
 
           // TODO need to figure out how to integrate this cleanly with MovementHandler
           if (dy == -1) {
-            movement.start(squirrel.walkUp);
+            movement.start(squirrel.moveUp);
           } else if (dy == 1) {
-            movement.start(squirrel.walkDown);
+            movement.start(squirrel.moveDown);
           } else if (dx == -1) {
-            movement.start(squirrel.walkLeft);
+            movement.start(squirrel.moveLeft);
           } else if (dx == 1) {
-            movement.start(squirrel.walkRight);
+            movement.start(squirrel.moveRight);
           }
 
         } else {
@@ -121,10 +121,10 @@ function SquirrelService(world, player, container) {
       }
 
       // TODO
-      squirrel.walkUp.endCallback = nextMove;
-      squirrel.walkDown.endCallback = nextMove;
-      squirrel.walkLeft.endCallback = nextMove;
-      squirrel.walkRight.endCallback = nextMove;
+      squirrel.moveUp.endCallback = nextMove;
+      squirrel.moveDown.endCallback = nextMove;
+      squirrel.moveLeft.endCallback = nextMove;
+      squirrel.moveRight.endCallback = nextMove;
 
       return {
         start: function() {
@@ -202,10 +202,10 @@ function SquirrelService(world, player, container) {
       body.data = squirrel;
 
       // TODO these shouldn't be instance specific?
-      squirrel.walkUp = Actions.makeMovement(squirrel, 'up', 0, -1, 250);
-      squirrel.walkDown = Actions.makeMovement(squirrel, 'down', 0, 1, 250);
-      squirrel.walkLeft = Actions.makeMovement(squirrel, 'left', -1, 0, 250);
-      squirrel.walkRight = Actions.makeMovement(squirrel, 'right', 1, 0, 250);
+      squirrel.moveUp = Actions.makeMovement(squirrel, 'move', 'up', 0, -1, 250);
+      squirrel.moveDown = Actions.makeMovement(squirrel, 'move', 'down', 0, 1, 250);
+      squirrel.moveLeft = Actions.makeMovement(squirrel, 'move', 'left', -1, 0, 250);
+      squirrel.moveRight = Actions.makeMovement(squirrel, 'move', 'right', 1, 0, 250);
 
       var movement = Actions.makeStateHandler();
 

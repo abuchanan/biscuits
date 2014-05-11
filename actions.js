@@ -4,7 +4,7 @@ function ActionsService() {
 
   var defaultDuration = 150;
 
-  function makeMovement(body, direction, deltaX, deltaY, duration) {
+  function makeMovement(body, name, direction, deltaX, deltaY, duration) {
     duration = duration || defaultDuration;
 
     var oldPos, newPos;
@@ -17,7 +17,8 @@ function ActionsService() {
         newPos = body.getPosition();
     }
 
-    var action = makeAction(duration, doMove);
+    var actionName = name + '-' + direction;
+    var action = makeAction(actionName, duration, doMove);
     return _.extend(action, {
       isMoving: true,
       // TODO getter
@@ -33,8 +34,9 @@ function ActionsService() {
     });
   }
 
-  function makeAction(duration, startCallback, endCallback) {
+  function makeAction(name, duration, startCallback, endCallback) {
     return {
+      name: name,
       duration: duration,
       startCallback: startCallback,
       endCallback: endCallback,
@@ -45,7 +47,7 @@ function ActionsService() {
   function StateHandler() {
 
     var intervalId;
-    var stop = makeAction(0);
+    var stop = makeAction('stop', 0);
 
     var state = stop;
     var nextState = stop;
