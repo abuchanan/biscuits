@@ -1,38 +1,7 @@
-function loadSpriteSheet(imageSrc, jsonSrc) {
-  var deferred = Q.defer();
+'use strict';
 
-  // create a texture from an image path
-  var texture = PIXI.Texture.fromImage(imageSrc);
-
-  var req = new XMLHttpRequest();
-  req.onload = function() {
-    var d = JSON.parse(this.responseText);
-    var data = {};
-
-    for (var i = 0; i < d.frames.length; i++) {
-      var frame = d.frames[i];
-      var x = frame.frame.x * -1;
-      var y = frame.frame.y * -1;
-      var w = frame.frame.w;
-      var h = frame.frame.h;
-
-      var r = new PIXI.Rectangle(x, y, w, h);
-      var part = new PIXI.Texture(texture, r);
-      var name = frame.filename.replace('.png', '');
-      data[name] = part;
-    }
-
-    deferred.resolve(data);
-  };
-  // TODO if this request fails, the whole app will hang
-  req.responseType = 'application/json';
-  req.overrideMimeType('application/json');
-  req.open('get', jsonSrc, true);
-  req.send();
-
-  return deferred.promise;
-}
-
+define(function(Keybindings) {
+});
 
 function loadPlayerTextures() {
     var imgSrc = "media/player-glued/player-pieces.png";
@@ -86,12 +55,16 @@ function loadPlayerTextures() {
 }
 
 // TODO should be a singleton?
-function Player(world, keybindings, w, h) {
+function Player(world, w, h, container) {
+
+    // TODO 
+    PlayerRenderer(player, playerLayer);
 
     var body = world.add(0, 0, w, h);
 
     // TODO
     var Actions = ActionsService();
+    var events = EventManager();
 
     var direction = 'down';
 
@@ -102,6 +75,8 @@ function Player(world, keybindings, w, h) {
 
       coins: 0,
 
+      addListener: events.addListener,
+
       getDirection: function() {
         return direction;
       },
@@ -110,12 +85,24 @@ function Player(world, keybindings, w, h) {
         direction = value;
       },
 
-      getPosition: function() {
+      getContinuousPosition: function() {
+        var state = movement.getState();
+        if (state && state.moveDef.isMoving) {
+          var percentComplete = state.getPercentComplete();
+          return state.moveDef.getPositionAt(percentComplete);
+        } else {
+          return this.getDiscretePosition();
+        }
+      },
+
+      getDiscretePosition: function() {
         return body.getPosition();
       },
 
       setPosition: function(x, y) {
         var objs = world.query(x, y, w, h);
+
+        // Check if the next tile is blocked.
         var blocked = false;
         for (var i = 0; i < objs.length; i++) {
           if (objs[i] !== body && objs[i].isBlock) {
@@ -126,7 +113,11 @@ function Player(world, keybindings, w, h) {
 
         if (!blocked) {
           body.setPosition(x, y);
+          // TODO include position in event data
+          events.fire('position changed');
         }
+
+        // TODO implement player collision event
       },
 
       getMovementState: function() {
@@ -176,6 +167,11 @@ function Player(world, keybindings, w, h) {
       },
     };
     body.data = player;
+
+
+    // TODO for firing "position change" event
+    /*
+    */
 
     var walkUp = Actions.makeMovement(player, 'walk', 'up', 0, -1);
     var walkDown = Actions.makeMovement(player, 'walk', 'down', 0, 1);

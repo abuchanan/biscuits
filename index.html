@@ -3,36 +3,15 @@
   <head>
     <meta charset='utf-8'>
     <title>Biscuits</title>
-    <script src='bower_components/underscore/underscore.js'></script>
-    <script src='bower_components/q/q.js'></script>
-    <script src='bower_components/pixi/bin/pixi.dev.js'></script>
-    <script src='bower_components/fpsmeter/dist/fpsmeter.js'></script>
-    <script src='pathfinding-browser.js'></script>
-
-    <script src='maploader.js'></script>
-
-    <script src='coins.js'></script>
-    <script src='chests.js'></script>
-    <script src='useable.js'></script>
-    <script src='swordcombat.js'></script>
-    <script src='portals.js'></script>
-    <script src='statuslayer.js'></script>
-
-
-    <script src='position.js'></script>
-    <script src='keybindings.js'></script>
-    <script src='actions.js'></script>
-    <script src='world.js'></script>
-    <script src='player.js'></script>
-    <script src='squirrel.js'></script>
-    <script src='loadworld.js'></script>
-    <script src='app.js'></script>
+    <script src='src/all.js'></script>
   </head>
   <body>
     <div id="biscuits-container"></div>
     <script>
       var container = document.getElementById("biscuits-container");
-      startBiscuits(container);
+      var biscuits = Biscuits(container);
+      biscuits.loadWorld('maps/foo9.json');
+      biscuits.start('main');
     </script>
   </body>
 </html>

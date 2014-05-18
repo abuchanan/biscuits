@@ -170,8 +170,6 @@ special rendering, like a flashlight in the dark
 throwing jars, e.g. zelda
 
 
-circular player physics body
-
 Load on demand:
 - worlds on demand
 -- load Tiled json, get load points, but don't bother with sprite slicing
@@ -179,17 +177,12 @@ Load on demand:
 - chunks of large worlds on demand?
 
 
-animate view shift?
-
 animation when switching world (e.g. go in door, current scene fades out)
 
 
 status layer
 
 walk through long grass, player sprite changes to match
-
-sprites that cover multiple tiles
-- should work, just need proof 
 
 planes, trains, automobiles, submarines, etc
 
@@ -223,11 +216,34 @@ things to define in Tiled and other ideas for objects:
 - locked doors
 
 
+emit/listen events for world objects + events like 'hit', 'use', etc?
+- better than just expecting a method of a certain name?
+- saves the calling code having to loop over objects and check for function
+
+
+workflow to edit large tile maps. need to be split into smaller chunks?
+then, the data for those chunks needs to represent their world offset.
+can tiled do this? 
+
+
 map load validation
 
 http://opengameart.org/content/tiled-terrains
 http://opengameart.org/content/oga-16x16-jrpg-sprites-tiles
 http://shaneriley.com/demos/canvas/tiled_renderer/images/mountain_landscape_23.png
+
+http://opengameart.org/content/orthographic-outdoor-tiles
+http://opengameart.org/content/dungeon-crawl-32x32-tiles
+http://opengameart.org/content/the-revolution-items
+http://opengameart.org/content/castle-tiles-for-rpgs
+http://opengameart.org/content/lpc-tile-atlas
+
+https://glue.readthedocs.org/en/latest/quickstart.html
+http://www.bensnider.com/imagemagick-split-and-join-a-sprite-sheet.html
+
+https://doc.93i.de/gamlib-ai/files/gamlib-base-js.html
+
+http://opengameart.org/content/terrain-textures-pack-from-stunt-rally-23
 
 https://www.zotero.org/c.a.s.t._library/items/itemKey/SZCJ6RAH
 

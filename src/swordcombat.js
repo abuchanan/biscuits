@@ -12,14 +12,18 @@ function SwordCombat(player, world, damage) {
         var frontRect = player.immediateFrontRect();
         var playerAreaRect = player.getRect();
 
-        var res = world.queryMany([frontRect, playerAreaRect]);
+        var areas = [frontRect, playerAreaRect];
+
+        world.broadcast('hit', areas);
 
         // TODO manage whether multiple objects can be hit
+        /*
         for (var i = 0; i < res.length; i++) {
           var obj = res[i];
           if (obj.data && obj.data.hittable) {
             obj.data.hit(damage);
           }
         }
+        */
   }
 }

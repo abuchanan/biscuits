@@ -1,23 +1,8 @@
-function Tile(x, y, w, h, sprite) {
-  this.x = x;
-  this.y = y;
-  this.w = w;
-  this.h = h;
-  this.sprite = sprite;
-}
-Tile.prototype = {
-  render: function() {
-    this.sprite.render.apply(this.sprite, arguments);
-  }
-}
-
-
 function parseTileset(tilesets) {
     var slices = {};
 
     for (var i = 0; i < tilesets.length; i++) {
       var tileset = tilesets[i];
-      console.log(tileset.name);
       // TODO figure out how global vs local tile IDs works
       var tileID = tileset.firstgid;
       var tileX = tileset.margin;
@@ -97,6 +82,10 @@ function parseTileLayer(map, layer, slices) {
   return tiles;
 }
 
+function parseImageLayer(layer) {
+  return PIXI.Sprite.fromImage(layer.image);
+}
+
 function parseMap(map, worldScale) {
 
   // TODO parse all tilesets
@@ -104,8 +93,18 @@ function parseMap(map, worldScale) {
   var data = {
     tilelayers: [],
     objectlayers: [],
+    imageLayers: [],
     // TODO cleaner
     mapData: map,
+
+    forEachObject: function(callback) {
+      for (var layer_i = 0; layer_i < data.objectlayers.length; layer_i++) {
+        for (var obj_i = 0; obj_i < data.objectlayers[layer_i].length; obj_i++) {
+          var obj = data.objectlayers[layer_i][obj_i];
+          callback(obj, layer_i);
+        }
+      }
+    }
   };
 
   for (var layer_i = 0; layer_i < map.layers.length; layer_i++) {
@@ -115,9 +114,13 @@ function parseMap(map, worldScale) {
         var tilelayer = parseTileLayer(map, layer, tileset);
         data.tilelayers.push(tilelayer);
 
-      } else if (layer.type = 'objectgroup') {
+      } else if (layer.type == 'objectgroup') {
         var objectlayer = parseObjectLayer(layer, map, worldScale);
         data.objectlayers.push(objectlayer);
+
+      } else if (layer.type == 'imagelayer') {
+        var imagelayer = parseImageLayer(layer);
+        data.imageLayers.push(imagelayer);
       }
   }
 
