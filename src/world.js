@@ -1,14 +1,14 @@
-    // TODO need something to broadcast activate/deactivate (or start/stop)
-    //      events to world objects. happens during scene load/unload,
-    //      and also if partially loading a large world
-    //      Could be implemented inside the World code, and triggered here
-    //      with world.start()/world.stop()
+// TODO need something to broadcast activate/deactivate (or start/stop)
+//      events to world objects. happens during scene load/unload,
+//      and also if partially loading a large world
+//      Could be implemented inside the World code, and triggered here
+//      with world.start()/world.stop()
 // TODO tile loader resource needs to be injectable for tests
-// TODO quadtree should be injectable too?
 // TODO are grid bounds even really necessary? should the world just
 //      expand to fit whatever object is added? probably.
-function World(gridX, gridY, gridWidth, gridHeight) {
+define(['QuadTree', 'EventEmitter'], function(QuadTree, EventEmitter) {
 
+return function World(gridX, gridY, gridWidth, gridHeight) {
   //function loadTile(x, y) {
   //}
 
@@ -18,7 +18,6 @@ function World(gridX, gridY, gridWidth, gridHeight) {
 
   var currentObjectID = 0;
   var worldObjects = {};
-
 
   /*
     Internal helper for turning a list of IDs
@@ -54,7 +53,6 @@ function World(gridX, gridY, gridWidth, gridHeight) {
       var ID = currentObjectID++;
       var currentX = x;
       var currentY = y;
-      var events = EventManager();
 
       // TODO support resize?
       var obj = {
@@ -75,8 +73,7 @@ function World(gridX, gridY, gridWidth, gridHeight) {
         remove: function() {
           tree.remove(ID);
         },
-        addListener: events.addListener,
-        fire: events.fire,
+        events: new EventEmitter(),
       };
 
       worldObjects[ID] = obj;
@@ -90,8 +87,9 @@ function World(gridX, gridY, gridWidth, gridHeight) {
       var IDs = tree.query(x, y, w, h);
       var objs = getObjects(IDs);
       for (var i = 0, ii = objs.length; i < ii; i++) {
-        objs[i].fire(eventname);
+        objs[i].events.trigger(eventname);
       }
     },
   };
 }
+});

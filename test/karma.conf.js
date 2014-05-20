@@ -5,10 +5,10 @@ module.exports = function(config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude
-    basePath: '',
+    basePath: '../',
 
     // frameworks to use
-    frameworks: ['mocha', 'chai', 'sinon'],
+    frameworks: ['mocha', 'requirejs', 'chai', 'sinon'],
 
     client: {
       mocha: {
@@ -18,12 +18,27 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      '../bower_components/underscore/underscore.js',
-      '../bower_components/q/q.js',
-      '../bower_components/pixi/bin/pixi.dev.js',
-      '../src/*',
+      'bower_components/requirejs/require.js',
+      {pattern: 'bower_components/eventEmitter/EventEmitter.js', included: false},
+      //'../bower_components/underscore/underscore.js',
+      //'../bower_components/q/q.js',
+      //'../bower_components/pixi/bin/pixi.dev.js',
 
-      'suites/*.js',
+      //'../src/*',
+
+      // This format, with "included: false", is important because
+      // we need to let Requirejs do the loading. Without this,
+      // Karma loads the scripts outside of Requirejs and causes errors,
+      // like http://requirejs.org/docs/errors.html#mismatch
+      {pattern: 'src/QuadTree.js', included: false},
+      {pattern: 'src/World.js', included: false},
+
+      {pattern: 'src/ImageGrid.js', included: false},
+      {pattern: 'src/ActiveBackgroundRegion.js', included: false},
+
+      {pattern: 'test/suites/*.js', included: false},
+
+      'test/init-require.js',
     ],
 
     // list of files to exclude

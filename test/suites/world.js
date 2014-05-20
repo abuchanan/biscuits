@@ -1,124 +1,128 @@
-suite('World', function() {
+define(['World'], function(World) {
 
-/*
-  Testing that World exists and can be called without error.
-*/
-test('basic create', function() {
-  World(0, 0, 10, 10);
-});
+  suite('World', function() {
 
-/*
-  A World object manages objects in a 2D grid.
-  World.add() is used to add objects to this grid, and
-  World.query() is used to find objects in the grid.
+  /*
+    Testing that World exists and can be called without error.
+  */
+  test('basic create', function() {
+    World(0, 0, 10, 10);
+  });
 
-  This is testing the most basic use of those methods.
-*/
-test('basic add and query', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 1, 1);
+  /*
+    A World object manages objects in a 2D grid.
+    World.add() is used to add objects to this grid, and
+    World.query() is used to find objects in the grid.
 
-  var res = world.query(0, 0, 10, 10);
-  assert.deepEqual(res, [objA]);
+    This is testing the most basic use of those methods.
+  */
+  test('basic add and query', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 1, 1);
 
-  var res = world.query(2, 2, 1, 1);
-  assert.deepEqual(res, [objA]);
-});
+    var res = world.query(0, 0, 10, 10);
+    assert.deepEqual(res, [objA]);
 
-/*
-  Sometimes it's handy to query multiple rectangles at once,
-  resulting in a unique list of objects in all those rectangles.
+    var res = world.query(2, 2, 1, 1);
+    assert.deepEqual(res, [objA]);
+  });
 
-  That's what world.queryMany(rects) is for.
-*/
-test('queryMany', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 2, 2);
-  var objB = world.add(6, 6, 2, 2);
+  /*
+    Sometimes it's handy to query multiple rectangles at once,
+    resulting in a unique list of objects in all those rectangles.
 
-  var res = world.queryMany([2, 2, 1, 1], [6, 6, 4, 4]);
-  assert.deepEqual(res, [objA, objB]);
-});
+    That's what world.queryMany(rects) is for.
+  */
+  test('queryMany', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 2, 2);
+    var objB = world.add(6, 6, 2, 2);
 
-/*
-  World objects can be removed with obj.remove()
-*/
-test('remove', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 1, 1);
-  objA.remove();
+    var res = world.queryMany([2, 2, 1, 1], [6, 6, 4, 4]);
+    assert.deepEqual(res, [objA, objB]);
+  });
 
-  var res = world.query(0, 0, 10, 10);
-  assert.equal(res.length, 0);
-});
+  /*
+    World objects can be removed with obj.remove()
+  */
+  test('remove', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 1, 1);
+    objA.remove();
 
-/*
-  Get the position of a world object with obj.getPosition()
-*/
-test('getPosition', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 1, 1);
-  var pos = objA.getPosition();
-  assert.deepEqual(pos, {x: 2, y: 2});
-});
+    var res = world.query(0, 0, 10, 10);
+    assert.equal(res.length, 0);
+  });
 
-/*
-  World objects can be moved with obj.setPosition(x, y)
-*/
-test('setPosition', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 1, 1);
-  objA.setPosition(3, 3);
+  /*
+    Get the position of a world object with obj.getPosition()
+  */
+  test('getPosition', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 1, 1);
+    var pos = objA.getPosition();
+    assert.deepEqual(pos, {x: 2, y: 2});
+  });
 
-  var pos = objA.getPosition();
-  assert.deepEqual(pos, {x: 3, y: 3});
+  /*
+    World objects can be moved with obj.setPosition(x, y)
+  */
+  test('setPosition', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 1, 1);
+    objA.setPosition(3, 3);
 
-  var res = world.query(3, 3, 1, 1);
-  assert.deepEqual(res, [objA]);
-});
+    var pos = objA.getPosition();
+    assert.deepEqual(pos, {x: 3, y: 3});
 
-/*
-  World objects come with event managers.
-*/
-test('world object event managers', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 1, 1);
-  var listener = sinon.spy();
-  objA.addListener('some event', listener);
-  assert(listener.notCalled);
-  objA.fire('some event');
-  assert(listener.calledOnce);
-});
+    var res = world.query(3, 3, 1, 1);
+    assert.deepEqual(res, [objA]);
+  });
 
-/*
-  It's very handy to be able to broadcast an event to all the objects
-  in some area of the grid.
+  /*
+    World objects come with event managers.
+  */
+  test('world object event managers', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 1, 1);
+    var listener = sinon.spy();
+    objA.events.on('some event', listener);
+    assert(listener.notCalled);
+    objA.events.trigger('some event');
+    assert(listener.calledOnce);
+  });
 
-  For example, in gameplay you might attack an area of the grid, so
-  you want to broadcast a "hit" event to part of the grid, affecting
-  all objects in that rectangle. You'd use World.broadcast() to do that.
+  /*
+    It's very handy to be able to broadcast an event to all the objects
+    in some area of the grid.
 
-  World objects can register event listeners with obj.addListener().
-*/
-test('broadcast events', function() {
-  var world = World(0, 0, 10, 10);
-  var objA = world.add(2, 2, 1, 1);
-  var objB = world.add(3, 3, 2, 2);
-  var objC = world.add(6, 6, 1, 1);
+    For example, in gameplay you might attack an area of the grid, so
+    you want to broadcast a "hit" event to part of the grid, affecting
+    all objects in that rectangle. You'd use World.broadcast() to do that.
 
-  var listenerA = sinon.spy();
-  var listenerB = sinon.spy();
-  var listenerC = sinon.spy();
+    World objects can register event listeners with obj.events.on().
+  */
+  test('broadcast events', function() {
+    var world = World(0, 0, 10, 10);
+    var objA = world.add(2, 2, 1, 1);
+    var objB = world.add(3, 3, 2, 2);
+    var objC = world.add(6, 6, 1, 1);
 
-  objA.addListener('event foo', listenerA);
-  objB.addListener('event foo', listenerB);
-  objC.addListener('event foo', listenerC);
+    var listenerA = sinon.spy();
+    var listenerB = sinon.spy();
+    var listenerC = sinon.spy();
 
-  world.broadcast('event foo', 2, 2, 4, 4);
+    objA.events.on('event foo', listenerA);
+    objB.events.on('event foo', listenerB);
+    objC.events.on('event foo', listenerC);
 
-  assert(listenerA.calledOnce);
-  assert(listenerB.calledOnce);
-  assert(listenerC.notCalled);
-});
+    world.broadcast('event foo', 2, 2, 4, 4);
+
+    assert(listenerA.calledOnce);
+    assert(listenerB.calledOnce);
+    assert(listenerC.notCalled);
+  });
+
+  });
 
 });
