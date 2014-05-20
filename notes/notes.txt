@@ -264,3 +264,8 @@ zelda
   over a long time
   wizard came to release seal, eliminated king
   vanished seven wise men
+
+
+
+is this an issue here?
+http://thanpol.as/javascript/promises-a-performance-hits-you-should-be-aware-of/

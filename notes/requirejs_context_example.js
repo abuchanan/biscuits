@@ -9,10 +9,7 @@ function createContext(stubs) {
 
   _.each(stubs, function (value, key) {
     var stubname = 'stub_' + key;
-
     map[key] = stubname;
-
-
   });
 
   /**
@@ -34,7 +31,6 @@ function createContext(stubs) {
     define(stubname, function () {
       return value;
     });
-
   });
 
   return context;

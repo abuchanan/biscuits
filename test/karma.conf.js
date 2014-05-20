@@ -19,12 +19,16 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'bower_components/requirejs/require.js',
+
       {pattern: 'bower_components/eventEmitter/EventEmitter.js', included: false},
+      {pattern: 'bower_components/squire/src/Squire.js', included: false},
       //'../bower_components/underscore/underscore.js',
       //'../bower_components/q/q.js',
       //'../bower_components/pixi/bin/pixi.dev.js',
 
       //'../src/*',
+
+      // TODO DRY this up
 
       // This format, with "included: false", is important because
       // we need to let Requirejs do the loading. Without this,
@@ -36,8 +40,12 @@ module.exports = function(config) {
       {pattern: 'src/ImageGrid.js', included: false},
       {pattern: 'src/ActiveBackgroundRegion.js', included: false},
 
-      {pattern: 'test/suites/*.js', included: false},
+      {pattern: 'src/WorldLoader.js', included: false},
+      {pattern: 'src/world/plugins/portal.js', included: false},
 
+      {pattern: 'test/suites/**/*.js', included: false},
+
+      {pattern: 'test/injector.js', included: false},
       'test/init-require.js',
     ],
 
