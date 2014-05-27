@@ -54,7 +54,6 @@ function loadPlayerTextures() {
     });
 }
 
-// TODO should be a singleton?
 function Player(world, w, h, container) {
 
     // TODO 
@@ -87,6 +86,7 @@ function Player(world, w, h, container) {
 
       getContinuousPosition: function() {
         var state = movement.getState();
+        // TODO I don't get the "isMoving" thing
         if (state && state.moveDef.isMoving) {
           var percentComplete = state.getPercentComplete();
           return state.moveDef.getPositionAt(percentComplete);
@@ -114,6 +114,7 @@ function Player(world, w, h, container) {
         if (!blocked) {
           body.setPosition(x, y);
           // TODO include position in event data
+          // TODO extract. make available on all world objects.
           events.fire('position changed');
         }
 
@@ -169,10 +170,6 @@ function Player(world, w, h, container) {
     body.data = player;
 
 
-    // TODO for firing "position change" event
-    /*
-    */
-
     var walkUp = Actions.makeMovement(player, 'walk', 'up', 0, -1);
     var walkDown = Actions.makeMovement(player, 'walk', 'down', 0, 1);
     var walkLeft = Actions.makeMovement(player, 'walk', 'left', -1, 0);
@@ -190,10 +187,6 @@ function Player(world, w, h, container) {
       keymap[keyName + ' keydown'] = movement.start.bind(movement, move);
       keymap[keyName + ' keyup'] = movement.stop.bind(movement, move);
     }
-
-    // TODO when keyup event happens during a different window
-    //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
-    //      window focus/blur events?
 
     bindMove('Up', walkUp);
     bindMove('Down', walkDown);
@@ -230,11 +223,13 @@ function PlayerRenderer(player, container) {
         // TODO s/direction/name/
         var percentComplete = state.getPercentComplete();
 
+        // TODO isMoving sucks
         if (state.moveDef.isMoving) {
           var pos = state.moveDef.getPositionAt(percentComplete);
           clip.position.x = pos.x;
           clip.position.y = pos.y;
 
+          // TODO just get player direction
           var textureName = state.moveDef.direction;
           clip.textures = textures[textureName];
           clip.play();

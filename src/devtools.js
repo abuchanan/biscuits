@@ -9,7 +9,7 @@ require(['biscuits'], function(biscuits) {
     right: '5px',
   });
 
-  biscuits.addListener('renderFrame', function() {
+  biscuits.on('renderFrame', function() {
     meter.tick();
   });
 });

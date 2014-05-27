@@ -1,19 +1,17 @@
 'use strict';
 
-define(['EventManager', 'requestAnimFrame'],
-  function(EventManager, requestAnimFrame) {
+define(['events', 'requestAnimFrame'], function(events, requestAnimFrame) {
 
   var running = false;
-  var events = EventManager();
 
 	function animate() {
     if (running) {
       requestAnimFrame(animate);
-      events.fire('renderFrame');
+      obj.fire('renderFrame');
     }
 	}
 
-  return {
+  var obj = {
     start: function() {
       running = true;
       requestAnimFrame(animate);
@@ -22,7 +20,9 @@ define(['EventManager', 'requestAnimFrame'],
     stop: function() {
       running = false;
     },
-
-    addListener: events.addListener,
   };
+
+  events.addMethods(obj);
+
+  return obj;
 });

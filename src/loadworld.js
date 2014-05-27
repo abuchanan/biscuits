@@ -1,12 +1,5 @@
 'use strict';
 
-// TODO consistent captalization scheme
-define(['renderer', 'scenes', 'MapLoader', 'World',
-        'Background', 'Player', 'HUD', 'Useable', 'Coins', 'Chests',
-        'Squirrels'],
-  function(renderer, scenes, MapLoader, World) {
-
-
 function createLoadpoint(name, x, y, playerDirection) {
   playerDirection = obj.playerDirection || 'down';
 
@@ -31,20 +24,25 @@ function lazy(func) {
   var called = false;
   var value;
 
-  return function() {
+  var func = function() {
     if (!called) {
       value = func.apply({}, arguments);
     }
     return value;
   }
+
+  func.clear = function() {
+    called = false;
+    value = undefined;
+  };
+  return func;
 }
 
 function sceneLoader(mapfile) {
   // TODO
+  // TODO maybe ScaledWorld() would be useful
   var scale = 16;
 
-  // TODO ok, getting better, but how do multiple loadpoints in one map
-  //      share the same world data?
   function initialize(map) {
     var container = renderer.newLayer();
     var worldViewLayer = container.newLayer();
@@ -62,72 +60,71 @@ function sceneLoader(mapfile) {
     // TODO
     var size = 32 / scale * map.mapData.width;
     // TODO should world be a singleton?
-    // TODO create world on every load? or only on the first?
-    // TODO this would reset every NPC's position and state on every load
-    //      e.g. if you went into a house and then out really quick,
-    //      everything would reset
-    //      BUT, on the flipside, when want to destroy some worlds, e.g.
-    //      you go from one map to another in a very linear path, and are
-    //      very unlikely to return to the previous maps. something needs
-    //      to manage destroying those resources.
     var world = World(size, size);
 
     // TODO should player w/h be dynamic?
-    //      at least 32 should no be hard-coded
-    // TODO should be a singleton? but it's specific to the world data structure
-    //      of every world
+    //      at least 32 should not be hard-coded
+    // TODO should be a singleton?
     var player = Player(world, 32 / scale, 32 / scale, container);
 
     // TODO HUD is duplicated for every scene? seems inefficient
-    HUD(player, hudLayer);
-    Useable(player, world);
+    //      good because it allows scene specific hud elements, such as
+    //      world mini map?
+    // TODO these calls probably aren't right
+    var hud = HUD(player, hudLayer);
+    var useable = Useable(player, world);
 
-    var backgroundTilesDef = BackgroundTilesDef('test-scene', 256, 256);
-    var backgroundTiles = BackgroundTiles(backgroundTilesDef);
-    // TODO hardcoded 640
-    var backgroundRegion = BackgroundRegion(640, 640, backgroundTiles);
-    BackgroundRenderer(backgroundRegion, backgroundLayer);
+    // TODO move to map loader
+    //var backgroundTilesDef = BackgroundTilesDef('test-scene', 256, 256);
+    //var backgroundTiles = BackgroundTiles(map.backgroundTiles);
 
-    player.addListener('position change', function() {
-      var pos = player.getDiscretePosition();
-      backgroundRegion.setPosition(Math.floor(pos.x * scale) - 320,
-                                   Math.floor(pos.y * scale) - 320);
+    var background = BackgroundRenderer(map.backgroundTiles, backgroundLayer);
+    background.region.setAnchor(0.5, 0.5);
+
+    // TODO make player pass this data (x, y) with event
+    player.addListener('position change', function(x, y) {
+      // TODO scale is always hindering things
+      background.region.setPosition(pos.x * scale, pos.y * scale);
     });
 
     container.addListener('renderFrame', function() {
       var pos = player.getContinuousPosition();
-      // TODO hardcoded dimensions
+      // TODO hardcoded dimensions. give layers a setAnchor or something
+      // TODO why is it 320 *minus* the position? shouldn't it be the
+      //      position minus 320?
       worldViewLayer.x = 320 - Math.floor(pos.x * scale);
       worldViewLayer.y = 320 - Math.floor(pos.y * scale);
     });
 
+    scene.add(container, hud, player, world);
+
     map.forEachObject(function(object, layerIdx) {
-      // TODO split multiple types on comma
-      var handler = handlers[obj.type];
-      if (handler) {
-        handler(obj, world, objectLayer, player);
-      }
+      // TODO implement forEachType
+      object.forEachType(function(type) {
+        loader.events.trigger('load ' + type, [object, scene]);
+      });
     });
 
-    // TODO possibly i could make this implicit using some tricks with
-    //      the dependency injection system
-    var services = ServiceSet([
-      container,
-      Chests,
-      Coins,
-      Squirrels,
-      HUD,
-    ]);
-
     return {
+      // This is async. Returns a promise
       load: function(loadpoint) {
         return services.start().then(function() {
           player.setDirection(loadpoint.playerDirection);
           player.setPosition(loadpoint.x, loadpoint.y);
         });
       },
+
+      // This is async. Returns a promise
       unload: function() {
         return services.stop();
+      },
+
+      // TODO async?
+      // TODO what manages calling destroy?
+      destroy: function() {
+        return services.stop().then(function() {
+          renderer.removeChild(container);
+        });
       },
     };
   }
@@ -138,6 +135,8 @@ function sceneLoader(mapfile) {
     var serviceSet = map.then(initialize);
     return serviceSet;
   });
+
+  // TODO some sort of scene cache might be more clear
   getScene = lazy(getScene);
 
   return {
@@ -146,34 +145,17 @@ function sceneLoader(mapfile) {
       return scene.load(loadpoint);
     },
     unload: function() {
+      // TODO if load hasn't been called, this will load the scene just to
+      //      unload it
       var scene = getScene();
       return scene.unload();
     },
-  };
-}
-
-function ServiceSet(services) {
-  return {
-    start: function() {
-      var promises = [];
-
-      for (var i = 0; i < services.length; i++) {
-        var started = Q(services[i].start());
-        promises.push(started);
-      }
-      return Q.all(promises);
-    },
-
-    // TODO what if stop is called before start finishes?!
-    //      and vice versa
-    // TODO what if stop is called but start was never called?
-    stop: function() {
-      var promises = [];
-      for (var i = 0; i < services.length; i++) {
-        var stopped = Q(services[i].stop());
-        promises.push(stopped);
-      }
-      return Q.all(promises);
+    destroy: function() {
+      // TODO this is very incomplete
+      //      the renderer container needs to be destroyed
+      //      this.unload() should be called first
+      scene.destroy();
+      getScene.clear();
     },
   };
 }

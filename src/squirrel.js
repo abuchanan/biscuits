@@ -129,12 +129,12 @@ define(function(WorldLoader, SquirrelRenderer) {
     body.data = squirrel;
 
     // TODO inconsistent naming, activate/deactivate, start/stop, etc
-    body.addListener('activate', function() {
+    body.on('activate', function() {
       squirrel.start();
       // TODO renderer, etc
     });
 
-    body.addListener('deactivate', function() {
+    body.on('deactivate', function() {
       squirrel.stop();
       // TODO renderer, etc
     });
