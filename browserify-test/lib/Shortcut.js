@@ -182,7 +182,6 @@ module.exports = function() {
             }
           }
         }
-        console.log('fffffuuu', code, keys, kp, modifiers);
         
         if(kp == keys.length && 
               modifiers.ctrl.pressed == modifiers.ctrl.wanted &&

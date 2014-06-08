@@ -1,21 +1,23 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
+var fs = require('fs'),
+    path = require('path'),
+    browserify = require('browserify'),
+    browserPack = require('browser-pack'),
+    browserResolve = require('browser-resolve'),
+    gulp = require('gulp'),
+    gutil = require('gulp-util'),
+    clean = require('gulp-clean'),
+    watch = require('gulp-watch'),
+    through = require('through'),
+    traceurRuntimePath = require('traceur').RUNTIME_PATH,
+    traceur = require('gulp-traceur'),
+    exorcist = require('exorcist'),
+    mold = require('mold-source-map'),
+    globule = require('globule'),
+    source = require('vinyl-source-stream'),
+    karma = require('karma');
 
-var browserify = require('browserify');
-var browserPack = require('browser-pack');
-var browserResolve = require('browser-resolve');
-
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var watch = require('gulp-watch');
-var through = require('through');
-var exorcist = require('exorcist');
-
-var globule = require('globule');
-var source = require('vinyl-source-stream');
-var karma = require('karma').server;
 
 var karmaConfigPath = path.join(__dirname, 'test/karma.conf.js');
 var preludePath = path.join(__dirname, 'mock_require.js');
@@ -25,7 +27,6 @@ var buildDir = path.join(__dirname, 'build');
 
 var browserPackOpts = {
   "raw": true,
-  "sourceMapPrefix": '//@',
   "prelude": preludeContent,
   "preludePath": preludePath,
 };
@@ -45,16 +46,15 @@ var fooFiles = [
   './test/suites/**/*.js',
   './test/utils/**/*.js',
   './test/mocks/**/*.js',
-  './lib/*.js'
+  //'./lib/*.js'
 ];
 
 var testBundleName = 'test-bundle.js';
 var testBundlePath = path.join(buildDir, testBundleName);
 var sourceMapFile = path.join(buildDir, 'test-bundle.js.map');
 
-// TODO if the browserify build fails on a simple syntax error,
-//      the gulp process dies...lame!
-gulp.task('build-test-bundle', function() {
+
+gulp.task('browserify-test-bundle', function() {
 
   var files = globule.find({
     src: fooFiles,
@@ -65,57 +65,77 @@ gulp.task('build-test-bundle', function() {
     resolve: browserResolveFunction,
   });
 
-  b.add(files)
+  function errorLogger(msg) {
+    gutil.log(gutil.colors.red(msg));
+  }
+
+  return b
+    .add(files)
     .bundle({debug: true})
-    .on('error', function(msg) {
-      gutil.log(gutil.colors.red(msg));
-    })
+    .on('error', errorLogger)
+    .pipe(mold.transformSourcesRelativeTo(__dirname))
     .pipe(exorcist(sourceMapFile))
     .pipe(source(testBundleName))
     .pipe(gulp.dest(buildDir));
 });
 
 
-var karmaStarted = false;
-
-gulp.task('karma', function() {
-  if (karmaStarted) {
-    return;
-  }
-
-  var errorHandler = function(exitCode) {
-    console.log('Karma has exited with code ' + exitCode);
-
-    // TODO figure out how to stop gulp nicely on Ctrl + C
-    if (exitCode == 0) {
-      process.kill();
-    }
-  };
+gulp.task('browserify-karma-start', function() {
 
   var karmaConfig = {
     configFile: karmaConfigPath,
     basePath: __dirname,
-    files: [testBundlePath],
+    autoWatch: true,
+    files: [
+      {pattern: sourceMapFile, included: false},
+      {pattern: testBundlePath, sourceMap: sourceMapFile}
+    ],
   };
-
-  karma.start(karmaConfig, errorHandler);
-  karmaStarted = true;
+  karma.server.start(karmaConfig);
 });
 
 
-gulp.task('test', ['build-test-bundle', 'karma']);
+gulp.task('build', function() {
 
-gulp.task('watch-test', function() {
+  gulp.src('./lib/*.js', {base: __dirname}).pipe(gulp.dest(buildDir));
+
+  return gulp
+    .src(fooFiles, {base: __dirname})
+    .pipe(traceur({modules: 'amd'}))
+    .pipe(gulp.dest(buildDir));
+});
+
+
+gulp.task('karma-start', function() {
+
+  var karmaConfig = {
+    configFile: karmaConfigPath,
+    basePath: __dirname,
+    autoWatch: true,
+    files: [
+      //'node_modules/traceur/bin/traceur-runtime.js',
+      //'lib/require.js',
+      //{pattern: 'build/**/*.js', included: false},
+
+      'node_modules/traceur/bin/traceur.js',
+      'lib/es6-module-loader.js',
+      //'node_modules/systemjs/dist/system.js',
+      'test/bootstrap.js',
+      {pattern: 'lib/**/*.js', included: false},
+      {pattern: 'src/**/*.js', included: false},
+      {pattern: 'test/**/*.js', included: false},
+    ],
+  };
+  karma.server.start(karmaConfig);
+});
+
+
+// TODO does the watch process die on syntax error?
+gulp.task('watch-test', ['karma-start'], function() {
   var toWatch = fooFiles;
 
-  // TODO this is firing twice for some odd reason
-  //      this was because of how vim was saving.
-  //      put a note in some dev docs about this, solution was
-  //      set backupcopy=yes
-  //gulp.start('build-test-bundle', 'karma');
-
   gulp.src(toWatch, {read: false})
-    .pipe(watch({emit: 'all'}, function(files) {
-      gulp.start('build-test-bundle', 'karma');
+    .pipe(watch(function(files) {
+      gulp.start('build');
     }));
 });

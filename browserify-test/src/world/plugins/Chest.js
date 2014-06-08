@@ -1,10 +1,9 @@
-'use strict';
+module ObjectLoader from 'src/ObjectLoader';
 
-exports.registerWorldLoaderPlugin = function(loader) {
+ObjectLoader.events.on('load chest', function(def, obj, scene) {
 
-  loader.events.addListener('load chest', function(obj, scene) {
     // TODO contain things other than coins
-    var value = obj.coinValue || 1;
+    var value = def.coinValue || 1;
 
     /*
     var g = new PIXI.Graphics();
@@ -13,14 +12,17 @@ exports.registerWorldLoaderPlugin = function(loader) {
     g.endFill();
     container.addChild(g);
     */
-    var worldObj = scene.world.add(obj.x, obj.y, obj.w, obj.h);
-    worldObj.isBlock = true;
+
+    var body = scene.world.add(def.x, def.y, def.w, def.h);
+    body.isBlock = true;
     var isOpen = false;
 
-    worldObj.events.on('use', function(player) {
+    // TODO or obj.events?
+    // TODO obj and body should probably be the same object
+    body.events.on('use', function(player) {
       if (!isOpen) {
         isOpen = true;
-        player.coins += value;
+        player.coins.deposit(value);
 
         /*
         g.clear();
@@ -30,5 +32,4 @@ exports.registerWorldLoaderPlugin = function(loader) {
         */
       }
     });
-  });
-};
+});

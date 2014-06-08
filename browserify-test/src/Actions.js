@@ -1,26 +1,18 @@
 'use strict';
 
-var EventEmitter = require('lib/EventEmitter');
-var _ = require('underscore');
+import EventEmitter from 'lib/EventEmitter';
+import _ from 'lib/underscore';
 
-var actionDefaults = {
+export var actionDefaults = {
   duration: 150,
 };
 
-var movementDefaults = {
+export var movementDefaults = {
   deltaX: 0,
   deltaY: 0,
 };
 
-exports.actionDefaults = actionDefaults;
-exports.movementDefaults = movementDefaults;
-exports.Action = Action;
-exports.Movement = Movement;
-exports.Manager = Manager;
-exports.KeysHelper = KeysHelper;
-
-
-function Action(options) {
+export function Action(options) {
   // TODO duration cannot be less than 0. check this.
   return _.extend({}, actionDefaults, options, {
     events: new EventEmitter(),
@@ -30,7 +22,7 @@ function Action(options) {
 
 // TODO if you deltaX/deltaY on the action after creationg,
 //      it wouldn't take effect here
-function Movement(body, direction, options) {
+export function Movement(body, direction, options) {
 
   options = _.extend({}, movementDefaults, options, {
     // TODO getter? needed?
@@ -54,7 +46,7 @@ function Movement(body, direction, options) {
     var pos = body.getPosition();
     lastPos = pos;
 
-    body.setDirection(direction);
+    body.direction = direction;
     body.setPosition(pos.x + options.deltaX, pos.y + options.deltaY);
 
     moving = true;
@@ -68,7 +60,7 @@ function Movement(body, direction, options) {
 }
 
 
-function Manager() {
+export function Manager() {
 
   var state = false;
   var nextState = false;
@@ -173,7 +165,7 @@ function Manager() {
   };
 }
 
-function KeysHelper(manager, events) {
+export function KeysHelper(manager, events) {
   return {
     bind: function(key, action) {
       events.on(key + ' keydown', manager.start.bind(manager, action));

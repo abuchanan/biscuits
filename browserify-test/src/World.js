@@ -1,78 +1,6 @@
-exports.World = World;
+import EventEmitter from 'lib/EventEmitter';
 
-var QuadTree = require('./QuadTree').QuadTree;
-var EventEmitter = require('../lib/EventEmitter');
-
-
-// TODO would be good to remove the dep. on tree
-function WorldObject(ID, x, y, w, h, tree) {
-  var currentX = x;
-  var currentY = y;
-
-  // TODO support resize?
-  return {
-    direction: 'down',
-
-    // TODO remove getID? It's really for debug only?
-    getID: function() {
-      return ID;
-    },
-    getPosition: function() {
-      return {x: currentX, y: currentY};
-    },
-    setPosition: function(x, y) {
-      currentX = x;
-      currentY = y;
-      // TODO inefficient. not sure how to improve using quadtrees though.
-      tree.remove(ID);
-      tree.add(x, y, w, h, ID);
-    },
-    remove: function() {
-      tree.remove(ID);
-    },
-    events: new EventEmitter(),
-
-    getRectangle: function() {
-      return [currentX, currentY, w, h];
-    },
-
-    // TODO different name
-    immediateFrontRect: function(distance) {
-      distance = distance || 1;
-
-      switch (direction) {
-        case 'up':
-          var x1 = currentX;
-          var y1 = currentY - distance;
-          var w1 = w;
-          var h1 = distance;
-          break;
-
-        case 'down':
-          var x1 = currentX;
-          var y1 = currentY + h;
-          var w1 = w;
-          var h1 = distance;
-          break;
-
-        case 'left':
-          var x1 = currentX - distance;
-          var y1 = currentY;
-          var w1 = distance;
-          var h1 = h;
-          break;
-
-        case 'right':
-          var x1 = currentX + w;
-          var y1 = currentY;
-          var w1 = distance;
-          var h1 = h;
-          break;
-      }
-      return [x1, y1, w1, h1];
-    },
-  };
-}
+import {QuadTree} from './QuadTree';
 
 // TODO need something to broadcast activate/deactivate (or start/stop)
 //      events to world objects. happens during scene load/unload,
@@ -83,8 +11,7 @@ function WorldObject(ID, x, y, w, h, tree) {
 // TODO are grid bounds even really necessary? should the world just
 //      expand to fit whatever object is added? probably.
 
-
-function World(gridX, gridY, gridWidth, gridHeight) {
+export function World(gridX, gridY, gridWidth, gridHeight) {
   //function loadTile(x, y) {
   //}
 
@@ -93,7 +20,7 @@ function World(gridX, gridY, gridWidth, gridHeight) {
   var tree = QuadTree(gridX, gridY, gridWidth, gridHeight);
 
   var currentObjectID = 0;
-  var worldObjects = {};
+  var bodies = {};
 
   /*
     Internal helper for turning a list of IDs
@@ -104,7 +31,7 @@ function World(gridX, gridY, gridWidth, gridHeight) {
 
     for (var i = 0, ii = IDs.length; i < ii; i++) {
       var ID = IDs[i];
-      result.push(worldObjects[ID]);
+      result.push(bodies[ID]);
     }
     return result;
   }
@@ -127,19 +54,46 @@ function World(gridX, gridY, gridWidth, gridHeight) {
 
     add: function(x, y, w, h) {
       var ID = currentObjectID++;
-      var obj = WorldObject(ID, x, y, w, h, tree);
-      worldObjects[ID] = obj;
+      var body = Body(ID, x, y, w, h, tree);
+      bodies[ID] = body;
       tree.add(x, y, w, h, ID);
-      return obj;
+      return body;
+    },
+  };
+}
+
+
+function Body(ID, x, y, w, h, tree) {
+  var currentX = x;
+  var currentY = y;
+
+  // TODO support resize?
+  return {
+    events: new EventEmitter(),
+
+    getPosition: function() {
+      return {x: currentX, y: currentY};
     },
 
-    // TODO events should be allowed to include data?
-    broadcast: function(eventname, x, y, w, h) {
-      var IDs = tree.query(x, y, w, h);
-      var objs = getObjects(IDs);
-      for (var i = 0, ii = objs.length; i < ii; i++) {
-        objs[i].events.trigger(eventname);
-      }
+    setPosition: function(x, y) {
+      currentX = x;
+      currentY = y;
+      // TODO inefficient. not sure how to improve using quadtrees though.
+      tree.remove(ID);
+      tree.add(x, y, w, h, ID);
+    },
+
+    remove: function() {
+      tree.remove(ID);
+    },
+
+    getRectangle: function() {
+      return {
+        x: currentX,
+        y: currentY,
+        w: w,
+        h: h
+      };
     },
   };
 }

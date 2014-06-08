@@ -1,27 +1,28 @@
-'use strict';
+import {Movement, Manager, KeysHelper} from 'src/Actions';
+import {BlockableMovement} from 'src/BlockableMovement';
+module Body from 'src/Body';
+module ObjectLoader from 'src/ObjectLoader';
 
-var Actions = require('src/Actions');
-var Movement = Actions.Movement;
-var _ = require('underscore');
+ObjectLoader.events.on('load player', loadPlayerObject);
 
-exports.registerWorldLoaderPlugin = function(loader) {
-
-  loader.events.addListener('load player', function(obj, scene) {
-
+function loadPlayerObject(def, obj, scene) {
     // TODO mechanism for telling scene that it needs to wait on a promise
     //      when loading
-    scene.loadDependsOn(loadPlayerTextures());
+    // scene.loadDependsOn(loadPlayerTextures());
 
     // TODO overload world.add to accept object with these keys
-    var worldObj = scene.world.add(obj.x, obj.y, obj.w, obj.h);
+    // TODO use MovingBody(...) instead? i.e. create a body and pass
+    //      it to the world, rather than have the world create the body?
+    var body = scene.world.add(def.x, def.y, def.w, def.h);
 
-    _.extend(worldObj,
-      PlayerCoins(),
-      BlockableMovement(worldObj, scene.world)
-    );
+    Body.mixinDirection(body);
 
-    PlayerMovement(scene.events, worldObj);
-    PlayerCollision(worldObj, scene.world);
+    obj.body = PositionChangeEvent(body);
+    obj.body = BlockableMovement(body, scene.world);
+    obj.coins = PlayerCoins();
+
+    PlayerMovement(scene.events, body);
+    PlayerCollision(obj, scene.world);
 
     // TODO PlayerCombat(keybindings, worldObj);
 
@@ -29,23 +30,53 @@ exports.registerWorldLoaderPlugin = function(loader) {
 
     // TODO how to allow player to move and swing sword at same time?
     //      how to coordinate separate action manager with the renderer?
-  });
-};
+}
+
+function PositionChangeEvent(body) {
+  var origSetPosition = body.setPosition;
+
+  body.setPosition = function(x, y) {
+    origSetPosition(x, y);
+    body.events.trigger('position changed', [x, y]);
+  };
+
+  return body;
+}
 
 
-function PlayerCollision(worldObj, world) {
-  worldObj.events.on('position changed', function() {
-    // TODO or worldObj.broadcast('player collision');
-    var rect = worldObj.getRectangle();
-    world.broadcast('player collision', rect, [worldObj]);
+function PlayerCollision(player, world) {
+  var playerBody = player.body;
+
+  playerBody.events.on('position changed', function() {
+    var rect = playerBody.getRectangle();
+
+    var objs = world.query(rect.x, rect.y, rect.w, rect.h);
+
+    for (var i = 0, ii = objs.length; i < ii; i++) {
+      if (objs[i] !== playerBody) {
+        objs[i].events.trigger('player collision', [player]);
+      }
+    }
+
+    // TODO? world.broadcast('player collision', rect, [body]);
+    //       or body.broadcast('player collision');
   });
 }
 
-function PlayerCoins(obj) {
+function PlayerCoins() {
   // TODO load player coins from game save service
-  // TODO accessor methods. add/take, credit/debit, or something.
+  // TODO basic validation/balance checking
+  var balance = 0;
   return {
-    coins: 0
+    deposit: function(val) {
+      balance += val;
+    },
+    spend: function(val) {
+      balance -= val;
+    },
+    balance: function() {
+      return balance;
+    }
   };
 }
 
@@ -55,41 +86,15 @@ function PlayerCoins(obj) {
 //      window focus/blur events?
 
 
-function BlockableMovement(worldObj, world) {
+function PlayerMovement(events, body) {
+  var walkUp = Movement(body, 'up', {deltaY: -1});
+  var walkDown = Movement(body, 'down', {deltaY: 1});
+  var walkLeft = Movement(body, 'left', {deltaX: -1});
+  var walkRight = Movement(body, 'right', {deltaX: 1});
 
-  return {
-    setPosition: function(x, y) {
-      // TODO extract to world.containsBlock()?
-      var objs = world.query(x, y, worldObj.w, worldObj.h);
-
-      // Check if the next tile is blocked.
-      var blocked = false;
-      for (var i = 0, ii = objs.length; i < ii; i++) {
-        if (objs[i] !== worldObj && objs[i].isBlock) {
-          blocked = true;
-          break;
-        }
-      }
-
-      if (!blocked) {
-        worldObj.setPosition(x, y);
-        // TODO include position in event data
-        // TODO extract. make available on all world objects.
-        // events.fire('position changed');
-      }
-    }
-  };
-}
-
-function PlayerMovement(events, worldObj) {
-
-  var walkUp = Movement(worldObj, 'up', {deltaY: -1});
-  var walkDown = Movement(worldObj, 'down', {deltaY: 1});
-  var walkLeft = Movement(worldObj, 'left', {deltaX: -1});
-  var walkRight = Movement(worldObj, 'right', {deltaX: 1});
-
-  var manager = Actions.Manager();
-  var keysHelper = Actions.KeysHelper(manager, events);
+  var manager = Manager();
+  events.on('scene tick', manager.tick);
+  var keysHelper = KeysHelper(manager, events);
 
   keysHelper.bind('Up', walkUp);
   keysHelper.bind('Down', walkDown);

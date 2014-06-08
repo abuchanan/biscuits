@@ -1,39 +1,8 @@
-exports.QuadTree = QuadTree;
-
-function Leaf() {
-  var data = {};
-  return {
-    add: function(x1, y1, w, h, ID) {
-      var x2 = x1 + w;
-      var y2 = y1 + h;
-
-      data[ID] = function(qx1, qy1, qw, qh) {
-        var qx2 = qx1 + qw;
-        var qy2 = qy1 + qh;
-        return qx2 > x1 && qx1 < x2 && qy2 > y1 && qy1 < y2;
-      };
-    },
-    remove: function(ID) {
-      delete data[ID];
-    },
-    query: function(x, y, w, h) {
-      var IDs = [];
-      for (var ID in data) {
-        var bb = data[ID];
-        if (data[ID](x, y, w, h)) {
-          IDs.push(ID);
-        }
-      }
-      return IDs;
-    },
-  };
-}
-
 // TODO note that it only stores int/string IDs
 //      I don't support storing arbitrary data (e.g. objects)
 //      because I want to keep this simple and efficient, and it's easy enough to
 //      map those IDs to arbitrary data outside of the quadtree.
-function QuadTree(minX, minY, treeW, treeH) {
+export function QuadTree(minX, minY, treeW, treeH) {
 
   var maxX = minX + treeW;
   var maxY = minY + treeH;
@@ -113,3 +82,32 @@ function QuadTree(minX, minY, treeW, treeH) {
     },
   };
 };
+
+function Leaf() {
+  var data = {};
+  return {
+    add: function(x1, y1, w, h, ID) {
+      var x2 = x1 + w;
+      var y2 = y1 + h;
+
+      data[ID] = function(qx1, qy1, qw, qh) {
+        var qx2 = qx1 + qw;
+        var qy2 = qy1 + qh;
+        return qx2 > x1 && qx1 < x2 && qy2 > y1 && qy1 < y2;
+      };
+    },
+    remove: function(ID) {
+      delete data[ID];
+    },
+    query: function(x, y, w, h) {
+      var IDs = [];
+      for (var ID in data) {
+        var bb = data[ID];
+        if (data[ID](x, y, w, h)) {
+          IDs.push(ID);
+        }
+      }
+      return IDs;
+    },
+  };
+}
