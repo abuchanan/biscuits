@@ -5,10 +5,12 @@ exports.registerWorldLoaderPlugin = function(loader) {
   //      would be nicer to wait until the player is overlapping more
   //      so it feels like you're *in* the portal
 
-  loader.events.addListener('load portal', function(obj, scene) {
-    var worldObj = scene.world.add(obj.x, obj.y, obj.w, obj.h);
-    var load = scene.load.bind(scene, obj.portalDestination);
-    worldObj.events.on('player collision', load);
+  loader.events.addListener('load portal', function(def, worldObj, scene) {
+    var body = scene.world.add(def.x, def.y, def.w, def.h);
+    // TODO test this
+    worldObj.events.on('player collision', function() {
+      scene.events.trigger('load scene: ' + def.portalDestination);
+    });
 
     /*
     TODO

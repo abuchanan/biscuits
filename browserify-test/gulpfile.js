@@ -39,6 +39,7 @@ gulp.task('karma-start', function() {
       'node_modules/traceur/bin/traceur.js',
       'lib/es6-module-loader.js',
       'test/bootstrap.js',
+      // TODO how are libs like EventEmitter and underscore working without SystemJS?
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},

@@ -1,7 +1,13 @@
-var EventEmitter = require('../lib/EventEmitter');
+var EventEmitter = require('lib/EventEmitter');
 
-exports.WorldLoader = function() {
+module.exports = Loader;
+
+function Loader() {
   return {
+    add: function(name, load, unload) {
+    },
+    load: function(name) {
+    },
     events: new EventEmitter()
   };
 }

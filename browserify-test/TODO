@@ -1,1 +1,10 @@
 allow plugins to return a promise?
+
+I don't like browserify. It doesn't need to walk the AST, because pretty
+much every file is going to be included anyway. What I need is a simple
+name resolver that can be run client-side. Walking the AST create lots
+of complexity and doesn't allow for something like requiring a module
+dynamically. It also makes the build/test cycle slower and more complex.
+
+
+Probably will end up needing some way to find an object by name/ID
