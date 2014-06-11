@@ -3,14 +3,28 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['chai', 'sinon'],
+    frameworks: ['requirejs', 'chai', 'sinon', 'traceur'],
+    //frameworks: ['chai', 'sinon'],
 
+    basePath: '..',
+
+    files: [
+      //'node_modules/traceur/bin/traceur.js',
+      //'lib/es6-module-loader.js',
+      //'lib/system.js',
+      'test/bootstrap.js',
+      {pattern: 'lib/**/*.js', included: false},
+      {pattern: 'src/**/*.js', included: false},
+      {pattern: 'test/**/*.js', included: false},
+    ],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      //'src/**/*.js': ['sourcemap'],
-      //'test/**/*.js': ['sourcemap']
+      'lib/di.js/**/*.js': ['traceur'],
+      'src/**/*.js': ['traceur'],
+      'test/utils/**/*.js': ['traceur'],
+      'test/suites/**/*.js': ['traceur'],
     },
 
 
@@ -18,6 +32,17 @@ module.exports = function(config) {
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress'],
+
+    traceurPreprocessor: {
+      options: {
+        "modules": "amd",
+        "sourceMap": true,
+        "types": true,
+        //"typeAssertions": true,
+        //"typeAssertionModule": "rtts-assert",
+        "annotations": true
+      }
+    },
 
 
     // web server port
@@ -35,7 +60,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
 
     // start these browsers

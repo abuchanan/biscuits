@@ -1,12 +1,3 @@
-export function mixinDirection(body) {
-  // TODO accessors?
-  body.direction = 'down';
-}
-
-
-function positionChangedEvent(body, events) {
-}
-
 function nearby(body, distance) {
   distance = distance || 1;
   var direction = body.direction || 'down';

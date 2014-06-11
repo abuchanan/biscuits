@@ -1,16 +1,38 @@
-// TODO external plugins will need something like require('biscuits/ObjectLoader');
-module ObjectLoader from 'src/ObjectLoader';
+import {Inject, InjectLazy} from 'di';
+import {Body} from 'src/world';
+import {SceneScope} from 'src/scene';
 
-ObjectLoader.events.on('load coin', loadCoinObject);
+export {CoinLoader};
 
-function loadCoinObject(def, obj, scene) {
-  var x = def.x;
-  var y = def.y;
-  var w = def.w;
-  var h = def.h;
-  var value = def.coinValue || 1;
+@SceneScope
+@InjectLazy(Body)
+function CoinLoader(createBody) {
+  return function(def, obj) {
+    var x = def.x;
+    var y = def.y;
+    var w = def.w;
+    var h = def.h;
+    // TODO don't bother with default values. fail on missing value.
+    var value = def.coinValue || 1;
 
-  var body = scene.world.add(x, y, w, h);
+    var bodyConfig = {
+      x: def.x,
+      y: def.y,
+      w: def.w,
+      h: def.h,
+      obj: obj,
+    };
+
+    obj.body = createBody('body-config', bodyConfig);
+
+    obj.events.on('player collision', function(player) {
+      console.log('pickup coin', obj.ID);
+      obj.body.remove();
+      player.coins.deposit(value);
+      // TODO container.removeChild(g);
+    });
+  }
+}
 
 /* TODO
   var g = new PIXI.Graphics();
@@ -19,10 +41,3 @@ function loadCoinObject(def, obj, scene) {
   g.endFill();
   container.addChild(g);
 */
-
-  body.events.on('player collision', function(player) {
-    body.remove();
-    player.coins.deposit(value);
-    //container.removeChild(g);
-  });
-}

@@ -1,0 +1,25 @@
+I have some semi-scattered thoughts I'd like to add to the discussion.
+
+Re: https://github.com/angular/di.js/issues/22#issuecomment-36773343
+While I'm turned off by the boilerplate, this approach is clear and explicit, two things I like more than brevity. 
+
+Consider that you'd have to recreate this if you extended MyClass to MySubclass. I thought a static create() method might be nice:
+
+```javascript
+class MyClass {
+    static create() {
+        var deps = arguments;
+        var cls = this;
+        return function() {
+            Array.prototype.unshift.apply(arguments, deps);
+            return Function.prototype.bind.apply(cls, arguments);
+        }
+    }
+}
+```
+It's possibly a minor issue, but maybe someone will find it interesting.
+
+Re: https://github.com/angular/di.js/issues/22#issuecomment-45165846
+You could allow non-string tokens using a Map, no?
+
+Re: 

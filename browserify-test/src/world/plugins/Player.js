@@ -1,83 +1,81 @@
+import {Inject, InjectLazy, TransientScope, SuperConstructor} from 'di';
+import {Body, World} from 'src/world';
+import {EventEmitter} from 'src/events';
 import {Movement, Manager, KeysHelper} from 'src/Actions';
-import {BlockableMovement} from 'src/BlockableMovement';
-module Body from 'src/Body';
-module ObjectLoader from 'src/ObjectLoader';
+import {factory} from 'src/utils';
+import {KeyEvents} from 'src/keyevents';
+import {SceneScope, Scene} from 'src/scene';
 
-ObjectLoader.events.on('load player', loadPlayerObject);
-
-function loadPlayerObject(def, obj, scene) {
-    // TODO mechanism for telling scene that it needs to wait on a promise
-    //      when loading
-    // scene.loadDependsOn(loadPlayerTextures());
-
-    // TODO overload world.add to accept object with these keys
-    // TODO use MovingBody(...) instead? i.e. create a body and pass
-    //      it to the world, rather than have the world create the body?
-    var body = scene.world.add(def.x, def.y, def.w, def.h);
-
-    Body.mixinDirection(body);
-
-    obj.body = PositionChangeEvent(body);
-    obj.body = BlockableMovement(body, scene.world);
-    obj.coins = PlayerCoins();
-
-    PlayerMovement(scene.events, body);
-    PlayerCollision(obj, scene.world);
-
-    // TODO PlayerCombat(keybindings, worldObj);
-
-    // TODO player use key and world event
-
-    // TODO how to allow player to move and swing sword at same time?
-    //      how to coordinate separate action manager with the renderer?
-}
-
-function PositionChangeEvent(body) {
-  var origSetPosition = body.setPosition;
-
-  body.setPosition = function(x, y) {
-    origSetPosition(x, y);
-    body.events.trigger('position changed', [x, y]);
-  };
-
-  return body;
-}
+export {PlayerLoader};
 
 
-function PlayerCollision(player, world) {
-  var playerBody = player.body;
+@TransientScope
+@Inject(SuperConstructor)
+//@InjectEventEmitter, World, 'body-config')
+class PlayerBody extends Body {
 
-  playerBody.events.on('position changed', function() {
-    var rect = playerBody.getRectangle();
+  constructor(superConstructor) {
+    //super(events, world, config);
+    superConstructor();
+    // TODO could use mixin(Body, BodyDirection)
+    this.direction = 'down';
+  }
 
-    var objs = world.query(rect.x, rect.y, rect.w, rect.h);
+  setPosition(x, y) {
+    if (!this._isBlocked(x, y)) {
+      super.setPosition(x, y);
+      this._triggerCollisions();
+    }
+  }
 
-    for (var i = 0, ii = objs.length; i < ii; i++) {
-      if (objs[i] !== playerBody) {
-        objs[i].events.trigger('player collision', [player]);
+  _isBlocked(x, y) {
+    // TODO extract to world.containsBlock()?
+    var rect = this.getRectangle();
+    var bodies = this.world.query(x, y, rect.w, rect.h);
+
+    // Check if the next tile is blocked.
+    for (var i = 0, ii = bodies.length; i < ii; i++) {
+      if (bodies[i] !== this && bodies[i].isBlock) {
+        return true;
       }
     }
 
-    // TODO? world.broadcast('player collision', rect, [body]);
-    //       or body.broadcast('player collision');
-  });
+    return false;
+  }
+
+  _triggerCollisions() {
+    var rect = this.getRectangle();
+    var bodies = this.world.query(rect.x, rect.y, rect.w, rect.h);
+
+    for (var i = 0, ii = bodies.length; i < ii; i++) {
+      if (bodies[i] !== this) {
+        // TODO trigger events on body or body.obj?
+        bodies[i].obj.events.trigger('player collision', [this.obj]);
+      }
+    }
+  }
 }
 
-function PlayerCoins() {
-  // TODO load player coins from game save service
-  // TODO basic validation/balance checking
-  var balance = 0;
-  return {
-    deposit: function(val) {
-      balance += val;
-    },
-    spend: function(val) {
-      balance -= val;
-    },
-    balance: function() {
-      return balance;
-    }
-  };
+
+// TODO load player coins from game save service
+// TODO basic validation/balance checking
+class PlayerCoins {
+
+  constructor() {
+    this._balance = 0;
+  }
+
+  deposit(amount) {
+    this._balance += amount;
+  }
+
+  withdraw(amount) {
+    this._balance -= amount;
+  }
+
+  balance() {
+    return this._balance;
+  }
 }
 
 
@@ -85,19 +83,68 @@ function PlayerCoins() {
 //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
 //      window focus/blur events?
 
+// TODO possible to say "if you depend on something with SceneScope,
+//      then you are automatically also SceneScope"?
+@SceneScope
+@Inject(KeyEvents, Scene)
+function PlayerMovement(keyevents, scene) {
+  return function(body) {
+    var walkUp = Movement(body, 'up', {deltaY: -1});
+    var walkDown = Movement(body, 'down', {deltaY: 1});
+    var walkLeft = Movement(body, 'left', {deltaX: -1});
+    var walkRight = Movement(body, 'right', {deltaX: 1});
 
-function PlayerMovement(events, body) {
-  var walkUp = Movement(body, 'up', {deltaY: -1});
-  var walkDown = Movement(body, 'down', {deltaY: 1});
-  var walkLeft = Movement(body, 'left', {deltaX: -1});
-  var walkRight = Movement(body, 'right', {deltaX: 1});
+    var manager = Manager();
+    // TODO move this into the manager
+    scene.events.on('scene tick', manager.tick);
+    var keysHelper = KeysHelper(manager, keyevents);
 
-  var manager = Manager();
-  events.on('scene tick', manager.tick);
-  var keysHelper = KeysHelper(manager, events);
-
-  keysHelper.bind('Up', walkUp);
-  keysHelper.bind('Down', walkDown);
-  keysHelper.bind('Left', walkLeft);
-  keysHelper.bind('Right', walkRight);
+    keysHelper.bind('Up', walkUp);
+    keysHelper.bind('Down', walkDown);
+    keysHelper.bind('Left', walkLeft);
+    keysHelper.bind('Right', walkRight);
+  }
 }
+
+
+// TODO if loading multiple players (which is currently outside the scope
+//      of this game) this would fail because it would give every player
+//      the same coins instance
+// TODO now i have to ensure this is SceneScope too, right? 
+//      Chasing down all these dependencies is pretty confusing.
+//      Maybe some sort of dependency graph analysis (static?) would
+//      help catch errors.
+// TODO test and pull request for stackable @Inject annotations
+//function PlayerLoader(coins, playerMovement, @InjectLazy(PlayerBody) createPlayerBody) {
+
+@SceneScope
+@Inject(PlayerCoins, PlayerMovement)
+@InjectLazy(PlayerBody)
+function PlayerLoader(coins, playerMovement, createPlayerBody) {
+  return function(def, obj) {
+    var bodyConfig = {
+      x: def.x,
+      y: def.y,
+      w: def.w,
+      h: def.h,
+      obj: obj,
+    };
+
+    obj.body = createPlayerBody('body-config', bodyConfig);
+    //new PlayerBody(def.x, def.y, def.w, def.h, obj);
+    obj.coins = coins;
+
+    playerMovement(obj.body);
+
+    // TODO mechanism for telling scene that it needs to wait on a promise
+    //      when loading
+    //      scene.loadDependsOn(loadPlayerTextures());
+    // TODO PlayerCombat(keybindings, worldObj);
+    // TODO player use key and world event
+    // TODO how to allow player to move and swing sword at same time?
+    //      how to coordinate separate action manager with the renderer?
+  }
+}
+
+//console.log(PlayerLoader.annotations);
+//console.log(PlayerLoader.parameters);

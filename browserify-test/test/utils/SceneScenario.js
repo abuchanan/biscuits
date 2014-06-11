@@ -1,43 +1,52 @@
-/* Helpers for integration testing of a scene */
+import {EventEmitter} from 'src/events';
+import {Inject, Injector, Provide} from 'di';
+import {Scene, SceneScope, SceneObjectLoader} from 'src/scene';
+import {KeyEvents} from 'src/keyevents';
+import {WorldConfig} from 'src/world';
 
-// TODO EventEmitter lies on the critical path of a few systems
-//      yet it looks like it's inefficient
+export {SceneScenario};
 
-import {Scene} from 'src/Scene';
-module ObjectLoader from 'src/ObjectLoader';
+@Inject(Injector)
+class SceneScenario {
 
-export function SceneScenario() {
+  constructor(injector, def) {
 
-  // TODO world size
-  var scene = Scene();
-  var time = 0;
+    @Provide(WorldConfig)
+    function getWorldConfig() {
+      return def.world;
+    }
 
-  function tick(n) {
-    time += n;
-    scene.events.trigger('scene tick', [time]);
+    // TODO creating a child injector fails to find KeyEvents for some reason.
+    //      creating a new injector works. possibly a bug in di framework
+    //      not a bug in DI after all, but a bug in the KeyEvents constructor.
+    //      "Shortcut" was undefined. Why the heck was this so hard to track
+    //      down? Why wasn't I pointed exactly to the line that needed fixing?
+    // TODO the createChild isn't using my getKeyEvents provider for some reason.
+    var childInjector = injector.createChild([getWorldConfig], [SceneScope]);
+
+    this.scene = childInjector.get(Scene);
+    this.keyEvents = childInjector.get(KeyEvents);
+
+    // TODO could move to Scene and provide SceneConfig dependency
+    childInjector.get(SceneObjectLoader).load(def.objects);
+
+    this.time = 0;
+    this._tick(0);
   }
 
-  tick(0);
+  keypress(name) {
+    this.keyEvents.trigger(name + ' keydown');
+    // Allow code (such as Actions.Movement) to respond to the keydown event
+    // before we trigger the keyup event.
+    this._tick(1);
 
-  var scenario = {
-    scene: scene,
+    this.keyEvents.trigger(name + ' keyup');
+    // TODO make configurable?
+    this._tick(200);
+  }
 
-    loadObjects: function(defs) {
-      defs.forEach(function(def) {
-        var worldObj = ObjectLoader.loadObject(def, scene);
-        scene.addObject(def.ID, worldObj);
-      });
-    },
-
-    keypress: function(name) {
-      scene.events.trigger(name + ' keydown');
-      tick(1);
-
-      scene.events.trigger(name + ' keyup');
-      // TODO
-      tick(200);
-    },
-  };
-
-  return scenario;
+  _tick(n) {
+    this.time += n;
+    this.scene.events.trigger('scene tick', [this.time]);
+  }
 }

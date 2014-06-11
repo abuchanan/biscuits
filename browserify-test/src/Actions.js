@@ -1,20 +1,41 @@
 'use strict';
 
 import EventEmitter from 'lib/EventEmitter';
-import _ from 'lib/underscore';
+//import _ from 'lib/underscore';
 
-export var actionDefaults = {
+export {
+  actionDefaults,
+  movementDefaults,
+  Action,
+  Movement,
+  Manager,
+  KeysHelper
+};
+
+var actionDefaults = {
   duration: 150,
 };
 
-export var movementDefaults = {
+var movementDefaults = {
   deltaX: 0,
   deltaY: 0,
 };
 
-export function Action(options) {
+// Extend a given object with all the properties in passed-in object(s).
+function extend(obj) {
+  Array.prototype.slice.call(arguments, 1).forEach(function(source) {
+    if (source) {
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    }
+  });
+  return obj;
+};
+
+function Action(options) {
   // TODO duration cannot be less than 0. check this.
-  return _.extend({}, actionDefaults, options, {
+  return extend({}, actionDefaults, options, {
     events: new EventEmitter(),
   });
 }
@@ -22,9 +43,9 @@ export function Action(options) {
 
 // TODO if you deltaX/deltaY on the action after creationg,
 //      it wouldn't take effect here
-export function Movement(body, direction, options) {
+function Movement(body, direction, options) {
 
-  options = _.extend({}, movementDefaults, options, {
+  options = extend({}, movementDefaults, options, {
     // TODO getter? needed?
     direction: direction,
     interpolatePosition: function(percent) {
@@ -60,7 +81,7 @@ export function Movement(body, direction, options) {
 }
 
 
-export function Manager() {
+function Manager() {
 
   var state = false;
   var nextState = false;
@@ -165,7 +186,7 @@ export function Manager() {
   };
 }
 
-export function KeysHelper(manager, events) {
+function KeysHelper(manager, events) {
   return {
     bind: function(key, action) {
       events.on(key + ' keydown', manager.start.bind(manager, action));

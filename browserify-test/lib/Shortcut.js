@@ -1,4 +1,4 @@
-module.exports = function() {
+define(function (require, exports, module) {module.exports = function() {
   /*
     The code originally provided by "Binny V A" was modified to allow 
     easier deregistration of a specific listener.
@@ -237,3 +237,5 @@ module.exports = function() {
   }
   return shortcut;
 }
+
+});

@@ -1,11 +1,14 @@
-module ObjectLoader from 'src/ObjectLoader';
+import {Inject} from 'di';
+import {BlockBody} from 'src/world';
+import {factory} from 'src/utils';
+import {SceneScope} from 'src/scene';
 
-ObjectLoader.events.on('load block', function(def, obj, scene) {
-    var body = scene.world.add(def.x, def.y, def.w, def.h);
-    // TODO should isBlock be on the worldObj or the world body?
-    //      maybe they should both be the same object?
-    //      world queries will return bodies, so how do you connect those
-    //      back to world objects?
-    body.isBlock = true;
-});
+export {BlockLoader};
 
+@SceneScope
+@Inject(factory(BlockBody))
+function BlockLoader(BlockBody) {
+  return function(def, obj) {
+    obj.body = new BlockBody(def.x, def.y, def.w, def.h);
+  }
+}

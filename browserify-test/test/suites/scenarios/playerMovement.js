@@ -1,12 +1,34 @@
-import {SceneScenario} from 'test/utils/SceneScenario';
+import {Injector} from 'di';
+import {SceneScenario as SceneScenarioToken} from 'test/utils/SceneScenario';
 
-// TODO I'd really like these to be automatically located and loaded
-// TODO If a map definition had an item and couldn't find a matching plugin
-//      that should be an error. Wouldn't want missing items to go by subtly
-//      without notice
-import 'src/world/plugins/Player';
-import 'src/world/plugins/Coin';
-import 'src/world/plugins/Block';
+import {CoinLoader} from 'src/world/plugins/Coin';
+import {PlayerLoader} from 'src/world/plugins/Player';
+import {ChestLoader} from 'src/world/plugins/Chest';
+import {BlockLoader} from 'src/world/plugins/Block';
+
+import {factory} from 'src/utils';
+
+
+var injector = new Injector();
+var SceneScenario = injector.get(factory(SceneScenarioToken));
+
+// TODO a visual scenario editor would be dope
+// TODO could provide as SceneConfig dep.
+var scenario = new SceneScenario({
+
+  world: {x: 0, y: 0, w: 40, h: 40},
+
+  objects: [
+    {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
+    // TODO don't even bother having a default coin value.
+    //      require that it be defined and fail when it's not.
+    {ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: CoinLoader},
+    {ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: CoinLoader, coinValue: 10},
+    //{ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
+    //{ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
+    //{ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
+  ]
+});
 
 /*
 TODO
@@ -21,36 +43,24 @@ set expectations on events that occur, such as
 - etc
 */
 
-// TODO a visual scenario editor would be dope
-var defs = [
-  {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: 'player'},
-  // TODO don't even bother having a default coin value.
-  //      require that it be defined and fail when it's not.
-  {ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: 'coin'},
-  {ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: 'coin', coinValue: 10},
-  {ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: 'block'},
-  {ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: 'chest'},
-  {ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: 'chest', coinValue: 10},
-];
+/*
 
-var scenario = SceneScenario();
-scenario.loadObjects(defs);
-
-var player = scenario.scene.getElementById('player-1');
+var player = scenario.scene.getObject('player-1');
 
 // Default player position and direction
 assert.deepEqual(player.body.getPosition(), {x: 1, y: 1});
 assert.equal(player.body.direction, 'down');
+// Default player coin balance
+assert.equal(player.coins.balance(), 0);
 
 scenario.keypress('Right');
+
+assert.equal(player.body.direction, 'right');
+
 scenario.keypress('Right');
 
 // Player position and direction changes according to keypresses
 assert.deepEqual(player.body.getPosition(), {x: 3, y: 1});
-assert.equal(player.body.direction, 'right');
-
-// Default player coin balance
-assert.equal(player.coins.balance(), 0);
 
 scenario.keypress('Right');
 
@@ -115,6 +125,7 @@ scenario.keypress('Use');
 
 // Chest #2 has a greater coin value.
 assert.equal(player.coins.balance(), 22);
+*/
 
 
 // TODO I want to test that the coin has been removed from the world.
