@@ -1,15 +1,16 @@
 import {EventEmitter} from 'src/events';
-import {Inject, Injector, Provide} from 'di';
+import {Injector, Provide} from 'di';
 import {Scene, SceneScope, SceneObjectLoader} from 'src/scene';
 import {KeyEvents} from 'src/keyevents';
 import {WorldConfig} from 'src/world';
 
 export {SceneScenario};
 
-@Inject(Injector)
 class SceneScenario {
 
-  constructor(injector, def) {
+  constructor(def) {
+
+    var injector = new Injector();
 
     @Provide(WorldConfig)
     function getWorldConfig() {

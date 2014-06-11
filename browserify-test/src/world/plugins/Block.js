@@ -1,14 +1,22 @@
-import {Inject} from 'di';
-import {BlockBody} from 'src/world';
-import {factory} from 'src/utils';
+import {InjectLazy} from 'di';
+import {Body} from 'src/world';
 import {SceneScope} from 'src/scene';
 
 export {BlockLoader};
 
 @SceneScope
-@Inject(factory(BlockBody))
-function BlockLoader(BlockBody) {
+@InjectLazy(Body)
+function BlockLoader(createBody) {
   return function(def, obj) {
-    obj.body = new BlockBody(def.x, def.y, def.w, def.h);
+    var bodyConfig = {
+      x: def.x,
+      y: def.y,
+      w: def.w,
+      h: def.h,
+      obj: obj,
+      isBlock: true,
+    };
+
+    obj.body = createBody('body-config', bodyConfig);
   }
 }

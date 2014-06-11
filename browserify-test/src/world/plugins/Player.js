@@ -1,4 +1,4 @@
-import {Inject, InjectLazy, TransientScope, SuperConstructor} from 'di';
+import {Inject, InjectLazy, TransientScope} from 'di';
 import {Body, World} from 'src/world';
 import {EventEmitter} from 'src/events';
 import {Movement, Manager, KeysHelper} from 'src/Actions';
@@ -10,13 +10,11 @@ export {PlayerLoader};
 
 
 @TransientScope
-@Inject(SuperConstructor)
-//@InjectEventEmitter, World, 'body-config')
+@Inject(EventEmitter, World, 'body-config')
 class PlayerBody extends Body {
 
-  constructor(superConstructor) {
-    //super(events, world, config);
-    superConstructor();
+  constructor(events, world, config) {
+    super(events, world, config);
     // TODO could use mixin(Body, BodyDirection)
     this.direction = 'down';
   }
@@ -118,9 +116,9 @@ function PlayerMovement(keyevents, scene) {
 //function PlayerLoader(coins, playerMovement, @InjectLazy(PlayerBody) createPlayerBody) {
 
 @SceneScope
-@Inject(PlayerCoins, PlayerMovement)
+@Inject(KeyEvents, PlayerCoins, PlayerMovement)
 @InjectLazy(PlayerBody)
-function PlayerLoader(coins, playerMovement, createPlayerBody) {
+function PlayerLoader(keyEvents, coins, playerMovement, createPlayerBody) {
   return function(def, obj) {
     var bodyConfig = {
       x: def.x,
@@ -135,6 +133,14 @@ function PlayerLoader(coins, playerMovement, createPlayerBody) {
     obj.coins = coins;
 
     playerMovement(obj.body);
+
+    // TODO keydown? What if the player holds the key down?
+    keyEvents.on('Use keydown', function() {
+      // TODO optimize?
+      obj.body.queryFront().forEach((used) => {
+        used.obj.events.trigger('use', [obj]);
+      });
+    });
 
     // TODO mechanism for telling scene that it needs to wait on a promise
     //      when loading

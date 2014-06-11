@@ -1,21 +1,29 @@
-import {Inject} from 'di';
+import {InjectLazy} from 'di';
 // TODO if this name is missing from the module, no import error is thrown.
 //      it's just "undefined" which totally sucks.
-import {BlockBody} from 'src/world';
-import {factory} from 'src/utils';
+import {Body} from 'src/world';
 import {SceneScope} from 'src/scene';
 
 export {ChestLoader};
 
 @SceneScope
-@Inject(factory(BlockBody))
-function ChestLoader(BlockBody) {
+@InjectLazy(Body)
+function ChestLoader(createBody) {
   return function(def, obj) {
     // TODO contain things other than coins
     var value = def.coinValue || 1;
     var isOpen = false;
 
-    obj.body = new BlockBody(def.x, def.y, def.w, def.h, obj);
+    var bodyConfig = {
+      x: def.x,
+      y: def.y,
+      w: def.w,
+      h: def.h,
+      obj: obj,
+      isBlock: true,
+    };
+
+    obj.body = createBody('body-config', bodyConfig);
 
     obj.events.on('use', function(player) {
       if (!isOpen) {

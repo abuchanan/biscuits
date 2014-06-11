@@ -26,7 +26,6 @@ function CoinLoader(createBody) {
     obj.body = createBody('body-config', bodyConfig);
 
     obj.events.on('player collision', function(player) {
-      console.log('pickup coin', obj.ID);
       obj.body.remove();
       player.coins.deposit(value);
       // TODO container.removeChild(g);

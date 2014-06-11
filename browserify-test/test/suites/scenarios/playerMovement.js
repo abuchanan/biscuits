@@ -1,16 +1,10 @@
-import {Injector} from 'di';
-import {SceneScenario as SceneScenarioToken} from 'test/utils/SceneScenario';
+import {SceneScenario} from 'test/utils/SceneScenario';
 
 import {CoinLoader} from 'src/world/plugins/Coin';
 import {PlayerLoader} from 'src/world/plugins/Player';
 import {ChestLoader} from 'src/world/plugins/Chest';
 import {BlockLoader} from 'src/world/plugins/Block';
 
-import {factory} from 'src/utils';
-
-
-var injector = new Injector();
-var SceneScenario = injector.get(factory(SceneScenarioToken));
 
 // TODO a visual scenario editor would be dope
 // TODO could provide as SceneConfig dep.
@@ -24,9 +18,9 @@ var scenario = new SceneScenario({
     //      require that it be defined and fail when it's not.
     {ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: CoinLoader},
     {ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: CoinLoader, coinValue: 10},
-    //{ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
-    //{ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
-    //{ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
+    {ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
+    {ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
+    {ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
   ]
 });
 
@@ -43,7 +37,6 @@ set expectations on events that occur, such as
 - etc
 */
 
-/*
 
 var player = scenario.scene.getObject('player-1');
 
@@ -125,7 +118,6 @@ scenario.keypress('Use');
 
 // Chest #2 has a greater coin value.
 assert.equal(player.coins.balance(), 22);
-*/
 
 
 // TODO I want to test that the coin has been removed from the world.
