@@ -1,7 +1,6 @@
 import {Inject, InjectLazy, TransientScope, SuperConstructor} from 'di';
 import {EventEmitter} from 'src/events';
 import {QuadTree} from 'src/QuadTree';
-import {factory} from 'src/utils';
 import {SceneScope} from 'src/scene';
 
 export {

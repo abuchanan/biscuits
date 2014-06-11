@@ -1,4 +1,3 @@
-import {EventEmitter} from 'src/events';
 import {Injector, Provide} from 'di';
 import {Scene, SceneScope, SceneObjectLoader} from 'src/scene';
 import {KeyEvents} from 'src/keyevents';

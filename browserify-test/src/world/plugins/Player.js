@@ -1,9 +1,8 @@
 import {Inject, InjectLazy, TransientScope} from 'di';
 import {Body, World} from 'src/world';
 import {EventEmitter} from 'src/events';
-import {Movement, Manager, KeysHelper} from 'src/Actions';
-import {factory} from 'src/utils';
 import {KeyEvents} from 'src/keyevents';
+import {Movement, Manager, KeysHelper} from 'src/Actions';
 import {SceneScope, Scene} from 'src/scene';
 
 export {PlayerLoader};

@@ -1,15 +1,14 @@
 import {Inject, Injector, TransientScope} from 'di';
 import {EventEmitter} from 'src/events';
-import {factory} from 'src/utils';
 
 export {SceneScope, Scene, SceneObjectLoader};
 
 class SceneScope {};
 
 @SceneScope
+@Inject(EventEmitter)
 class Scene {
 
-  @Inject(EventEmitter)
   constructor(events) {
     this.events = events;
     this._objects = {};
@@ -35,8 +34,6 @@ class Scene {
   }
 }
 
-// TODO ffffuuuuuccck this is sharing event emitter instance between
-//      all instances when used with factory()
 @TransientScope
 @Inject(EventEmitter)
 class SceneObject {
@@ -79,8 +76,6 @@ class SceneObjectLoader {
     definitions.forEach(function(def) {
       // TODO allow multiple types/loaders
       var handler = loader.injector.get(def.type);
-      // TODO each object needs to have events by default
-      // TODO uuggghhhh. factory() doesn't work.
       var obj = loader.injector.get(SceneObject);
       handler(def, obj);
       loader.scene.addObject(def.ID, obj);
