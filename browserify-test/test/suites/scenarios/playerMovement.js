@@ -2,18 +2,16 @@ import {Injector} from 'di';
 import {SceneScenario} from 'test/utils/SceneScenario';
 import {WorldScene, Scene} from 'src/scene';
 
-import {CoinLoader} from 'src/world/plugins/Coin';
-import {PlayerLoader} from 'src/world/plugins/Player';
-import {ChestLoader} from 'src/world/plugins/Chest';
-import {BlockLoader} from 'src/world/plugins/Block';
+import {CoinLoader} from 'src/plugins/Coin';
+import {PlayerLoader} from 'src/plugins/Player';
+import {ChestLoader} from 'src/plugins/Chest';
+import {BlockLoader} from 'src/plugins/Block';
 
 /*
 TODO
 
 set expectations on events that occur, such as
-- player collision
 - sword damage
-- open chest
 - load point (rename spawn point?)
 - portal loads new scene
 - scene waits on async load dependency
