@@ -1,4 +1,6 @@
-import {Inject} from 'di';
+import {Inject, TransientScope} from 'di';
+import {Scene} from 'src/scene';
+import {Input} from 'src/input';
 import EventEmitter from 'lib/EventEmitter';
 
 export {
@@ -84,7 +86,7 @@ function Movement(body, direction, options) {
 
 @TransientScope
 @Inject(Scene)
-function ActionManager(Scene) {
+function ActionManager(scene) {
 
   var state = false;
   var nextState = false;
@@ -194,19 +196,19 @@ function ActionManager(Scene) {
 class ActionInputHelper {
   constructor(input, scene, manager) {
     var helper = this;
-    this._start = manager.start.bind(manager);
-    this._stop = manager.stop.bind(manager);
+    this._actions = {};
+    this.manager = manager;
 
-    this.scene.events.on('scene tick', function() {
+    scene.events.on('scene tick', function() {
       var action = helper._actions[input.event];
       if (action) {
-        action();
+        action[0].call(manager, action[1]);
       }
     });
   }
 
   bind(name, action) {
-    this._actions[name + ' keydown'] = this._start.bind(action);
-    this._actions[name + ' keyup'] = this._stop.bind(action);
+    this._actions[name + ' keydown'] = [this.manager.start, action];
+    this._actions[name + ' keyup'] = [this.manager.stop, action];
   }
 }
