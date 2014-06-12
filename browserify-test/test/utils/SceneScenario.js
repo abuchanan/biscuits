@@ -1,36 +1,34 @@
 import {Inject, Injector, Provide} from 'di';
 import {SceneManager} from 'src/scenemanager';
-import {GlobalKeyEvents} from 'src/keyevents';
+import {Input} from 'src/input';
 
 export {SceneScenario};
 
-@Inject(GlobalKeyEvents, SceneManager)
+@Inject(Input, SceneManager)
 class SceneScenario {
 
-  constructor(keyEvents, manager) {
-    this.keyEvents = keyEvents;
+  constructor(input, manager) {
+    this.input = input;
     this.manager = manager;
   }
 
   load(name) {
     this.manager.load(name);
-    this.time = 0;
-    this._tick(0);
+    this._time = 0;
+    this.tick(0);
   }
 
-  keypress(name) {
-    this.keyEvents.trigger(name + ' keydown');
-    // Allow code (such as Actions.Movement) to respond to the keydown event
-    // before we trigger the keyup event.
-    this._tick(1);
+  // TODO default to 200 or 1 for keyupTime?
+  keypress(name, keydownTime = 1, keyupTime = 200) {
+    this.input.event = name + ' keydown';
+    this.tick(keydownTime);
 
-    this.keyEvents.trigger(name + ' keyup');
-    // TODO make configurable?
-    this._tick(200);
+    this.input.event = name + ' keyup';
+    this.tick(keyupTime);
   }
 
-  _tick(n) {
-    this.time += n;
-    this.manager.scene.events.trigger('scene tick', [this.time]);
+  tick(n) {
+    this._time += n;
+    this.manager.scene.events.trigger('scene tick', [this._time]);
   }
 }

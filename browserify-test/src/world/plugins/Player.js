@@ -1,7 +1,7 @@
-import {Inject, InjectLazy, TransientScope} from 'di';
+import {Inject, InjectLazy} from 'di';
 import {Body} from 'src/world';
-import {SceneKeyEvents} from 'src/keyevents';
-import {Movement, Manager, KeysHelper} from 'src/Actions';
+import {Input} from 'src/input';
+import {Movement, ActionManager, ActionInputHelper} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 
@@ -77,24 +77,24 @@ class PlayerCoins {
 //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
 //      window focus/blur events?
 
+// TODO inject Movement
+
 @SceneScope
-@Inject(SceneKeyEvents, Scene)
-function PlayerMovement(keyevents, scene) {
+@Inject(ActionManager)
+@InjectLazy(ActionInputHelper)
+function PlayerMovement(manager, createActionInputHelper) {
   return function(body) {
     var walkUp = Movement(body, 'up', {deltaY: -1});
     var walkDown = Movement(body, 'down', {deltaY: 1});
     var walkLeft = Movement(body, 'left', {deltaX: -1});
     var walkRight = Movement(body, 'right', {deltaX: 1});
 
-    var manager = Manager();
-    // TODO move this into the manager
-    scene.events.on('scene tick', manager.tick);
-    var keysHelper = KeysHelper(manager, keyevents);
+    var inputHelper = createActionInputHelper(ActionManager, manager);
 
-    keysHelper.bind('Up', walkUp);
-    keysHelper.bind('Down', walkDown);
-    keysHelper.bind('Left', walkLeft);
-    keysHelper.bind('Right', walkRight);
+    inputHelper.bind('Up', walkUp);
+    inputHelper.bind('Down', walkDown);
+    inputHelper.bind('Left', walkLeft);
+    inputHelper.bind('Right', walkRight);
   }
 }
 
@@ -107,9 +107,9 @@ function PlayerMovement(keyevents, scene) {
 //function PlayerLoader(coins, playerMovement, @InjectLazy(PlayerBody) createPlayerBody) {
 
 @SceneScope
-@Inject(KeyEvents, PlayerCoins, PlayerMovement)
+@Inject(Scene, Input, PlayerCoins, PlayerMovement)
 @InjectLazy(PlayerBody)
-function PlayerLoader(keyEvents, coins, playerMovement, createPlayerBody) {
+function PlayerLoader(scene, input, coins, playerMovement, createPlayerBody) {
   return function(def, obj) {
     var bodyConfig = {
       x: def.x,
@@ -124,13 +124,15 @@ function PlayerLoader(keyEvents, coins, playerMovement, createPlayerBody) {
 
     playerMovement(obj.body);
 
-    // TODO keydown? What if the player holds the key down?
-    keyEvents.on('Use keydown', function() {
-      console.log('use');
-      // TODO optimize?
-      obj.body.queryFront().forEach((used) => {
-        used.obj.events.trigger('use', [obj]);
-      });
+    scene.events.on('scene tick', function() {
+      // TODO keydown? What if the player holds the key down?
+      if (input.event == 'Use keydown') {
+        console.log('use');
+        // TODO optimize?
+        obj.body.queryFront().forEach((used) => {
+          used.obj.events.trigger('use', [obj]);
+        });
+      }
     });
 
     // TODO mechanism for telling scene that it needs to wait on a promise

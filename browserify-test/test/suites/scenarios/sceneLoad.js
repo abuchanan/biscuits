@@ -1,6 +1,6 @@
 import {Inject, Injector} from 'di';
-import {SceneKeyEvents} from 'src/keyevents';
-import {WorldScene} from 'src/scene';
+import {Input} from 'src/input';
+import {WorldScene, Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 import {SceneScenario} from 'test/utils/SceneScenario';
 
@@ -16,12 +16,18 @@ var scenario = injector.get(SceneScenario);
 // TODO this @SceneScope thing is really easy to forget and very difficult
 //      to track down...not very happy with this so far.
 @SceneScope
-@Inject(SceneKeyEvents)
-function MockLoader(keyevents) {
+@Inject(Scene, Input)
+function MockLoader(scene, input) {
   return function(def, obj) {
     obj.loaded = true;
     obj.useCallback = sinon.spy();
-    keyevents.on('Use keydown', obj.useCallback);
+
+    // TODO make a helper for this pattern
+    scene.events.on('scene tick', function() {
+      if (input.event == 'Use keydown') {
+        obj.useCallback();
+      }
+    });
   }
 }
 

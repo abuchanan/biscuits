@@ -1,17 +1,17 @@
-'use strict';
-
+import {Inject} from 'di';
 import EventEmitter from 'lib/EventEmitter';
-//import _ from 'lib/underscore';
 
 export {
   actionDefaults,
   movementDefaults,
   Action,
   Movement,
-  Manager,
-  KeysHelper
+  ActionManager,
+  ActionInputHelper
 };
 
+// TODO make injectable config (might end up as a class?)
+// TODO check that this definition order works with exports
 var actionDefaults = {
   duration: 150,
 };
@@ -33,6 +33,7 @@ function extend(obj) {
   return obj;
 };
 
+// TODO inject
 function Action(options) {
   // TODO duration cannot be less than 0. check this.
   return extend({}, actionDefaults, options, {
@@ -81,7 +82,9 @@ function Movement(body, direction, options) {
 }
 
 
-function Manager() {
+@TransientScope
+@Inject(Scene)
+function ActionManager(Scene) {
 
   var state = false;
   var nextState = false;
@@ -134,6 +137,8 @@ function Manager() {
     }
   }
 
+  scene.events.on('scene tick', tick);
+
   // TODO what would happen if you changed duration in the middle of a move?
   function updateStatePercentComplete(time) {
     var percent = (time - state.startTime) / state.action.duration;
@@ -181,16 +186,27 @@ function Manager() {
     stopAll: function() {
       nextState = false;
     },
-
-    tick: tick,
   };
 }
 
-function KeysHelper(manager, events) {
-  return {
-    bind: function(key, action) {
-      events.on(key + ' keydown', manager.start.bind(manager, action));
-      events.on(key + ' keyup', manager.stop.bind(manager, action));
-    }
-  };
+@TransientScope
+@Inject(Input, Scene, ActionManager)
+class ActionInputHelper {
+  constructor(input, scene, manager) {
+    var helper = this;
+    this._start = manager.start.bind(manager);
+    this._stop = manager.stop.bind(manager);
+
+    this.scene.events.on('scene tick', function() {
+      var action = helper._actions[input.event];
+      if (action) {
+        action();
+      }
+    });
+  }
+
+  bind(name, action) {
+    this._actions[name + ' keydown'] = this._start.bind(action);
+    this._actions[name + ' keyup'] = this._stop.bind(action);
+  }
 }
