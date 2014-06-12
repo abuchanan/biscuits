@@ -2,7 +2,7 @@ import {InjectLazy} from 'di';
 // TODO if this name is missing from the module, no import error is thrown.
 //      it's just "undefined" which totally sucks.
 import {Body} from 'src/world';
-import {SceneScope} from 'src/scene';
+import {SceneScope} from 'src/scope';
 
 export {ChestLoader};
 

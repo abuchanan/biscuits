@@ -54,7 +54,7 @@ require.config({
   },
 
   // dynamically load all test files
-  deps: ['test/suites/scenarios/playerMovement'],
+  deps: ['test/suites/scenarios/sceneLoad'],
 
   // we have to kickoff jasmine, as it is asynchronous
   callback: window.__karma__.start

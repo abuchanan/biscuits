@@ -1,0 +1,3 @@
+export {SceneScope};
+
+class SceneScope {};

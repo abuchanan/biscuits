@@ -1,9 +1,10 @@
-import {Inject, Injector, TransientScope} from 'di';
+import {Inject, Injector, Provide, TransientScope} from 'di';
 import {EventEmitter} from 'src/events';
+import {WorldConfig} from 'src/world';
+import {SceneScope} from 'src/scope';
 
-export {SceneScope, Scene, SceneObjectLoader};
+export {Scene, SceneLoader, WorldScene};
 
-class SceneScope {};
 
 @SceneScope
 @Inject(EventEmitter)
@@ -34,6 +35,7 @@ class Scene {
   }
 }
 
+
 @TransientScope
 @Inject(EventEmitter)
 class SceneObject {
@@ -53,19 +55,12 @@ class SceneObject {
 //      the parent too, even though the original call is 
 //      childInjector.get(SceneObjectLoader)
 //      Dizzying :(
-//
-//      This is causing a lot of bugs which are very difficult to debug.
-//      Now, all of my object loaders need to have @SceneScope, otherwise
-//      none of them will get the keyevents which are scope to each scene.
-//
-//      Possibly it's better to flip everything. Don't use child injectors.
-//      Always use separate injectors, and if you want something to have
-//      a permanent life cycle, you have to write/mark it as a singleton.
+/*
 @SceneScope
 @Inject(Injector, Scene)
 class SceneObjectLoader {
 
-  constructor(injector, scene, SceneObject) {
+  constructor(injector, scene) {
     this.injector = injector;
     this.scene = scene;
   }
@@ -73,7 +68,7 @@ class SceneObjectLoader {
   load(definitions) {
     var loader = this;
 
-    definitions.forEach(function(def) {
+    definitions.forEach((def) => {
       // TODO allow multiple types/loaders
       var handler = loader.injector.get(def.type);
       var obj = loader.injector.get(SceneObject);
@@ -82,3 +77,27 @@ class SceneObjectLoader {
     });
   }
 }
+*/
+function WorldScene(worldConfig, definitions) {
+
+  @Provide(WorldConfig)
+  function getWorldConfig() {
+    return worldConfig;
+  }
+
+  @Provide(SceneLoader)
+  @Inject(Injector, Scene)
+  function loadScene(injector, scene) {
+    definitions.forEach((def) => {
+      // TODO allow multiple types/loaders
+      var handler = injector.get(def.type);
+      var obj = injector.get(SceneObject);
+      handler(def, obj);
+      scene.addObject(def.ID, obj);
+    });
+  }
+
+  return [getWorldConfig, loadScene];
+}
+
+class SceneLoader {}

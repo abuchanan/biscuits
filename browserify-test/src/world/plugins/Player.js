@@ -1,15 +1,12 @@
 import {Inject, InjectLazy, TransientScope} from 'di';
-import {Body, World} from 'src/world';
-import {EventEmitter} from 'src/events';
-import {KeyEvents} from 'src/keyevents';
+import {Body} from 'src/world';
+import {SceneKeyEvents} from 'src/keyevents';
 import {Movement, Manager, KeysHelper} from 'src/Actions';
-import {SceneScope, Scene} from 'src/scene';
+import {Scene} from 'src/scene';
+import {SceneScope} from 'src/scope';
 
 export {PlayerLoader};
 
-
-@TransientScope
-@Inject(EventEmitter, World, 'body-config')
 class PlayerBody extends Body {
 
   constructor(events, world, config) {
@@ -80,10 +77,8 @@ class PlayerCoins {
 //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
 //      window focus/blur events?
 
-// TODO possible to say "if you depend on something with SceneScope,
-//      then you are automatically also SceneScope"?
 @SceneScope
-@Inject(KeyEvents, Scene)
+@Inject(SceneKeyEvents, Scene)
 function PlayerMovement(keyevents, scene) {
   return function(body) {
     var walkUp = Movement(body, 'up', {deltaY: -1});
@@ -104,9 +99,6 @@ function PlayerMovement(keyevents, scene) {
 }
 
 
-// TODO if loading multiple players (which is currently outside the scope
-//      of this game) this would fail because it would give every player
-//      the same coins instance
 // TODO now i have to ensure this is SceneScope too, right? 
 //      Chasing down all these dependencies is pretty confusing.
 //      Maybe some sort of dependency graph analysis (static?) would
@@ -128,13 +120,13 @@ function PlayerLoader(keyEvents, coins, playerMovement, createPlayerBody) {
     };
 
     obj.body = createPlayerBody('body-config', bodyConfig);
-    //new PlayerBody(def.x, def.y, def.w, def.h, obj);
     obj.coins = coins;
 
     playerMovement(obj.body);
 
     // TODO keydown? What if the player holds the key down?
     keyEvents.on('Use keydown', function() {
+      console.log('use');
       // TODO optimize?
       obj.body.queryFront().forEach((used) => {
         used.obj.events.trigger('use', [obj]);
@@ -145,11 +137,7 @@ function PlayerLoader(keyEvents, coins, playerMovement, createPlayerBody) {
     //      when loading
     //      scene.loadDependsOn(loadPlayerTextures());
     // TODO PlayerCombat(keybindings, worldObj);
-    // TODO player use key and world event
     // TODO how to allow player to move and swing sword at same time?
     //      how to coordinate separate action manager with the renderer?
   }
 }
-
-//console.log(PlayerLoader.annotations);
-//console.log(PlayerLoader.parameters);

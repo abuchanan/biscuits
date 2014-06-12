@@ -1,6 +1,6 @@
 import {Inject, InjectLazy} from 'di';
 import {Body} from 'src/world';
-import {SceneScope} from 'src/scene';
+import {SceneScope} from 'src/scope';
 
 export {CoinLoader};
 

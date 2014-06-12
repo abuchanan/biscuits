@@ -1,13 +1,12 @@
-import {Inject, InjectLazy, TransientScope, SuperConstructor} from 'di';
+import {Inject, InjectLazy, TransientScope} from 'di';
+import {SceneScope} from 'src/scope';
 import {EventEmitter} from 'src/events';
 import {QuadTree} from 'src/QuadTree';
-import {SceneScope} from 'src/scene';
 
 export {
   WorldConfig,
   World,
-  Body,
-  BlockBody
+  Body
 };
 
 // TODO need something to broadcast activate/deactivate (or start/stop)
@@ -37,10 +36,9 @@ class World {
     return this._getObjects(IDs);
   }
 
-  // TODO use ES6 rest?
-  queryMany() {
+  queryMany(...args) {
     // TODO change QuadTree.queryMany to queryMany(rect1, rect2, ...)
-    var IDs = this._tree.queryMany(arguments);
+    var IDs = this._tree.queryMany(args);
     return this._getObjects(IDs);
   }
 
@@ -51,8 +49,6 @@ class World {
   }
 
   add(body) {
-    // TODO problem here with body vs world object
-    //      maybe body should point to world object?
     this._objects[body.ID] = body;
     var rect = body.getRectangle();
     this._tree.add(rect.x, rect.y, rect.w, rect.h, body.ID);
@@ -78,12 +74,7 @@ class World {
 }
 
 
-// TODO fuck, i'm getting tired of the complexity of DI already....
-//      I have to make sure all classes in the inheritance chain get the
-//      same annotations. Maybe di.js should read annotations all the
-//      way up the chain?
 // TODO support resize?
-//@SceneScope
 @TransientScope
 @Inject(EventEmitter, World, 'body-config')
 class Body {

@@ -1,35 +1,19 @@
-import {Injector, Provide} from 'di';
-import {Scene, SceneScope, SceneObjectLoader} from 'src/scene';
-import {KeyEvents} from 'src/keyevents';
-import {WorldConfig} from 'src/world';
+import {Inject, Injector, Provide} from 'di';
+import {SceneManager} from 'src/scenemanager';
+import {GlobalKeyEvents} from 'src/keyevents';
 
 export {SceneScenario};
 
+@Inject(GlobalKeyEvents, SceneManager)
 class SceneScenario {
 
-  constructor(def) {
+  constructor(keyEvents, manager) {
+    this.keyEvents = keyEvents;
+    this.manager = manager;
+  }
 
-    var injector = new Injector();
-
-    @Provide(WorldConfig)
-    function getWorldConfig() {
-      return def.world;
-    }
-
-    // TODO creating a child injector fails to find KeyEvents for some reason.
-    //      creating a new injector works. possibly a bug in di framework
-    //      not a bug in DI after all, but a bug in the KeyEvents constructor.
-    //      "Shortcut" was undefined. Why the heck was this so hard to track
-    //      down? Why wasn't I pointed exactly to the line that needed fixing?
-    // TODO the createChild isn't using my getKeyEvents provider for some reason.
-    var childInjector = injector.createChild([getWorldConfig], [SceneScope]);
-
-    this.scene = childInjector.get(Scene);
-    this.keyEvents = childInjector.get(KeyEvents);
-
-    // TODO could move to Scene and provide SceneConfig dependency
-    childInjector.get(SceneObjectLoader).load(def.objects);
-
+  load(name) {
+    this.manager.load(name);
     this.time = 0;
     this._tick(0);
   }
@@ -47,6 +31,6 @@ class SceneScenario {
 
   _tick(n) {
     this.time += n;
-    this.scene.events.trigger('scene tick', [this.time]);
+    this.manager.scene.events.trigger('scene tick', [this.time]);
   }
 }

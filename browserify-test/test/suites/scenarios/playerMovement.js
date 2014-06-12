@@ -9,20 +9,25 @@ import {BlockLoader} from 'src/world/plugins/Block';
 // TODO a visual scenario editor would be dope
 // TODO could provide as SceneConfig dep.
 var scenario = new SceneScenario({
+  scenes: {
+    sceneone: {
+      world: {x: 0, y: 0, w: 40, h: 40},
 
-  world: {x: 0, y: 0, w: 40, h: 40},
-
-  objects: [
-    {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
-    // TODO don't even bother having a default coin value.
-    //      require that it be defined and fail when it's not.
-    {ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: CoinLoader},
-    {ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: CoinLoader, coinValue: 10},
-    {ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
-    {ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
-    {ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
-  ]
+      objects: [
+        {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
+        // TODO don't even bother having a default coin value.
+        //      require that it be defined and fail when it's not.
+        {ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: CoinLoader},
+        {ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: CoinLoader, coinValue: 10},
+        {ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
+        {ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
+        {ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
+      ]
+    },
+  }
 });
+
+scenario.load('sceneone');
 
 /*
 TODO
@@ -37,8 +42,7 @@ set expectations on events that occur, such as
 - etc
 */
 
-
-var player = scenario.scene.getObject('player-1');
+var player = scenario.manager.scene.getObject('player-1');
 
 // Default player position and direction
 assert.deepEqual(player.body.getPosition(), {x: 1, y: 1});
