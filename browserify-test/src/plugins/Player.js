@@ -1,4 +1,4 @@
-import {Inject, InjectLazy} from 'di';
+import {Inject, InjectLazy, TransientScope} from 'di';
 import {Body} from 'src/world';
 import {Input} from 'src/input';
 import {Movement, ActionManager, ActionInputHelper} from 'src/Actions';
@@ -6,6 +6,7 @@ import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 
 export {PlayerLoader};
+
 
 class PlayerBody extends Body {
 
@@ -78,24 +79,31 @@ class PlayerCoins {
 //      window focus/blur events?
 
 // TODO inject Movement
+@TransientScope
+@Inject(ActionManager, Body)
+class PlayerActions {
 
-@SceneScope
-@Inject(ActionManager)
-@InjectLazy(ActionInputHelper)
-function PlayerMovement(manager, createActionInputHelper) {
-  return function(body) {
-    var walkUp = Movement(body, 'up', {deltaY: -1});
-    var walkDown = Movement(body, 'down', {deltaY: 1});
-    var walkLeft = Movement(body, 'left', {deltaX: -1});
-    var walkRight = Movement(body, 'right', {deltaX: 1});
-
-    var inputHelper = createActionInputHelper(ActionManager, manager);
-
-    inputHelper.bind('Up', walkUp);
-    inputHelper.bind('Down', walkDown);
-    inputHelper.bind('Left', walkLeft);
-    inputHelper.bind('Right', walkRight);
+  constructor(manager, body) {
+    this.manager = manager;
+    this.walkUp = Movement(body, 'up', {deltaY: -1});
+    this.walkDown = Movement(body, 'down', {deltaY: 1});
+    this.walkLeft = Movement(body, 'left', {deltaX: -1});
+    this.walkRight = Movement(body, 'right', {deltaX: 1});
   }
+}
+
+
+@TransientScope
+@Inject(PlayerActions)
+@InjectLazy(ActionInputHelper)
+function PlayerActionsDriver(actions, createActionInputHelper) {
+
+  var inputHelper = createActionInputHelper(ActionManager, actions.manager);
+
+  inputHelper.bind('Up', actions.walkUp);
+  inputHelper.bind('Down', actions.walkDown);
+  inputHelper.bind('Left', actions.walkLeft);
+  inputHelper.bind('Right', actions.walkRight);
 }
 
 
@@ -103,14 +111,13 @@ function PlayerMovement(manager, createActionInputHelper) {
 //      Chasing down all these dependencies is pretty confusing.
 //      Maybe some sort of dependency graph analysis (static?) would
 //      help catch errors.
-// TODO test and pull request for stackable @Inject annotations
-//function PlayerLoader(coins, playerMovement, @InjectLazy(PlayerBody) createPlayerBody) {
 
 @SceneScope
-@Inject(Scene, Input, PlayerCoins, PlayerMovement)
-@InjectLazy(PlayerBody)
-function PlayerLoader(scene, input, coins, playerMovement, createPlayerBody) {
+@Inject(Scene, Input, PlayerCoins)
+@InjectLazy(PlayerBody, PlayerActions, PlayerActionsDriver)
+function PlayerLoader(scene, input, coins, createBody, createActions, startDriver) {
   return function(def, obj) {
+
     var bodyConfig = {
       x: def.x,
       y: def.y,
@@ -119,16 +126,17 @@ function PlayerLoader(scene, input, coins, playerMovement, createPlayerBody) {
       obj: obj,
     };
 
-    obj.body = createPlayerBody('body-config', bodyConfig);
+    obj.body = createBody('body-config', bodyConfig);
     obj.coins = coins;
 
-    playerMovement(obj.body);
+    var actions = createActions(Body, obj.body);
+    startDriver(PlayerActions, actions);
 
     scene.events.on('scene tick', function() {
       // TODO keydown? What if the player holds the key down?
       if (input.event == 'Use keydown') {
-        console.log('use');
         // TODO optimize?
+        // TODO can only use one object?
         obj.body.queryFront().forEach((used) => {
           used.obj.events.trigger('use', [obj]);
         });
