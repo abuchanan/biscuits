@@ -145,6 +145,7 @@ function PlayerLoader(scene, input, coins, renderer, createBody, createActions,
 
     scene.events.on('scene tick', function() {
       // TODO keydown? What if the player holds the key down?
+      // TODO no long event
       if (input.event == 'Use keydown') {
         // TODO optimize?
         // TODO can only use one object?
@@ -156,6 +157,7 @@ function PlayerLoader(scene, input, coins, renderer, createBody, createActions,
       // TODO optimize, dirty checking
       layer.removeChild(g);
       var pos = obj.body.getRectangle();
+      g = renderer.createGraphic();
       g.beginFill(0xDDDDDD);
       g.drawRect(pos.x, pos.y, pos.w, pos.h);
       g.endFill();

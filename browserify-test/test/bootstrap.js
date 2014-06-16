@@ -55,7 +55,8 @@ require.config({
 
   // dynamically load all test files
   deps: [
-    'test/suites/scenarios/squirrelMovement',
+    'test/suites/keyboardInput',
+    //'test/suites/scenarios/squirrelMovement',
     //'test/suites/scenarios/sceneLoad',
     //'test/suites/scenarios/playerMovement',
   ],

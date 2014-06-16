@@ -64,8 +64,10 @@ function Movement(body, direction, options) {
 
   var action = Action(options);
   var moving = false;
+  // TODO false value won't play nice with interpolatePosition code above
   var lastPos = false;
 
+  // TODO events are too heavy for this
   action.events.on('action start', function() {
     var pos = body.getPosition();
     lastPos = pos;
@@ -96,7 +98,7 @@ function ActionManager(scene) {
   //      stop, but the next state will get a start time of now, instead
   //      of 20 ticks ago.
   function switchState(startTime) {
-    if (state) {
+    if (state && state !== nextState) {
       state.action.events.trigger('action end');
     }
     state = nextState;
@@ -119,6 +121,7 @@ function ActionManager(scene) {
         // time = 100.
         var nextStateTime = state.startTime + state.action.duration;
 
+        // TODO these ended up being all the same. consolidate
         // We're stopping, end the current state.
         if (!nextState) {
           switchState(nextStateTime);
@@ -130,7 +133,7 @@ function ActionManager(scene) {
 
         // We're looping the current action.
         } else {
-          state.startTime = nextStateTime;
+          switchState(nextStateTime);
           updateStatePercentComplete(time);
         }
       }
@@ -195,20 +198,22 @@ function ActionManager(scene) {
 @Inject(Input, Scene, ActionManager)
 class ActionInputHelper {
   constructor(input, scene, manager) {
-    var helper = this;
-    this._actions = {};
-    this.manager = manager;
+    var actions = this._actions = {};
 
     scene.events.on('scene tick', function() {
-      var action = helper._actions[input.event];
-      if (action) {
-        action[0].call(manager, action[1]);
+
+      // TODO optimize?
+      for (var name in actions) {
+        if (input[name]) {
+          manager.start(actions[name]);
+        } else {
+          manager.stop(actions[name]);
+        }
       }
     });
   }
 
   bind(name, action) {
-    this._actions[name + ' keydown'] = [this.manager.start, action];
-    this._actions[name + ' keyup'] = [this.manager.stop, action];
+    this._actions[name] = action;
   }
 }

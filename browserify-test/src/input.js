@@ -11,7 +11,12 @@ class Input {
   constructor() {
     // TODO doesn't work for multiple keys at once
     //      think walking and firing at same time
-    this.event;
+    this.Up = false;
+    this.Down = false;
+    this.Left = false;
+    this.Right = false;
+    this.Use = false;
+    this.Sword = false;
   }
 }
 
@@ -36,11 +41,13 @@ class KeyboardInput {
       eventname = eventname || keyname;
 
       shortcutjs.add(keyname, function() {
-          input.event = eventname + ' keydown';
+          //input.event = eventname + ' keydown';
+          input[eventname] = true;
       }, keyDownOptions);
 
       shortcutjs.add(keyname, function() {
-          input.event = eventname + ' keyup';
+          //input.event = eventname + ' keyup';
+          input[eventname] = false;
       }, keyUpOptions);
     }
 

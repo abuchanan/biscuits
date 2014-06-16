@@ -6,7 +6,7 @@
 // Luckily, it seems like we can sidestep most of that mess by using
 // Events instead of KeyboardEvents.
 // Many thanks to http://stackoverflow.com/a/14469275/1062565
-module.exports = KeyEventsHelper;
+export {KeyEventsHelper};
 
 function KeyEventsHelper(element) {
   return {
