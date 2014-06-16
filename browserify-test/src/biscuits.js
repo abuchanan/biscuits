@@ -31,8 +31,7 @@ function start() {
     {ID: 'coin-1', x: 20, y: 20, w: 10, h: 10, type: CoinLoader},
     {ID: 'coin-2', x: 50, y: 10, w: 10, h: 10, type: CoinLoader, coinValue: 10},
     //{ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
-    //{ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
-    //{ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
+    {ID: 'chest-1', x: 40, y: 40, w: 10, h: 10, type: ChestLoader},
   ]);
 
   manager.register('mock', mockWorld);

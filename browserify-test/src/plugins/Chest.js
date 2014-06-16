@@ -1,14 +1,18 @@
-import {InjectLazy} from 'di';
+import {Inject, InjectLazy} from 'di';
 // TODO if this name is missing from the module, no import error is thrown.
 //      it's just "undefined" which totally sucks.
 import {Body} from 'src/world';
 import {SceneScope} from 'src/scope';
+import {Renderer} from 'src/render';
 
 export {ChestLoader};
 
 @SceneScope
+@Inject(Renderer)
 @InjectLazy(Body)
-function ChestLoader(createBody) {
+function ChestLoader(renderer, createBody) {
+  var layer = renderer.getLayer('objects');
+
   return function(def, obj) {
     // TODO contain things other than coins
     var value = def.coinValue || 1;
@@ -29,22 +33,18 @@ function ChestLoader(createBody) {
       if (!isOpen) {
         isOpen = true;
         player.coins.deposit(value);
-      }
-    });
-  }
-}
 
-    /*
-    var g = new PIXI.Graphics();
-    g.beginFill(0x00FFFF);
-    g.drawRect(x, y, w, h);
-    g.endFill();
-    container.addChild(g);
-    */
-
-        /*
         g.clear();
         g.beginFill(0x0000FF);
-        g.drawRect(x, y, w, h);
+        g.drawRect(def.x, def.y, def.w, def.h);
         g.endFill();
-        */
+      }
+    });
+
+    var g = renderer.createGraphic();
+    g.beginFill(0x00FFFF);
+    g.drawRect(def.x, def.y, def.w, def.h);
+    g.endFill();
+    layer.addChild(g);
+  }
+}
