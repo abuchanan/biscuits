@@ -3,15 +3,12 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['requirejs', 'chai', 'sinon', 'traceur'],
-    //frameworks: ['chai', 'sinon'],
+    frameworks: ['requirejs', 'sinon', 'traceur'],
 
     basePath: '..',
 
     files: [
-      //'node_modules/traceur/bin/traceur.js',
-      //'lib/es6-module-loader.js',
-      //'lib/system.js',
+      'test/lib/assert.js',
       'test/bootstrap.js',
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},

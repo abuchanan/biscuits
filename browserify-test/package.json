@@ -11,10 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "chai": "^1.9.1",
     "gulp-traceur": "^0.7.0",
     "karma": "^0.12.16",
-    "karma-chai": "^0.1.0",
     "karma-sinon": "^1.0.3",
     "traceur": "0.0.43"
   }
