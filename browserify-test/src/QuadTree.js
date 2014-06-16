@@ -1,5 +1,5 @@
 import {Inject, TransientScope} from 'di';
-import {SceneScope} from 'src/scene';
+import {SceneScope} from 'src/scope';
 
 // TODO note that it only stores int/string IDs
 //      I don't support storing arbitrary data (e.g. objects)
@@ -62,7 +62,7 @@ class QuadTree {
 
     if (!found) {
       // TODO better error message
-      console.log(x, y, w, h, ID);
+      console.log(x, y, w, h, ID, this._minX, this._minY, this._maxX, this._maxY);
       throw 'Error: out of bounds';
     }
   }
