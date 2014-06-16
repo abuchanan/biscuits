@@ -23,6 +23,7 @@ function MockLoader(scene, input) {
     obj.useCallback = sinon.spy();
 
     // TODO make a helper for this pattern
+    //      maybe just trigger events on scene.events
     scene.events.on('scene tick', function() {
       if (input.event == 'Use keydown') {
         obj.useCallback();

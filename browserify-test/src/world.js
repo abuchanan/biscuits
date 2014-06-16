@@ -18,6 +18,10 @@ export {
 // TODO are grid bounds even really necessary? should the world just
 //      expand to fit whatever object is added? probably.
 
+// TODO a problem with interfaces is that DI doesn't know they are interfaces.
+//      An interface shouldn't be able to be used to fulfill a dependency.
+//      DI should throw an error if there is no concrete provider for the
+//      interface token.
 class WorldConfig {}
 
 @SceneScope
@@ -79,7 +83,6 @@ class World {
 @Inject(EventEmitter, World, 'body-config')
 class Body {
 
-  //constructor(events, world, x, y, w, h, obj) {
   constructor(events, world, config) {
     // TODO needed?
     this.events = events;
