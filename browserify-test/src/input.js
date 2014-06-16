@@ -7,6 +7,14 @@ import {Scene} from 'src/scene';
 export {KeyboardInput, Input};
 
 
+class Input {
+  constructor() {
+    // TODO doesn't work for multiple keys at once
+    //      think walking and firing at same time
+    this.event;
+  }
+}
+
 @Inject(Input)
 class KeyboardInput {
 
@@ -42,13 +50,5 @@ class KeyboardInput {
     add('Right');
     add('E', 'Use');
     add('F', 'Sword');
-  }
-}
-
-class Input {
-  constructor() {
-    // TODO doesn't work for multiple keys at once
-    //      think walking and firing at same time
-    this.event;
   }
 }

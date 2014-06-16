@@ -2,8 +2,31 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <script src="foobundle.js"></script>
+    <title>Biscuits</title>
+    <script src='lib/require.js'></script>
+    <script src='lib/traceur-runtime.js'></script>
   </head>
-  <body></body>
 
+  <body>
+    <div id="biscuits-container"></div>
+    <script>
+      var container = document.getElementById("biscuits-container");
+
+      require.config({
+        map: {
+          '*': {
+            'di': 'lib/di.js/index'
+          }
+        },
+
+        callback: function() {
+          require(['src/biscuits'], function(biscuits) {
+            var view = biscuits.start();
+            container.appendChild(view);
+          });
+        }
+      });
+
+    </script>
+  </body>
 </html>

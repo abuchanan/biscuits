@@ -2,48 +2,48 @@
 
 var path = require('path'),
     gulp = require('gulp'),
-    traceur = require('gulp-traceur'),
-    karma = require('karma');
+    connect = require('gulp-connect'),
+    traceur = require('gulp-traceur');
 
 
-var karmaConfigPath = path.join(__dirname, 'test/karma.conf.js');
 var buildDir = path.join(__dirname, 'build');
 
-// TODO rename/reorganize
-var files = [
-  './src/**/*.js',
-  './test/suites/**/*.js',
-  './test/utils/**/*.js',
-  './test/mocks/**/*.js',
+var es6Files = [
+  'src/**/*.js',
+  'lib/di.js/*.js'
 ];
 
+var copyFiles = [
+  'index.html',
+  'lib/EventEmitter.js',
+  'lib/Shortcut.js',
+  'lib/require.js',
+  'lib/traceur-runtime.js',
+  'lib/pixi.js',
+]
+
+var traceurOptions = {
+  modules: 'amd',
+  types: true,
+  annotations: true
+}
 
 gulp.task('build', function() {
 
-  gulp.src('./lib/*.js', {base: __dirname}).pipe(gulp.dest(buildDir));
+  gulp.src(copyFiles, {base: __dirname}).pipe(gulp.dest(buildDir));
 
   return gulp
-    .src(files, {base: __dirname})
-    .pipe(traceur({modules: 'amd'}))
+    .src(es6Files, {base: __dirname})
+    .pipe(traceur(traceurOptions))
     .pipe(gulp.dest(buildDir));
 });
 
+gulp.task('serve', function() {
+  connect.server({
+    root: 'build',
+  });
+});
 
-gulp.task('karma-start', function() {
-
-  var karmaConfig = {
-    configFile: karmaConfigPath,
-    basePath: __dirname,
-    autoWatch: true,
-    files: [
-      'node_modules/traceur/bin/traceur.js',
-      'lib/es6-module-loader.js',
-      'test/bootstrap.js',
-      // TODO how are libs like EventEmitter and underscore working without SystemJS?
-      {pattern: 'lib/**/*.js', included: false},
-      {pattern: 'src/**/*.js', included: false},
-      {pattern: 'test/**/*.js', included: false},
-    ],
-  };
-  karma.server.start(karmaConfig);
+gulp.task('watch', function() {
+  gulp.watch(es6Files, ['build']);
 });

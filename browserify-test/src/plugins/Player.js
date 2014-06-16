@@ -4,6 +4,7 @@ import {Input} from 'src/input';
 import {Movement, ActionManager, ActionInputHelper} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
+import {Renderer} from 'src/render';
 
 export {PlayerLoader};
 
@@ -113,9 +114,13 @@ function PlayerActionsDriver(actions, createActionInputHelper) {
 //      help catch errors.
 
 @SceneScope
-@Inject(Scene, Input, PlayerCoins)
+@Inject(Scene, Input, PlayerCoins, Renderer)
 @InjectLazy(PlayerBody, PlayerActions, PlayerActionsDriver)
-function PlayerLoader(scene, input, coins, createBody, createActions, startDriver) {
+function PlayerLoader(scene, input, coins, renderer, createBody, createActions,
+                      startDriver) {
+
+  var layer = renderer.newLayer();
+
   return function(def, obj) {
 
     var bodyConfig = {
@@ -125,6 +130,12 @@ function PlayerLoader(scene, input, coins, createBody, createActions, startDrive
       h: def.h,
       obj: obj,
     };
+
+    var g = renderer.createGraphic();
+    g.beginFill(0xDDDDDD);
+    g.drawRect(def.x, def.y, def.w, def.h);
+    g.endFill();
+    layer.addChild(g);
 
     obj.body = createBody('body-config', bodyConfig);
     obj.coins = coins;
@@ -141,6 +152,14 @@ function PlayerLoader(scene, input, coins, createBody, createActions, startDrive
           used.obj.events.trigger('use', [obj]);
         });
       }
+
+      // TODO optimize, dirty checking
+      layer.removeChild(g);
+      var pos = obj.body.getRectangle();
+      g.beginFill(0xDDDDDD);
+      g.drawRect(pos.x, pos.y, pos.w, pos.h);
+      g.endFill();
+      layer.addChild(g);
     });
 
     // TODO mechanism for telling scene that it needs to wait on a promise
