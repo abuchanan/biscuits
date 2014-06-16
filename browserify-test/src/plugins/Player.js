@@ -119,7 +119,7 @@ function PlayerActionsDriver(actions, createActionInputHelper) {
 function PlayerLoader(scene, input, coins, renderer, createBody, createActions,
                       startDriver) {
 
-  var layer = renderer.newLayer();
+  var layer = renderer.getLayer('player');
 
   return function(def, obj) {
 

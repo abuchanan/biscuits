@@ -26,10 +26,10 @@ function start() {
   injector.get(KeyboardInput);
 
   // TODO mock world for debugging only
-  var mockWorld = WorldScene({x: 0, y: 0, w: 40, h: 40}, [
+  var mockWorld = WorldScene({x: 0, y: 0, w: 400, h: 400}, [
     {ID: 'player-1', x: 1, y: 1, w: 10, h: 10, type: PlayerLoader},
-    //{ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: CoinLoader},
-    //{ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: CoinLoader, coinValue: 10},
+    {ID: 'coin-1', x: 20, y: 20, w: 10, h: 10, type: CoinLoader},
+    {ID: 'coin-2', x: 50, y: 10, w: 10, h: 10, type: CoinLoader, coinValue: 10},
     //{ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
     //{ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
     //{ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},

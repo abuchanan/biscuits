@@ -1,12 +1,17 @@
 import {Inject, InjectLazy} from 'di';
 import {Body} from 'src/world';
 import {SceneScope} from 'src/scope';
+import {Renderer} from 'src/render';
 
 export {CoinLoader};
 
 @SceneScope
+@Inject(Renderer)
 @InjectLazy(Body)
-function CoinLoader(createBody) {
+function CoinLoader(renderer, createBody) {
+  // TODO test that renderables are removed from renderer when scene is unloaded
+  var layer = renderer.getLayer('objects');
+
   return function(def, obj) {
     var x = def.x;
     var y = def.y;
@@ -28,15 +33,14 @@ function CoinLoader(createBody) {
     obj.events.on('player collision', function(player) {
       obj.body.remove();
       player.coins.deposit(value);
-      // TODO container.removeChild(g);
+      // TODO test for this
+      layer.removeChild(g);
     });
+
+    var g = renderer.createGraphic();
+    g.beginFill(0xF0F074);
+    g.drawRect(x, y, w, h);
+    g.endFill();
+    layer.addChild(g);
   }
 }
-
-/* TODO
-  var g = new PIXI.Graphics();
-  g.beginFill(0xF0F074);
-  g.drawRect(x, y, w, h);
-  g.endFill();
-  container.addChild(g);
-*/

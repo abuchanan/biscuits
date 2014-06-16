@@ -10,6 +10,7 @@ class Renderer {
   constructor(config) {
     this.renderer = PIXI.autoDetectRenderer();
     this.stage = new PIXI.Stage(0xffffff);
+    this._layers = {};
   }
 
   getViewDOM() {
@@ -22,8 +23,13 @@ class Renderer {
   }
 
   // TODO layer ordering
-  newLayer() {
-    var layer = new PIXI.DisplayObjectContainer();
+  getLayer(name) {
+    var layer = this._layers[name];
+    if (layer) {
+      return layer;
+    }
+
+    layer = this._layers[name] = new PIXI.DisplayObjectContainer();
     this.stage.addChild(layer);
     return layer;
   }
