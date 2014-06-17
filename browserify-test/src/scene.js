@@ -2,6 +2,7 @@ import {Inject, Injector, Provide, TransientScope} from 'di';
 import {EventEmitter} from 'src/events';
 import {WorldConfig} from 'src/world';
 import {SceneScope} from 'src/scope';
+import {Renderer} from 'src/render';
 
 export {Scene, SceneLoader, WorldScene};
 
@@ -48,7 +49,7 @@ class SceneObject {
 
 // TODO @InjectFactory?
 
-function WorldScene(worldConfig, definitions) {
+function WorldScene(worldConfig, definitions, extras) {
 
   @Provide(WorldConfig)
   function getWorldConfig() {
@@ -59,14 +60,24 @@ function WorldScene(worldConfig, definitions) {
   // TODO maybe renderer should be scene scoped?
 
   @Provide(SceneLoader)
-  @Inject(Injector, Scene)
-  function loadScene(injector, scene) {
+  @Inject(Injector, Scene, Renderer)
+  function loadScene(injector, scene, renderer) {
+    renderer.getLayer('background');
+    renderer.getLayer('objects');
+    renderer.getLayer('player');
+    renderer.getLayer('hud');
+
+    renderer
     definitions.forEach((def) => {
       // TODO allow multiple types/loaders
       var handler = injector.get(def.type);
       var obj = injector.get(SceneObject);
       handler(def, obj);
       scene.addObject(def.ID, obj);
+    });
+
+    extras.forEach((extra) => {
+      injector.get(extra);
     });
   }
 

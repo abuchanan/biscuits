@@ -6,7 +6,7 @@ import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 import {Renderer} from 'src/render';
 
-export {PlayerLoader};
+export {PlayerLoader, PlayerCoins};
 
 
 class PlayerBody extends Body {

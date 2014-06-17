@@ -1,37 +1,53 @@
+import {Inject} from 'di';
+import PIXI from 'lib/pixi';
 import {Renderer} from 'src/render';
+import {ImageGrid} from 'src/ImageGrid';
+import {Scene} from 'src/scene';
 
-export {ActiveBackgroundRegion};
+export {BackgroundLoader};
 
 
-@Inject(Renderer)
-function Background(renderer) {
+@Inject(Renderer, Scene)
+function BackgroundLoader(renderer, scene) {
   // TODO layer ordering/config
   var layer = renderer.getLayer('background');
 
-  // TODO 
-  var region = ActiveBackgroundRegion(layer.width, layer.height, tiles);
-  var renderable = new TileBatchRenderable(region.forEachTile);
-  region.setAnchor(0.5, 0.5);
+  var tex = PIXI.Texture.fromImage('media/tmw_desert_spacing.png');
+  var r = new PIXI.Rectangle(1, 1, 32, 32);
+  var part = new PIXI.Texture(tex, r);
 
-  layer.addChild(renderable);
-  // TODO handle container resize
+  return function(def, obj) {
 
-  // TODO get tiles
-  //      var background = BackgroundRenderer(map.backgroundTiles);
+    // TODO 
+    var tiles = new ImageGrid({
+      tileWidth: 10,
+      tileHeight: 10,
+      getTile: function(x, y) {
+        var spr = new PIXI.Sprite(part);
+        spr.x = x * 10;
+        spr.y = y * 10;
+        return spr;
+      }
+    });
 
+    var region = new ActiveBackgroundRegion(layer.width, layer.height, tiles);
+    var renderable = new TileBatchRenderable(region.forEachTile.bind(region));
+    //region.setAnchor(0.5, 0.5);
 
-  // TODO make player pass this data (x, y) with event
-  // TODO? player.addListener('position change', function(x, y) {
-  //});
+    layer.addChild(renderable);
+    // TODO handle container resize
 
-  // TODO hard-coded player object ID is weird
-  //      player should probably be injectable anyway
-  var player = scene.getObject('player-1');
+    // TODO? player.addListener('position change', function(x, y) {});
 
-  scene.events.on('scene tick', function() {
-    var pos = player.getPosition();
-    region.setPosition(pos.x, pos.y);
-  });
+    // TODO hard-coded player object ID is weird
+    //      player should probably be injectable anyway
+    var player = scene.getObject('player-1');
+
+    scene.events.on('scene tick', function() {
+      var pos = player.getPosition();
+      //region.setPosition(pos.x, pos.y);
+    });
+  };
 }
 
 
@@ -88,6 +104,7 @@ class ActiveBackgroundRegion {
 class TileBatchRenderable extends PIXI.DisplayObject {
 
   constructor(forEachTile) {
+    super();
     this.renderable = true;
     this.forEachTile = forEachTile;
   }
@@ -101,8 +118,7 @@ class TileBatchRenderable extends PIXI.DisplayObject {
     // alow for trimming
     var isRotated = true;
 
-    this.forEachTile(function(tile) {
-      var child = tile.getRenderable();
+    this.forEachTile(function(child) {
       // Maybe the sprite isn't loaded.
       if (!child) {
         return;
@@ -174,6 +190,7 @@ class TileBatchRenderable extends PIXI.DisplayObject {
   }
 
   _renderWebGL(renderSession) {
+    
     if (!this.visible || this.alpha <= 0) {
       return;
     }
@@ -191,8 +208,7 @@ class TileBatchRenderable extends PIXI.DisplayObject {
     
     fsb.begin(this, renderSession);
 
-    this.forEachTile(function(tile) {
-      var sprite = tile.getRenderable();
+    this.forEachTile(function(sprite) {
       // Maybe the sprite isn't loaded.
       if (!sprite) {
         return;

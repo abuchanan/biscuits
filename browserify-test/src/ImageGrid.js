@@ -1,6 +1,6 @@
-'use strict';
+export {ImageGrid};
 
-module.exports = function(tilesDef) {
+function ImageGrid(tilesDef) {
 
     // TODO this manages the cached tiles
     //      at some point it should unload old tiles
