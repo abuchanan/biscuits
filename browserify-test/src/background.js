@@ -12,6 +12,7 @@ function BackgroundLoader(renderer, scene) {
   // TODO layer ordering/config
   var layer = renderer.getLayer('background');
 
+  // TODO clean up
   var tex = PIXI.Texture.fromImage('media/tmw_desert_spacing.png');
   var r = new PIXI.Rectangle(1, 1, 32, 32);
   var part = new PIXI.Texture(tex, r);
@@ -20,12 +21,12 @@ function BackgroundLoader(renderer, scene) {
 
     // TODO 
     var tiles = new ImageGrid({
-      tileWidth: 10,
-      tileHeight: 10,
+      tileWidth: 32,
+      tileHeight: 32,
       getTile: function(x, y) {
         var spr = new PIXI.Sprite(part);
-        spr.x = x * 10;
-        spr.y = y * 10;
+        spr.x = x * this.tileWidth;
+        spr.y = y * this.tileHeight;
         return spr;
       }
     });
