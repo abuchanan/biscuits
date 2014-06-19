@@ -97,9 +97,8 @@ function start() {
       deps: [SquirrelBody, SquirrelDriver, SquirrelRenderer]
     },
 
-  ]);
      // TODO background config
-//  ], [HUD, BackgroundRenderer]);
+  ], [HUD, BackgroundRenderer]);
 
   manager.register('mock', mockWorld);
   manager.load('mock');
