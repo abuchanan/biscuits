@@ -161,6 +161,22 @@ function PlayerLoader(scene, input, coins, initPlayerRenderer, createBody, creat
   }
 }
 
+/* TODO can't complete this until background region is injectable, player is injectable,
+        which means erradicating InjectLazy locals use.
+*/
+@Inject(Renderer, Scene)
+function PlayerWorldViewRenderer(renderer, scene) {
+  return function(body, actions) {
+
+    // TODO make this more flexible
+    var backgroundLayer = renderer.getLayer('background');
+    var objectsLayer = renderer.getLayer('objects');
+
+    scene.events.on('scene tick', function() {
+    });
+  };
+}
+
 
 // TODO @InjectPromise(PlayerTextures) ?
 @SceneScope

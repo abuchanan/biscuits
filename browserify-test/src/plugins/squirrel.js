@@ -63,6 +63,9 @@ function SquirrelDriver(scene) {
     //      when the object is destroyed. That feels like something the absolutely 
     //      requires a "destory" hook, although this could be built into Body so that
     //      everyone gets it for free.
+    //
+    //      Could also consider using something like WeakMap to track event listeners?
+    //      Won't have reasonable browser support for a long time though.
     var noop = function() {};
     var choices = [
       actions.walkUp,

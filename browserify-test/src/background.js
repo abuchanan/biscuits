@@ -7,8 +7,8 @@ import {Scene} from 'src/scene';
 export {BackgroundLoader};
 
 
-@Inject(Renderer, Scene)
-function BackgroundLoader(renderer, scene) {
+@Inject(Renderer)
+function BackgroundLoader(renderer) {
   // TODO layer ordering/config
   var layer = renderer.getLayer('background');
 
@@ -37,17 +37,6 @@ function BackgroundLoader(renderer, scene) {
 
     layer.addChild(renderable);
     // TODO handle container resize
-
-    // TODO? player.addListener('position change', function(x, y) {});
-
-    // TODO hard-coded player object ID is weird
-    //      player should probably be injectable anyway
-    var player = scene.getObject('player-1');
-
-    scene.events.on('scene tick', function() {
-      var pos = player.getPosition();
-      //region.setPosition(pos.x, pos.y);
-    });
   };
 }
 

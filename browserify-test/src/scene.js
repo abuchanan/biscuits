@@ -67,7 +67,6 @@ function WorldScene(worldConfig, definitions, extras) {
     renderer.getLayer('player');
     renderer.getLayer('hud');
 
-    renderer
     definitions.forEach((def) => {
       // TODO allow multiple types/loaders
       var handler = injector.get(def.type);
