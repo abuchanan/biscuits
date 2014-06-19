@@ -5,7 +5,6 @@ import {Input} from 'src/input';
 import EventEmitter from 'lib/EventEmitter';
 
 export {
-  actionDefaults,
   movementDefaults,
   Action,
   Movement,
@@ -14,11 +13,6 @@ export {
   ActionInputHelper
 };
 
-// TODO make injectable config (might end up as a class?)
-// TODO check that this definition order works with exports
-var actionDefaults = {
-  duration: 150,
-};
 
 var movementDefaults = {
   deltaX: 0,
@@ -38,54 +32,77 @@ function extend(obj) {
 };
 
 // TODO inject
-function Action(options) {
-  // TODO duration cannot be less than 0. check this.
-  return extend({}, actionDefaults, options, {
-    events: new EventEmitter(),
-  });
+class Action {
+  constructor(duration = 150) {
+    // TODO duration cannot be less than 0. check this.
+    this.duration = duration;
+  }
+  start() {}
+  tick() {}
 }
 
 
 // TODO if you deltaX/deltaY on the action after creationg,
 //      it wouldn't take effect here
-function Movement(name, body, direction, options) {
+class Movement extends Action {
 
-  options = extend({}, movementDefaults, options, {
-    name, direction,
+  constructor(name, body, direction, deltaX, deltaY, duration = 150) {
+    super(duration);
+    this.name = name;
+    this.body = body;
+    this.direction = direction;
+    this.deltaX = deltaX;
+    this.deltaY = deltaY;
 
-    // TODO getter? needed?
-    interpolatePosition: function(percent) {
-      if (!moving) {
-        return body.getPosition();
+    this._lastPos;
+    this._startTime;
+    this._percentComplete;
+  }
+
+  _updatePercentComplete(time) {
+  // TODO what would happen if you changed duration in the middle of a move?
+    this._percentComplete = (time - this._startTime) / this.duration;
+  }
+
+  // TODO getter? needed?
+  interpolatePosition() {
+    var percent = this._percentComplete || 0;
+    var pos = this._lastPos || this.body.getPosition();
+    return {
+      x: pos.x + (this.deltaX * percent),
+      y: pos.y + (this.deltaY * percent),
+    };
+  }
+
+  start(startTime, done) {
+    try {
+      var pos = this.body.getPosition();
+      this.body.setPosition(pos.x + this.deltaX, pos.y + this.deltaY);
+
+      this.body.direction = this.direction;
+      this._startTime = startTime;
+      this._lastPos = pos;
+
+    // TODO
+    } catch (e) {
+      if (e == 'blocked') {
+        console.log('caught blocked');
+        //done();
+      } else {
+        throw e;
       }
-      return {
-        x: lastPos.x + (options.deltaX * percent),
-        y: lastPos.y + (options.deltaY * percent),
-      };
-    },
-  });
+    }
+  }
+  
+  tick(time, done) {
+    this._updatePercentComplete(time);
 
-  var action = Action(options);
-  var moving = false;
-  // TODO false value won't play nice with interpolatePosition code above
-  var lastPos = false;
-
-  // TODO events are too heavy for this
-  action.events.on('action start', function() {
-    var pos = body.getPosition();
-    lastPos = pos;
-
-    body.direction = direction;
-    body.setPosition(pos.x + options.deltaX, pos.y + options.deltaY);
-
-    moving = true;
-  });
-
-  action.events.on('action end', function() {
-    moving = false;
-  });
-
-  return action;
+    if (this._percentComplete > 1) {
+      this._percentComplete = 0;
+      this._lastPos = false;
+      done();
+    }
+  }
 }
 
 
@@ -101,45 +118,25 @@ function ActionManager(scene) {
   //      stop, but the next state will get a start time of now, instead
   //      of 20 ticks ago.
   function switchState(startTime) {
-    if (state && state !== nextState) {
-      state.action.events.trigger('action end');
+
+    function done() {
+      state = false;
     }
+
     state = nextState;
     if (state) {
-      state.startTime = startTime;
-      state.action.events.trigger('action start');
+      state.action.start(startTime, done);
     }
   }
 
   function tick(time) {
+
+    function done() {
+      switchState(time);
+    }
+
     if (state) {
-      updateStatePercentComplete(time);
-
-      if (state.percentComplete >= 1) {
-        // The current state might have reached 100% at some time in the past.
-        // For example, if the current state ended at time = 100, and we're
-        // at time = 120, we're 20 ticks late to starting the next state.
-        // 
-        // So, adjust the start time of the next state so that it starts at
-        // time = 100.
-        var nextStateTime = state.startTime + state.action.duration;
-
-        // TODO these ended up being all the same. consolidate
-        // We're stopping, end the current state.
-        if (!nextState) {
-          switchState(nextStateTime);
-
-        // We're moving to a new state, end the current state,
-        // and start the next.
-        } else if (state !== nextState) {
-          switchState(nextStateTime);
-
-        // We're looping the current action.
-        } else {
-          switchState(nextStateTime);
-          updateStatePercentComplete(time);
-        }
-      }
+      state.action.tick(time, done);
     } else if (nextState) {
       switchState(time);
     }
@@ -147,19 +144,9 @@ function ActionManager(scene) {
 
   scene.events.on('scene tick', tick);
 
-  // TODO what would happen if you changed duration in the middle of a move?
-  function updateStatePercentComplete(time) {
-    var percent = (time - state.startTime) / state.action.duration;
-    if (percent > 1) {
-      percent = 1;
-    }
-    state.percentComplete = percent;
-  }
-
   function State(action) {
     return {
       action: action,
-      percentComplete: 0,
     }
   }
 

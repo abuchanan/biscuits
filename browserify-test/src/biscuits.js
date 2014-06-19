@@ -109,6 +109,7 @@ function start() {
     manager.scene.events.trigger('scene tick', [Date.now()]);
     renderer.render();
   }
+  // TODO inject this so that the frame rate can be mocked for testing
   requestAnimationFrame(loop);
 
   return renderer.getViewDOM();

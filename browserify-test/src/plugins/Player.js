@@ -30,6 +30,8 @@ class PlayerBody extends Body {
     if (!this._isBlocked(x, y)) {
       super.setPosition(x, y);
       this._triggerCollisions();
+    } else {
+      throw 'blocked';
     }
   }
 
@@ -96,10 +98,10 @@ class PlayerActions {
 
   constructor(manager, body) {
     this.manager = manager;
-    this.walkUp = Movement('walk-up', body, 'up', {deltaY: -32});
-    this.walkDown = Movement('walk-down', body, 'down', {deltaY: 32});
-    this.walkLeft = Movement('walk-left', body, 'left', {deltaX: -32});
-    this.walkRight = Movement('walk-right', body, 'right', {deltaX: 32});
+    this.walkUp = new Movement('walk-up', body, 'up', 0, -32);
+    this.walkDown = new Movement('walk-down', body, 'down', 0, 32);
+    this.walkLeft = new Movement('walk-left', body, 'left', -32, 0);
+    this.walkRight = new Movement('walk-right', body, 'right', 32, 0);
   }
 }
 
@@ -203,7 +205,7 @@ function PlayerRenderer(textures, body, actions, renderer, scene) {
       var textureName = state.action.name;
       clip.textures = textures[textureName];
 
-      var pos = state.action.interpolatePosition(state.percentComplete);
+      var pos = state.action.interpolatePosition();
       clip.position.x = pos.x;
       clip.position.y = pos.y;
 
