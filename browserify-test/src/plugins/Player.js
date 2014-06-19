@@ -170,6 +170,7 @@ function PlayerRenderer(textures, renderer, scene) {
   var layer = renderer.getLayer('player');
 
   // TODO wrap PIXI in an injectable that is not PIXI specific
+  // TODO wouldn't work with multiple players. move into create function below
   var clip = new PIXI.MovieClip(textures['stop-down']);
 
   return function(body, actions) {

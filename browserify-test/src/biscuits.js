@@ -8,6 +8,7 @@ import {CoinLoader} from 'src/plugins/Coin';
 import {PlayerLoader} from 'src/plugins/Player';
 import {ChestLoader} from 'src/plugins/Chest';
 import {BlockLoader} from 'src/plugins/Block';
+import {SquirrelLoader} from 'src/plugins/squirrel';
 import {BackgroundLoader} from 'src/background';
 import {HUD} from 'src/hud';
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
@@ -38,6 +39,7 @@ function start() {
     {ID: 'coin-2', x: 50, y: 10, w: 10, h: 10, type: CoinLoader, coinValue: 10},
     //{ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
     {ID: 'chest-1', x: 40, y: 40, w: 10, h: 10, type: ChestLoader},
+    {ID: 'squirrel-1', x: 128, y: 128, w: 32, h: 32, type: SquirrelLoader},
   ], [HUD]);
 
   manager.register('mock', mockWorld);
