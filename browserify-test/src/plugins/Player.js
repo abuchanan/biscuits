@@ -144,27 +144,14 @@ function PlayerDriver(actions, ActionInputHelperFactory) {
     // TODO how to allow player to move and swing sword at same time?
     //      how to coordinate separate action manager with the renderer?
 
-/* TODO can't complete this until background region is injectable, player is injectable,
-*/
-@Inject(Renderer, Scene)
-function PlayerWorldViewRenderer(renderer, scene) {
-  return function(body, actions) {
-
-    // TODO make this more flexible
-    var backgroundLayer = renderer.getLayer('background');
-    var objectsLayer = renderer.getLayer('objects');
-
-    scene.events.on('scene tick', function() {
-    });
-  };
-}
-
 
 @ObjectScope
 @Inject(PlayerTextures, Body, PlayerActions, Renderer, Scene)
 function PlayerRenderer(textures, body, actions, renderer, scene) {
 
   var layer = renderer.getLayer('player');
+  var backgroundLayer = renderer.getLayer('background');
+  var objectsLayer = renderer.getLayer('objects');
 
   // TODO wrap PIXI in an injectable that is not PIXI specific
   // TODO wouldn't work with multiple players. move into create function below
@@ -176,6 +163,10 @@ function PlayerRenderer(textures, body, actions, renderer, scene) {
   // TODO base animationSpeed on movement speed definitions
   clip.animationSpeed = 0.1;
   layer.addChild(clip);
+
+  // TODO clean up renderer.renderer
+  clip.position.x = renderer.renderer.width / 2;
+  clip.position.y = renderer.renderer.height / 2;
 
   scene.events.on('scene tick', function(time) {
     var state = actions.manager.getState();
@@ -193,8 +184,10 @@ function PlayerRenderer(textures, body, actions, renderer, scene) {
     if (state.action == 'stop') {
 
       var pos = body.getPosition();
-      clip.position.x = pos.x;
-      clip.position.y = pos.y;
+      objectsLayer.x = (objectsLayer.width / 2) - pos.x;
+      objectsLayer.y = (objectsLayer.height / 2) - pos.y;
+      backgroundLayer.x = (backgroundLayer.width / 2) - pos.x;
+      backgroundLayer.y = (backgroundLayer.height / 2) - pos.y;
 
       var textureName = 'stop-' + body.direction;
       clip.textures = textures[textureName];
@@ -206,8 +199,10 @@ function PlayerRenderer(textures, body, actions, renderer, scene) {
       clip.textures = textures[textureName];
 
       var pos = state.action.interpolatePosition();
-      clip.position.x = pos.x;
-      clip.position.y = pos.y;
+      objectsLayer.x = Math.floor((objectsLayer.width / 2) - pos.x);
+      objectsLayer.y = Math.floor((objectsLayer.height / 2) - pos.y);
+      backgroundLayer.x = Math.floor((backgroundLayer.width / 2) - pos.x);
+      backgroundLayer.y = Math.floor((backgroundLayer.height / 2) - pos.y);
 
       clip.play();
     }

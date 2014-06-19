@@ -1,5 +1,6 @@
 export {ImageGrid};
 
+// TODO clean this up. make it a class.
 function ImageGrid(tilesDef) {
 
     // TODO this manages the cached tiles
@@ -10,9 +11,10 @@ function ImageGrid(tilesDef) {
       var scaledMaxX = scaledX + Math.floor(w / tilesDef.tileWidth) + 1;
       var scaledMaxY = scaledY + Math.floor(h / tilesDef.tileHeight) + 1;
 
-      for (var y = scaledY; y < scaledMaxY; y++) {
-        for (var x = scaledX; x < scaledMaxX; x++) {
-          var tile = tilesDef.getTile(x, y);
+      for (var iy = scaledY; iy < scaledMaxY; iy++) {
+        for (var ix = scaledX; ix < scaledMaxX; ix++) {
+          var tile = tilesDef.getTile(ix, iy);
+
           if (tile) {
             callback(tile);
           }
@@ -26,7 +28,8 @@ function ImageGrid(tilesDef) {
       // Used to prefetch tile resources
       prefetch: function(x, y, w, h) {
         query(x, y, w, h, function(tile) {
-          tile.load();
+          // TODO prefetch is currently broken
+          //tile.load();
         });
       },
     };

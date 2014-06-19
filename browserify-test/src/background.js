@@ -8,6 +8,7 @@ import {SceneScope} from 'src/scope';
 export {BackgroundRenderer};
 
 
+// TODO inject deps
 @SceneScope
 @Inject(Renderer)
 function BackgroundRenderer(renderer) {
@@ -15,24 +16,46 @@ function BackgroundRenderer(renderer) {
 
   // TODO clean up
   var tex = PIXI.Texture.fromImage('media/tmw_desert_spacing.png');
-  var r = new PIXI.Rectangle(1, 1, 32, 32);
-  var part = new PIXI.Texture(tex, r);
+  var parts = [];
+
+  for (var i = 0; i < 6; i++) {
+    for (var j = 0; j < 6; j++) {
+      var x = 1 * i + i * 32 + 1;
+      var y = 1 * j + j * 32 + 1;
+
+      var r = new PIXI.Rectangle(x, y, 32, 32);
+      var part = new PIXI.Texture(tex, r);
+      parts.push(part);
+    }
+  }
+
+  var grid = [];
+  for (var j = -20; j < 20; j++) {
+    for (var i = -20; i < 20; i++) {
+      var x = Math.floor(Math.random() * parts.length);
+      var spr = new PIXI.Sprite(parts[x]);
+      spr.x = i * 32;
+      spr.y = j * 32;
+      grid.push(spr);
+    }
+  }
 
   // TODO 
-  var tiles = new ImageGrid({
+  var tiles = ImageGrid({
     tileWidth: 32,
     tileHeight: 32,
     getTile: function(x, y) {
-      var spr = new PIXI.Sprite(part);
-      spr.x = x * this.tileWidth;
-      spr.y = y * this.tileHeight;
-      return spr;
+      var mx = x + 20;
+      var my = y + 20;
+      var i = 40 * my + mx;
+      return grid[i];
     }
   });
 
-  var region = new ActiveBackgroundRegion(layer.width, layer.height, tiles);
-  var renderable = new TileBatchRenderable(region.forEachTile.bind(region));
-  //region.setAnchor(0.5, 0.5);
+  // TODO fix active background region. separate it from renderer.
+  //var region = new ActiveBackgroundRegion(layer.width, layer.height, tiles);
+  // region.setAnchor(0.5, 0.5);
+  var renderable = new TileBatchRenderable(grid.forEach.bind(grid));
 
   layer.addChild(renderable);
   // TODO handle container resize
