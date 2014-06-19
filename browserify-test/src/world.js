@@ -1,10 +1,12 @@
-import {Inject, InjectLazy, TransientScope} from 'di';
-import {SceneScope} from 'src/scope';
+import {Inject} from 'di';
+import {SceneScope, ObjectScope} from 'src/scope';
+import {SceneObject} from 'src/scene';
 import {EventEmitter} from 'src/events';
-import {QuadTree} from 'src/QuadTree';
+import {QuadTreeFactory} from 'src/QuadTree';
 
 export {
   WorldConfig,
+  BodyConfig,
   World,
   Body
 };
@@ -22,15 +24,32 @@ export {
 //      An interface shouldn't be able to be used to fulfill a dependency.
 //      DI should throw an error if there is no concrete provider for the
 //      interface token.
-class WorldConfig {}
+
+class WorldConfig {
+  constructor(x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+  }
+}
+
+class BodyConfig {
+  constructor(x, y, w, h, isBlock = false) {
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.isBlock = isBlock;
+  }
+}
 
 @SceneScope
-@Inject(WorldConfig)
-@InjectLazy(QuadTree)
+@Inject(WorldConfig, QuadTreeFactory)
 class World {
 
-  constructor(config, createQuadTree) {
-    this._tree = createQuadTree('quadtree-config', config);
+  constructor(config, QuadTreeFactory) {
+    this._tree = QuadTreeFactory(config.x, config.y, config.w, config.h);
     this._objects = {};
     this._currentObjectID = 0;
   }
@@ -79,11 +98,12 @@ class World {
 
 
 // TODO support resize?
-@TransientScope
-@Inject(EventEmitter, World, 'body-config')
+// TODO replace "body-config" string with class
+@ObjectScope
+@Inject(EventEmitter, World, BodyConfig, SceneObject)
 class Body {
 
-  constructor(events, world, config) {
+  constructor(events, world, config, obj) {
     // TODO needed?
     this.events = events;
     this.world = world;
@@ -93,8 +113,8 @@ class Body {
     this._y = config.y;
     this.w = config.w;
     this.h = config.h;
-    this.obj = config.obj;
     this.isBlock = config.isBlock || false;
+    this.obj = obj;
     world.add(this);
   }
 

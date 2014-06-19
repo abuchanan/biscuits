@@ -1,20 +1,27 @@
-import {Inject, InjectLazy, TransientScope} from 'di';
+import {Inject, Provide, SuperConstructor} from 'di';
 import {Body} from 'src/world';
-import {Input} from 'src/input';
-import {Movement, ActionManager, ActionInputHelper} from 'src/Actions';
+import {Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
 import {Scene} from 'src/scene';
-import {SceneScope} from 'src/scope';
+import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {loadSpriteSheetSync} from 'src/sprite';
 import PIXI from 'lib/pixi';
 
-export {PlayerLoader, PlayerCoins};
+export {
+  PlayerBody,
+  PlayerDriver,
+  PlayerRenderer,
+  CoinPurse
+};
 
 
+@ObjectScope
+@Provide(Body)
+@Inject(SuperConstructor)
 class PlayerBody extends Body {
 
-  constructor(events, world, config) {
-    super(events, world, config);
+  constructor(superConstructor) {
+    superConstructor();
     // TODO could use mixin(Body, BodyDirection)
     this.direction = 'down';
   }
@@ -48,7 +55,7 @@ class PlayerBody extends Body {
     for (var i = 0, ii = bodies.length; i < ii; i++) {
       if (bodies[i] !== this) {
         // TODO trigger events on body or body.obj?
-        bodies[i].obj.events.trigger('player collision', [this.obj]);
+        bodies[i].events.trigger('player collision', [this]);
       }
     }
   }
@@ -57,7 +64,8 @@ class PlayerBody extends Body {
 
 // TODO load player coins from game save service
 // TODO basic validation/balance checking
-class PlayerCoins {
+@ObjectScope
+class CoinPurse {
 
   constructor() {
     this._balance = 0;
@@ -82,7 +90,7 @@ class PlayerCoins {
 //      window focus/blur events?
 
 // TODO inject Movement
-@TransientScope
+@ObjectScope
 @Inject(ActionManager, Body)
 class PlayerActions {
 
@@ -96,12 +104,11 @@ class PlayerActions {
 }
 
 
-@TransientScope
-@Inject(PlayerActions)
-@InjectLazy(ActionInputHelper)
-function PlayerActionsDriver(actions, createActionInputHelper) {
+@ObjectScope
+@Inject(PlayerActions, ActionInputHelperFactory)
+function PlayerDriver(actions, ActionInputHelperFactory) {
 
-  var inputHelper = createActionInputHelper(ActionManager, actions.manager);
+  var inputHelper = ActionInputHelperFactory(actions.manager);
 
   inputHelper.bind('Up', actions.walkUp);
   inputHelper.bind('Down', actions.walkDown);
@@ -110,36 +117,11 @@ function PlayerActionsDriver(actions, createActionInputHelper) {
 }
 
 
-// TODO now i have to ensure this is SceneScope too, right? 
-//      Chasing down all these dependencies is pretty confusing.
+// TODO Chasing down scope dependencies is pretty confusing.
 //      Maybe some sort of dependency graph analysis (static?) would
 //      help catch errors.
 
-@SceneScope
-@Inject(Scene, Input, PlayerCoins, PlayerRenderer)
-@InjectLazy(PlayerBody, PlayerActions, PlayerActionsDriver)
-function PlayerLoader(scene, input, coins, initPlayerRenderer, createBody, createActions,
-                      startDriver) {
-
-  return function(def, obj) {
-
-    var bodyConfig = {
-      x: def.x,
-      y: def.y,
-      w: def.w,
-      h: def.h,
-      obj: obj,
-    };
-
-    // TODO replace this convention with an injector per world object?
-    obj.body = createBody('body-config', bodyConfig);
-    obj.coins = coins;
-
-    var actions = createActions(Body, obj.body);
-    startDriver(PlayerActions, actions);
-
-    initPlayerRenderer(obj.body, actions);
-
+    /* TODO move to driver?
     scene.events.on('scene tick', function() {
       // TODO keydown? What if the player holds the key down?
       // TODO no longer "input.event" instead "input.Up"
@@ -151,6 +133,7 @@ function PlayerLoader(scene, input, coins, initPlayerRenderer, createBody, creat
         });
       }
     });
+    */
 
     // TODO mechanism for telling scene that it needs to wait on a promise
     //      when loading
@@ -158,11 +141,8 @@ function PlayerLoader(scene, input, coins, initPlayerRenderer, createBody, creat
     // TODO PlayerCombat(keybindings, worldObj);
     // TODO how to allow player to move and swing sword at same time?
     //      how to coordinate separate action manager with the renderer?
-  }
-}
 
 /* TODO can't complete this until background region is injectable, player is injectable,
-        which means erradicating InjectLazy locals use.
 */
 @Inject(Renderer, Scene)
 function PlayerWorldViewRenderer(renderer, scene) {
@@ -178,10 +158,9 @@ function PlayerWorldViewRenderer(renderer, scene) {
 }
 
 
-// TODO @InjectPromise(PlayerTextures) ?
-@SceneScope
-@Inject(PlayerTextures, Renderer, Scene)
-function PlayerRenderer(textures, renderer, scene) {
+@ObjectScope
+@Inject(PlayerTextures, Body, PlayerActions, Renderer, Scene)
+function PlayerRenderer(textures, body, actions, renderer, scene) {
 
   var layer = renderer.getLayer('player');
 
@@ -189,51 +168,48 @@ function PlayerRenderer(textures, renderer, scene) {
   // TODO wouldn't work with multiple players. move into create function below
   var clip = new PIXI.MovieClip(textures['stop-down']);
 
-  return function(body, actions) {
+  // TODO scale player sprite images in actual image file
+  clip.width = body.w;
+  clip.height = body.h;
+  // TODO base animationSpeed on movement speed definitions
+  clip.animationSpeed = 0.1;
+  layer.addChild(clip);
 
-    // TODO scale player sprite images in actual image file
-    clip.width = body.w;
-    clip.height = body.h;
-    // TODO base animationSpeed on movement speed definitions
-    clip.animationSpeed = 0.1;
-    layer.addChild(clip);
+  scene.events.on('scene tick', function(time) {
+    var state = actions.manager.getState();
 
-    scene.events.on('scene tick', function(time) {
-      var state = actions.manager.getState();
+    // TODO try to remove this stop special case. Maybe actions should be
+    //      DFAs. After each walk action, it would move to a "stop-{direction"
+    //      state.
+    //      This would allow a nice action/DFA modeling tool too.
+    //
+    //      Something to ask: how would concurrent actions/states be handled?
 
-      // TODO try to remove this stop special case. Maybe actions should be
-      //      DFAs. After each walk action, it would move to a "stop-{direction"
-      //      state.
-      //      This would allow a nice action/DFA modeling tool too.
-      //
-      //      Something to ask: how would concurrent actions/states be handled?
+    // TODO maybe the renderer could hook in via some sort of action tick event.
+    //      then it wouldn't need to depend on scene tick, it wouldn't need
+    //      interpolatePosition, 
+    if (state.action == 'stop') {
 
-      // TODO maybe the renderer could hook in via some sort of action tick event.
-      //      then it wouldn't need to depend on scene tick, it wouldn't need
-      //      interpolatePosition, 
-      if (state.action == 'stop') {
+      var pos = body.getPosition();
+      clip.position.x = pos.x;
+      clip.position.y = pos.y;
 
-        var pos = body.getPosition();
-        clip.position.x = pos.x;
-        clip.position.y = pos.y;
+      var textureName = 'stop-' + body.direction;
+      clip.textures = textures[textureName];
+      clip.gotoAndStop(0);
 
-        var textureName = 'stop-' + body.direction;
-        clip.textures = textures[textureName];
-        clip.gotoAndStop(0);
+    } else {
 
-      } else {
+      var textureName = state.action.name;
+      clip.textures = textures[textureName];
 
-        var textureName = state.action.name;
-        clip.textures = textures[textureName];
+      var pos = state.action.interpolatePosition(state.percentComplete);
+      clip.position.x = pos.x;
+      clip.position.y = pos.y;
 
-        var pos = state.action.interpolatePosition(state.percentComplete);
-        clip.position.x = pos.x;
-        clip.position.y = pos.y;
-
-        clip.play();
-      }
-    });
-  };
+      clip.play();
+    }
+  });
 }
 
 function PlayerTextures() {

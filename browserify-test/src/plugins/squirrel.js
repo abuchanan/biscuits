@@ -1,27 +1,40 @@
-import {Inject, InjectLazy, TransientScope} from 'di';
+import {Inject, Provide, SuperConstructor} from 'di';
 import {Movement, ActionManager} from 'src/Actions';
 import {Scene} from 'src/scene';
-import {SceneScope} from 'src/scope';
+import {ObjectScope} from 'src/scope';
 import {loadSpriteSheetSync} from 'src/sprite';
 import {Renderer} from 'src/render';
 import PIXI from 'lib/pixi';
 import {Body} from 'src/world';
 
-export {SquirrelLoader, SquirrelActions, SquirrelDriver};
-// TODO injector per world object? would make things even more pluggable,
-//      but tradeoff is memory space.
+export {
+  SquirrelBody,
+  SquirrelActions,
+  SquirrelDriver,
+  SquirrelRenderer
+}
 
 
+// TODO does this trash all inherited annotations?
+//      Yes. sucky poo poo.
+//
+//      this could be a really interesting case to bring up with di.js
+//
+//      this also clobbers the @ObjectScope. also poop.
+@ObjectScope
+@Provide(Body)
+@Inject(SuperConstructor)
 class SquirrelBody extends Body {
 
-  constructor(events, world, config) {
-    super(events, world, config);
+  constructor(superConstructor) {
+    superConstructor();
     // TODO could use mixin(Body, BodyDirection)
     this.direction = 'down';
   }
 }
 
-@TransientScope
+
+@ObjectScope
 @Inject(ActionManager, Body)
 class SquirrelActions {
   constructor(manager, body) {
@@ -36,10 +49,9 @@ class SquirrelActions {
 // TODO sporadic animation. a squirrel isn't a fluid animation loop.
 
 
-@SceneScope
-@Inject(Scene)
-function SquirrelDriver(scene) {
-  return function(actions) {
+@ObjectScope
+@Inject(Scene, SquirrelActions)
+function SquirrelDriver(scene, actions) {
 
     // TODO I think that simplicity in destroying an object is really interesting,
     //      particularly when it comes to callback functions like this. Currently,
@@ -89,32 +101,10 @@ function SquirrelDriver(scene) {
         actions.manager.stopAll();
       }
     });
-  };
 }
 
 
 // TODO gosh it would be nice not to have to prefix everything with "Squirrel"
-@SceneScope
-@Inject(Scene, SquirrelRenderer, SquirrelDriver)
-@InjectLazy(SquirrelBody, SquirrelActions)
-function SquirrelLoader(scene, initRenderer, startDriver, createBody, createActions) {
-  return function(def, obj) {
-    var life = 10;
-
-    var bodyConfig = {
-      x: def.x,
-      y: def.y,
-      w: def.w,
-      h: def.h,
-      obj: obj,
-    }
-
-    // TODO InjectLazy locals is going away, get rid of it in this code
-    obj.body = createBody('body-config', bodyConfig);
-    var actions = createActions(Body, obj.body);
-    startDriver(actions);
-
-    initRenderer(obj.body, actions);
 
     // TODO squirrels can be destroyed which is an interesting case where an object
     //      need to destroy itself.
@@ -129,12 +119,8 @@ function SquirrelLoader(scene, initRenderer, startDriver, createBody, createActi
         pathfinder.stop();
       },
     */
-  }
-}
 
 
-// TODO how to handle something like this? scene scope, but reused constantly
-@SceneScope
 function SquirrelTextures() {
 
     var imgSrc = "media/squirrel-pieces.png";
@@ -164,19 +150,18 @@ function SquirrelTextures() {
 }
 
 
-// TODO I forget this ALL THE TIME!
-@SceneScope
-@Inject(SquirrelTextures, Renderer, Scene)
-function SquirrelRenderer(textures, renderer, scene) {
+// TODO I forget this ALL THE TIME! (scope annotation)
+@ObjectScope
+@Inject(SquirrelTextures, Renderer, Scene, Body, SquirrelActions)
+function SquirrelRenderer(textures, renderer, scene, body, actions) {
 
   var layer = renderer.getLayer('objects');
-
-  return function(body, actions) {
 
     var clip = new PIXI.MovieClip(textures['idle-left']);
     clip.width = body.w;
     clip.height = body.h;
     // TODO configurable
+    // TODO make match action duration
     clip.animationSpeed = 0.07;
     clip.play();
 
@@ -209,7 +194,6 @@ function SquirrelRenderer(textures, renderer, scene) {
       }
 
     });
-  };
 }
 
 

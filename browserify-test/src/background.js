@@ -3,13 +3,14 @@ import PIXI from 'lib/pixi';
 import {Renderer} from 'src/render';
 import {ImageGrid} from 'src/ImageGrid';
 import {Scene} from 'src/scene';
+import {SceneScope} from 'src/scope';
 
-export {BackgroundLoader};
+export {BackgroundRenderer};
 
 
+@SceneScope
 @Inject(Renderer)
-function BackgroundLoader(renderer) {
-  // TODO layer ordering/config
+function BackgroundRenderer(renderer) {
   var layer = renderer.getLayer('background');
 
   // TODO clean up
@@ -17,27 +18,24 @@ function BackgroundLoader(renderer) {
   var r = new PIXI.Rectangle(1, 1, 32, 32);
   var part = new PIXI.Texture(tex, r);
 
-  return function(def, obj) {
+  // TODO 
+  var tiles = new ImageGrid({
+    tileWidth: 32,
+    tileHeight: 32,
+    getTile: function(x, y) {
+      var spr = new PIXI.Sprite(part);
+      spr.x = x * this.tileWidth;
+      spr.y = y * this.tileHeight;
+      return spr;
+    }
+  });
 
-    // TODO 
-    var tiles = new ImageGrid({
-      tileWidth: 32,
-      tileHeight: 32,
-      getTile: function(x, y) {
-        var spr = new PIXI.Sprite(part);
-        spr.x = x * this.tileWidth;
-        spr.y = y * this.tileHeight;
-        return spr;
-      }
-    });
+  var region = new ActiveBackgroundRegion(layer.width, layer.height, tiles);
+  var renderable = new TileBatchRenderable(region.forEachTile.bind(region));
+  //region.setAnchor(0.5, 0.5);
 
-    var region = new ActiveBackgroundRegion(layer.width, layer.height, tiles);
-    var renderable = new TileBatchRenderable(region.forEachTile.bind(region));
-    //region.setAnchor(0.5, 0.5);
-
-    layer.addChild(renderable);
-    // TODO handle container resize
-  };
+  layer.addChild(renderable);
+  // TODO handle container resize
 }
 
 

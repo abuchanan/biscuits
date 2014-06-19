@@ -1,28 +1,32 @@
 import {Injector, Provide} from 'di';
 import {RenderConfig, Renderer} from 'src/render';
 import {SceneManager} from 'src/scenemanager';
-import {WorldScene} from 'src/scene';
+import {WorldScene} from 'src/worldscene';
 import {KeyboardInput} from 'src/input';
+import {WorldConfig, BodyConfig, Body} from 'src/world';
 
-import {CoinLoader} from 'src/plugins/Coin';
-import {PlayerLoader} from 'src/plugins/Player';
-import {ChestLoader} from 'src/plugins/Chest';
-import {BlockLoader} from 'src/plugins/Block';
-import {SquirrelLoader} from 'src/plugins/squirrel';
-import {BackgroundLoader} from 'src/background';
+import {PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse} from 'src/plugins/Player';
+import {CoinConfig, CoinRenderer, CoinCollision} from 'src/plugins/Coin';
+import {ChestConfig, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
+import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
+import {BackgroundRenderer} from 'src/background';
 import {HUD} from 'src/hud';
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
 
 export {start};
 
+function valueProvider(token, value) {
+  var fn = function() { return value; };
+  fn.annotations = [new Provide(token)];
+  return fn;
+}
 
 function start() {
 
-  @Provide(RenderConfig)
-  function getRenderConfig() {
-    return {};
-  }
-
+  var getRenderConfig = valueProvider(RenderConfig, {});
+  
+  // TODO submit a patch to di.js allowing me to provide values to a new injector
+  //      without a wrapper
   var injector = new Injector([getRenderConfig]);
   var renderer = injector.get(Renderer);
   var manager = injector.get(SceneManager);
@@ -31,16 +35,71 @@ function start() {
 
   injector.get(KeyboardInput);
 
+  var worldConfig = new WorldConfig(0, 0, 400, 400);
+
   // TODO mock world for debugging only
-  var mockWorld = WorldScene({x: 0, y: 0, w: 400, h: 400}, [
-    {ID: 'player-1', x: 256, y: 256, w: 32, h: 32, type: PlayerLoader},
-    {ID: 'background', type: BackgroundLoader},
-    {ID: 'coin-1', x: 20, y: 20, w: 10, h: 10, type: CoinLoader},
-    {ID: 'coin-2', x: 50, y: 10, w: 10, h: 10, type: CoinLoader, coinValue: 10},
-    //{ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
-    {ID: 'chest-1', x: 40, y: 40, w: 10, h: 10, type: ChestLoader},
-    {ID: 'squirrel-1', x: 128, y: 128, w: 32, h: 32, type: SquirrelLoader},
-  ], [HUD]);
+  var mockWorld = WorldScene(worldConfig, [
+
+    {
+      ID: 'player-1',
+      providers: [
+        // TODO get rid of this syntax
+        valueProvider(BodyConfig, new BodyConfig(256, 256, 32, 32)),
+        // TODO kinda sucks that I have to provide this also.
+        //      unless maybe I provide it as a value?
+        PlayerBody
+      ],
+      deps: [PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse]
+    },
+
+    {
+      ID: 'block-1',
+      providers: [
+        valueProvider(BodyConfig, new BodyConfig(64, 64, 32, 32, true))
+      ],
+      deps: [Body]
+    },
+
+    {
+      ID: 'chest-1',
+      providers: [
+        valueProvider(BodyConfig, new BodyConfig(128, 128, 32, 32, true)),
+        valueProvider(ChestConfig, new ChestConfig(10))
+        // TODO ChestBody?
+      ],
+      deps: [Body, ChestRenderer, ChestUseable]
+    },
+
+    {
+      ID: 'coin-1', 
+      providers: [
+        valueProvider(BodyConfig, new BodyConfig(128, 0, 32, 32)),
+        valueProvider(CoinConfig, new CoinConfig(10))
+      ], 
+      deps: [Body, CoinRenderer, CoinCollision]
+    },
+
+    {
+      ID: 'coin-1',
+      providers: [
+        valueProvider(BodyConfig, new BodyConfig(128, 64, 32, 32)),
+        valueProvider(CoinConfig, new CoinConfig(5))
+      ],
+      deps: [Body, CoinRenderer, CoinCollision]
+    },
+
+    {
+      ID: 'squirrel-1',
+      providers: [
+        valueProvider(BodyConfig, new BodyConfig(128, 256, 32, 32)),
+        SquirrelBody
+      ],
+      deps: [SquirrelBody, SquirrelDriver, SquirrelRenderer]
+    },
+
+  ]);
+     // TODO background config
+//  ], [HUD, BackgroundRenderer]);
 
   manager.register('mock', mockWorld);
   manager.load('mock');

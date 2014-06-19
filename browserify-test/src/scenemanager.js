@@ -1,5 +1,4 @@
 import {Inject, Injector, Provide} from 'di';
-import {WorldConfig} from 'src/world';
 import {Scene, SceneLoader} from 'src/scene';
 import {SceneScope} from 'src/scope';
 

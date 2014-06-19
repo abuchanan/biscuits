@@ -1,5 +1,6 @@
 import {Inject, TransientScope} from 'di';
 import {Scene} from 'src/scene';
+import {SceneScope} from 'src/scope';
 import {Input} from 'src/input';
 import EventEmitter from 'lib/EventEmitter';
 
@@ -9,6 +10,7 @@ export {
   Action,
   Movement,
   ActionManager,
+  ActionInputHelperFactory,
   ActionInputHelper
 };
 
@@ -195,8 +197,15 @@ function ActionManager(scene) {
   };
 }
 
-@TransientScope
-@Inject(Input, Scene, ActionManager)
+// TODO I don't like this "...Factory" name pattern
+@SceneScope
+@Inject(Input, Scene)
+function ActionInputHelperFactory(input, scene) {
+  return function(manager) {
+    return new ActionInputHelper(input, scene, manager);
+  }
+}
+
 class ActionInputHelper {
   constructor(input, scene, manager) {
     var actions = this._actions = {};

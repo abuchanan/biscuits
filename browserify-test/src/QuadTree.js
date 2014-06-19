@@ -1,26 +1,25 @@
-import {Inject, TransientScope} from 'di';
-import {SceneScope} from 'src/scope';
-
 // TODO note that it only stores int/string IDs
 //      I don't support storing arbitrary data (e.g. objects)
 //      because I want to keep this simple and efficient, and it's easy enough to
 //      map those IDs to arbitrary data outside of the quadtree.
-export {QuadTree};
+export {QuadTreeFactory};
 
-// TODO the @TransientScope is critical here, and it will be
-//      for anything created with InjectLazy.
-@TransientScope
-@Inject('quadtree-config')
+function QuadTreeFactory() {
+  return function(...args) {
+    return new QuadTree(...args);
+  }
+}
+
 class QuadTree {
 
-  //constructor(minX, minY, treeW, treeH) {
-  constructor(config) {
+  constructor(x, y, w, h) {
+
     // TODO var maxChildren = 10;
 
-    this._minX  = config.x;
-    this._minY  = config.y;
-    this._maxX = this._minX + config.w;
-    this._maxY = this._minY + config.h;
+    this._minX = x;
+    this._minY = y;
+    this._maxX = this._minX + w;
+    this._maxY = this._minY + h;
     this._midX = this._maxX / 2;
     this._midY = this._maxY / 2;
 
