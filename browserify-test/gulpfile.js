@@ -21,6 +21,7 @@ var copyFiles = [
   'lib/require.js',
   'lib/traceur-runtime.js',
   'lib/pixi.js',
+  'lib/fpsmeter.js',
 ]
 
 var traceurOptions = {
@@ -29,6 +30,7 @@ var traceurOptions = {
   annotations: true
 }
 
+// TODO gulp watch task will fail on traceur syntax error
 gulp.task('build', function() {
 
   gulp.src(copyFiles, {base: __dirname}).pipe(gulp.dest(buildDir));

@@ -10,6 +10,7 @@ import {ChestLoader} from 'src/plugins/Chest';
 import {BlockLoader} from 'src/plugins/Block';
 import {BackgroundLoader} from 'src/background';
 import {HUD} from 'src/hud';
+import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
 
 export {start};
 
@@ -24,6 +25,8 @@ function start() {
   var injector = new Injector([getRenderConfig]);
   var renderer = injector.get(Renderer);
   var manager = injector.get(SceneManager);
+
+  manager.plugins.push(FPSMeterPlugin);
 
   injector.get(KeyboardInput);
 

@@ -11,6 +11,8 @@ class SceneManager {
   constructor(injector) {
     this.injector = injector;
     this.defs = {};
+    // TODO better name/organization for plugins?
+    this.plugins = [];
   }
 
   register(name, def) {
@@ -31,6 +33,11 @@ class SceneManager {
 
     var childInjector = this.injector.createChild(def, [SceneScope]);
     childInjector.get(SceneLoader);
+
+    this.plugins.forEach((plugin) => {
+      childInjector.get(plugin);
+    });
+
     this.scene = childInjector.get(Scene);
   }
 }
