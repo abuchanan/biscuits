@@ -29,7 +29,7 @@ function start() {
 
   // TODO mock world for debugging only
   var mockWorld = WorldScene({x: 0, y: 0, w: 400, h: 400}, [
-    {ID: 'player-1', x: 1, y: 1, w: 32, h: 32, type: PlayerLoader},
+    {ID: 'player-1', x: 256, y: 256, w: 32, h: 32, type: PlayerLoader},
     {ID: 'background', type: BackgroundLoader},
     {ID: 'coin-1', x: 20, y: 20, w: 10, h: 10, type: CoinLoader},
     {ID: 'coin-2', x: 50, y: 10, w: 10, h: 10, type: CoinLoader, coinValue: 10},

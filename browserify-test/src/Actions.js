@@ -46,11 +46,12 @@ function Action(options) {
 
 // TODO if you deltaX/deltaY on the action after creationg,
 //      it wouldn't take effect here
-function Movement(body, direction, options) {
+function Movement(name, body, direction, options) {
 
   options = extend({}, movementDefaults, options, {
+    name, direction,
+
     // TODO getter? needed?
-    direction: direction,
     interpolatePosition: function(percent) {
       if (!moving) {
         return body.getPosition();
