@@ -35,7 +35,7 @@ function start() {
 
   injector.get(KeyboardInput);
 
-  var worldConfig = new WorldConfig(0, 0, 400, 400);
+  var worldConfig = new WorldConfig(-4000, -4000, 8000, 8000);
 
   // TODO mock world for debugging only
   var mockWorld = WorldScene(worldConfig, [
