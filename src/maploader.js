@@ -1,3 +1,7 @@
+import PIXI from 'lib/pixi';
+
+export {loadMapSync};
+
 function parseTileset(tilesets) {
     var slices = {};
 
@@ -33,7 +37,7 @@ function parseTileset(tilesets) {
     return slices;
 }
 
-function parseObjectLayer(layer, map, worldScale) {
+function parseObjectLayer(layer, map) {
   var all = [];
 
   for (var i = 0; i < layer.objects.length; i++) {
@@ -41,21 +45,32 @@ function parseObjectLayer(layer, map, worldScale) {
 
       // TODO catch bad coordinates
       var pos = {
-        // TODO inconsistent with background tiles
-        x: obj.x / worldScale,
-        y: obj.y / worldScale,
-        w: obj.width / worldScale,
-        h: obj.height / worldScale,
+        x: obj.x,
+        y: obj.y,
+        w: obj.width,
+        h: obj.height,
         type: obj.type,
         name: obj.name,
       };
 
-      var parsedObj = _.extend({}, layer.properties, obj.properties, pos);
+      var parsedObj = extend({}, layer.properties, obj.properties, pos);
       all.push(parsedObj);
   }
 
   return all;
 }
+
+// Extend a given object with all the properties in passed-in object(s).
+function extend(obj) {
+  Array.prototype.slice.call(arguments, 1).forEach(function(source) {
+    if (source) {
+      for (var prop in source) {
+        obj[prop] = source[prop];
+      }
+    }
+  });
+  return obj;
+};
 
 function parseTileLayer(map, layer, slices) {
   var tiles = [];
@@ -86,7 +101,7 @@ function parseImageLayer(layer) {
   return PIXI.Sprite.fromImage(layer.image);
 }
 
-function parseMap(map, worldScale) {
+function parseMap(map) {
 
   // TODO parse all tilesets
   var tileset = parseTileset(map.tilesets);
@@ -115,7 +130,7 @@ function parseMap(map, worldScale) {
         data.tilelayers.push(tilelayer);
 
       } else if (layer.type == 'objectgroup') {
-        var objectlayer = parseObjectLayer(layer, map, worldScale);
+        var objectlayer = parseObjectLayer(layer, map);
         data.objectlayers.push(objectlayer);
 
       } else if (layer.type == 'imagelayer') {
@@ -127,18 +142,17 @@ function parseMap(map, worldScale) {
   return data;
 }
 
-function loadMap(src, worldScale) {
-  var deferred = Q.defer();
+function loadMapSync(src) {
   var req = new XMLHttpRequest();
-  req.onload = function() {
-    var d = JSON.parse(this.responseText);
-    var data = parseMap(d, worldScale);
-    deferred.resolve(data);
-  };
+
   // TODO if this request fails, the whole app will hang
   req.responseType = 'application/json';
   req.overrideMimeType('application/json');
-  req.open('get', src, true);
+  req.open('get', src, false);
   req.send();
-  return deferred.promise;
+
+  var d = JSON.parse(req.responseText);
+  var data = parseMap(d);
+
+  return data;
 }

@@ -13,6 +13,7 @@ import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {HUD} from 'src/hud';
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
 import PIXI from 'lib/pixi';
+import {loadMapSync} from 'src/maploader';
 
 export {start};
 
@@ -22,37 +23,20 @@ function valueProvider(token, value) {
   return fn;
 }
 
-@Provide(BackgroundGrid)
-function getBackgroundGrid() {
-  // TODO clean up
-  var tex = PIXI.Texture.fromImage('media/tmw_desert_spacing.png');
-  var parts = [];
-
-  for (var i = 0; i < 6; i++) {
-    for (var j = 0; j < 6; j++) {
-      var x = 1 * i + i * 32 + 1;
-      var y = 1 * j + j * 32 + 1;
-
-      var r = new PIXI.Rectangle(x, y, 32, 32);
-      var part = new PIXI.Texture(tex, r);
-      parts.push(part);
-    }
-  }
-
-  var grid = [];
-  for (var j = -20; j < 20; j++) {
-    for (var i = -20; i < 20; i++) {
-      var x = Math.floor(Math.random() * parts.length);
-      var spr = new PIXI.Sprite(parts[x]);
-      spr.x = i * 32;
-      spr.y = j * 32;
-      grid.push(spr);
-    }
-  }
-  return grid;
-}
-
 function start() {
+
+  var map = loadMapSync('maps/foo9.json');
+
+  @Provide(BackgroundGrid)
+  function getLoadedBackground() {
+    var grid = [];
+    map.tilelayers.forEach((layer) => {
+      layer.forEach((sprite) => {
+        grid.push(sprite);
+      });
+    });
+    return grid;
+  }
 
   var getRenderConfig = valueProvider(RenderConfig, {});
   
@@ -66,72 +50,77 @@ function start() {
 
   injector.get(KeyboardInput);
 
-  var worldConfig = new WorldConfig(-4000, -4000, 8000, 8000);
+  var worldConfig = new WorldConfig(0, 0, map.mapData.width * map.mapData.tilewidth, map.mapData.height * map.mapData.tileheight);
 
-  // TODO mock world for debugging only
-  var mockWorld = WorldScene([
-    valueProvider(WorldConfig, worldConfig),
-    getBackgroundGrid,
-  ], [
-
+  console.log(map);
+  var objects = [
     {
       ID: 'player-1',
       providers: [
         // TODO get rid of this syntax
-        valueProvider(BodyConfig, new BodyConfig(256, 256, 32, 32)),
+        valueProvider(BodyConfig, new BodyConfig(256, 64, 32, 32)),
         // TODO kinda sucks that I have to provide this also.
         //      unless maybe I provide it as a value?
         PlayerBody
       ],
       deps: [PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse, PlayerUseAction]
-    },
+    }
+  ];
 
-    {
-      ID: 'block-1',
-      providers: [
-        valueProvider(BodyConfig, new BodyConfig(64, 64, 32, 32, true))
-      ],
-      deps: [Body]
-    },
+  map.objectlayers.forEach((layer) => {
+    layer.forEach((def) => {
 
-    {
-      ID: 'chest-1',
-      providers: [
-        valueProvider(BodyConfig, new BodyConfig(128, 128, 32, 32, true)),
-        valueProvider(ChestConfig, new ChestConfig(10))
-        // TODO ChestBody?
-      ],
-      deps: [Body, ChestRenderer, ChestUseable]
-    },
+      if (def.type == 'squirrel') {
+        objects.push({
+          ID: def.name, //'squirrel-1',
+          providers: [
+            valueProvider(BodyConfig, new BodyConfig(def.x, def.y, def.w, def.h)),
+            SquirrelBody
+          ],
+          deps: [SquirrelBody, SquirrelDriver, SquirrelRenderer]
+        });
 
-    {
-      ID: 'coin-1', 
-      providers: [
-        valueProvider(BodyConfig, new BodyConfig(128, 0, 32, 32)),
-        valueProvider(CoinConfig, new CoinConfig(10))
-      ], 
-      deps: [Body, CoinRenderer, CoinCollision]
-    },
+      } else if (def.type == 'coin') {
+        var value = def.value || 1;
+        objects.push({
+          ID: def.name, //'coin-1', 
+          providers: [
+            valueProvider(BodyConfig, new BodyConfig(def.x, def.y, def.w, def.h)),
+            valueProvider(CoinConfig, new CoinConfig(value))
+          ], 
+          deps: [Body, CoinRenderer, CoinCollision]
+        });
 
-    {
-      ID: 'coin-1',
-      providers: [
-        valueProvider(BodyConfig, new BodyConfig(128, 64, 32, 32)),
-        valueProvider(CoinConfig, new CoinConfig(5))
-      ],
-      deps: [Body, CoinRenderer, CoinCollision]
-    },
+      } else if (def.type == 'chest') {
+        var value = def.value || 1;
+        objects.push({
+          ID: def.name,
+          providers: [
+            valueProvider(BodyConfig, new BodyConfig(def.x, def.y, def.w, def.h, true)),
+            valueProvider(ChestConfig, new ChestConfig(value))
+            // TODO ChestBody?
+          ],
+          deps: [Body, ChestRenderer, ChestUseable]
+        });
 
-    {
-      ID: 'squirrel-1',
-      providers: [
-        valueProvider(BodyConfig, new BodyConfig(128, 256, 32, 32)),
-        SquirrelBody
-      ],
-      deps: [SquirrelBody, SquirrelDriver, SquirrelRenderer]
-    },
+      } else if (def.type == 'wall') {
+        objects.push({
+          ID: def.name,
+          providers: [
+            valueProvider(BodyConfig, new BodyConfig(def.x, def.y, def.w, def.h, true)),
+          ],
+          deps: [Body]
+        });
+      }
 
-  ], [HUD, BackgroundRenderer]);
+    });
+  });
+
+  // TODO mock world for debugging only
+  var mockWorld = WorldScene([
+    valueProvider(WorldConfig, worldConfig),
+    getLoadedBackground,
+  ], objects, [HUD, BackgroundRenderer]);
 
   manager.register('mock', mockWorld);
   manager.load('mock');

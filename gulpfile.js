@@ -16,6 +16,7 @@ var es6Files = [
 var copyFiles = [
   'index.html',
   'media/**/*',
+  'maps/*',
   'lib/EventEmitter.js',
   'lib/Shortcut.js',
   'lib/require.js',
