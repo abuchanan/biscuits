@@ -5,7 +5,7 @@ import {WorldScene} from 'src/worldscene';
 import {KeyboardInput} from 'src/input';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
 
-import {PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse} from 'src/plugins/Player';
+import {PlayerBody, PlayerDriver, PlayerRenderer, PlayerUseAction, CoinPurse} from 'src/plugins/Player';
 import {CoinConfig, CoinRenderer, CoinCollision} from 'src/plugins/Coin';
 import {ChestConfig, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
 import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
@@ -49,7 +49,7 @@ function start() {
         //      unless maybe I provide it as a value?
         PlayerBody
       ],
-      deps: [PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse]
+      deps: [PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse, PlayerUseAction]
     },
 
     {

@@ -1,4 +1,5 @@
 import {Inject, Provide, SuperConstructor} from 'di';
+import {Input} from 'src/input';
 import {Body} from 'src/world';
 import {Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
 import {Scene} from 'src/scene';
@@ -11,6 +12,7 @@ export {
   PlayerBody,
   PlayerDriver,
   PlayerRenderer,
+  PlayerUseAction,
   CoinPurse
 };
 
@@ -119,23 +121,25 @@ function PlayerDriver(actions, ActionInputHelperFactory) {
 }
 
 
-// TODO Chasing down scope dependencies is pretty confusing.
-//      Maybe some sort of dependency graph analysis (static?) would
-//      help catch errors.
-
-    /* TODO move to driver?
+@ObjectScope
+@Inject(Scene, Body, Input)
+function PlayerUseAction(scene, body, input) {
     scene.events.on('scene tick', function() {
       // TODO keydown? What if the player holds the key down?
-      // TODO no longer "input.event" instead "input.Up"
-      if (input.event == 'Use keydown') {
+      if (input.Use) {
+        console.log('use');
         // TODO optimize?
         // TODO can only use one object?
-        obj.body.queryFront().forEach((used) => {
-          used.obj.events.trigger('use', [obj]);
+        body.queryFront().forEach((hit) => {
+          hit.events.trigger('use', [body]);
         });
       }
     });
-    */
+}
+
+// TODO Chasing down scope dependencies is pretty confusing.
+//      Maybe some sort of dependency graph analysis (static?) would
+//      help catch errors.
 
     // TODO mechanism for telling scene that it needs to wait on a promise
     //      when loading
