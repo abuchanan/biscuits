@@ -56,7 +56,8 @@ class Movement extends Action {
 
     this._lastPos;
     this._startTime;
-    this._percentComplete;
+    this._percentComplete = 0;
+    this._moving = false;
   }
 
   _updatePercentComplete(time) {
@@ -66,8 +67,12 @@ class Movement extends Action {
 
   // TODO getter? needed?
   interpolatePosition() {
-    var percent = this._percentComplete || 0;
-    var pos = this._lastPos || this.body.getPosition();
+    if (!this._moving) {
+      return this.body.getPosition();
+    }
+
+    var pos = this._lastPos;
+    var percent = this._percentComplete;
     return {
       x: pos.x + (this.deltaX * percent),
       y: pos.y + (this.deltaY * percent),
@@ -75,19 +80,20 @@ class Movement extends Action {
   }
 
   start(startTime, done) {
+
+    this.body.direction = this.direction;
+
     try {
       var pos = this.body.getPosition();
-      this.body.setPosition(pos.x + this.deltaX, pos.y + this.deltaY);
-
-      this.body.direction = this.direction;
       this._startTime = startTime;
-      this._lastPos = pos;
 
-    // TODO
+      this.body.setPosition(pos.x + this.deltaX, pos.y + this.deltaY);
+      this._lastPos = pos;
+      this._moving = true;
+
     } catch (e) {
       if (e == 'blocked') {
-        console.log('caught blocked');
-        //done();
+        this._moving = false;
       } else {
         throw e;
       }
@@ -100,6 +106,7 @@ class Movement extends Action {
     if (this._percentComplete > 1) {
       this._percentComplete = 0;
       this._lastPos = false;
+      this._moving = false;
       done();
     }
   }
