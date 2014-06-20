@@ -1,4 +1,4 @@
-import {Inject, Injector, Provide} from 'di';
+import {Injector, Provide} from 'di';
 import {WorldConfig} from 'src/world';
 import {Scene, SceneObject, SceneLoader} from 'src/scene';
 import {Renderer} from 'src/render';
@@ -19,8 +19,7 @@ function WorldScene(worldConfig, definitions, extras) {
   // TODO maybe renderer should be scene scoped?
 
   @Provide(SceneLoader)
-  @Inject(Injector, Scene, Renderer)
-  function loadScene(injector, scene, renderer) {
+  function loadScene(injector: Injector, scene: Scene, renderer: Renderer) {
     renderer.getLayer('background');
     renderer.getLayer('objects');
     renderer.getLayer('player');

@@ -1,4 +1,3 @@
-import {Inject} from 'di';
 import {SceneScope, ObjectScope} from 'src/scope';
 import {SceneObject} from 'src/scene';
 import {EventEmitter} from 'src/events';
@@ -45,11 +44,10 @@ class BodyConfig {
 }
 
 @SceneScope
-@Inject(WorldConfig, QuadTreeFactory)
 class World {
 
-  constructor(config, QuadTreeFactory) {
-    this._tree = QuadTreeFactory(config.x, config.y, config.w, config.h);
+  constructor(config: WorldConfig, createQuadTree: QuadTreeFactory) {
+    this._tree = createQuadTree(config.x, config.y, config.w, config.h);
     this._objects = {};
     this._currentObjectID = 0;
   }
@@ -100,10 +98,11 @@ class World {
 // TODO support resize?
 // TODO replace "body-config" string with class
 @ObjectScope
-@Inject(EventEmitter, World, BodyConfig, SceneObject)
 class Body {
 
-  constructor(events, world, config, obj) {
+  constructor(events: EventEmitter, world: World, config: BodyConfig,
+              obj: SceneObject) {
+
     // TODO needed?
     this.events = events;
     this.world = world;

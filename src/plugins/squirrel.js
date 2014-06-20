@@ -1,4 +1,4 @@
-import {Inject, Provide, SuperConstructor} from 'di';
+import {Provide, SuperConstructor} from 'di';
 import {Movement, ActionManager} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {ObjectScope} from 'src/scope';
@@ -23,10 +23,9 @@ export {
 //      this also clobbers the @ObjectScope. also poop.
 @ObjectScope
 @Provide(Body)
-@Inject(SuperConstructor)
 class SquirrelBody extends Body {
 
-  constructor(superConstructor) {
+  constructor(superConstructor: SuperConstructor) {
     superConstructor();
     // TODO could use mixin(Body, BodyDirection)
     this.direction = 'down';
@@ -35,9 +34,9 @@ class SquirrelBody extends Body {
 
 
 @ObjectScope
-@Inject(ActionManager, Body)
 class SquirrelActions {
-  constructor(manager, body) {
+
+  constructor(manager: ActionManager, body: Body) {
     this.manager = manager
 
     this.walkUp = new Movement('walk-up', body, 'up', 0, -32, 250);
@@ -50,8 +49,7 @@ class SquirrelActions {
 
 
 @ObjectScope
-@Inject(Scene, SquirrelActions)
-function SquirrelDriver(scene, actions) {
+function SquirrelDriver(scene: Scene, actions: SquirrelActions) {
 
     // TODO I think that simplicity in destroying an object is really interesting,
     //      particularly when it comes to callback functions like this. Currently,
@@ -152,8 +150,8 @@ function SquirrelTextures() {
 
 // TODO I forget this ALL THE TIME! (scope annotation)
 @ObjectScope
-@Inject(SquirrelTextures, Renderer, Scene, Body, SquirrelActions)
-function SquirrelRenderer(textures, renderer, scene, body, actions) {
+function SquirrelRenderer(textures: SquirrelTextures, renderer: Renderer,
+                          scene: Scene, body: Body, actions: SquirrelActions) {
 
   var layer = renderer.getLayer('objects');
 

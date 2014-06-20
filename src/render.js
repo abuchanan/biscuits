@@ -1,14 +1,12 @@
-import {Inject} from 'di';
 import PIXI from 'lib/pixi';
 
 export {RenderConfig, Renderer};
 
 class RenderConfig {}
 
-@Inject(RenderConfig)
 class Renderer {
 
-  constructor(config) {
+  constructor(config: RenderConfig) {
     this.renderer = PIXI.autoDetectRenderer();
     this.stage = new PIXI.Stage(0xffffff);
     // TODO this was causing an error. why?

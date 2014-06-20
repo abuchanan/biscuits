@@ -1,4 +1,4 @@
-import {Inject, TransientScope} from 'di';
+import {TransientScope} from 'di';
 import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 import {Input} from 'src/input';
@@ -114,8 +114,7 @@ class Movement extends Action {
 
 
 @TransientScope
-@Inject(Scene)
-function ActionManager(scene) {
+function ActionManager(scene: Scene) {
 
   var state = false;
   var nextState = false;
@@ -193,8 +192,7 @@ function ActionManager(scene) {
 
 // TODO I don't like this "...Factory" name pattern
 @SceneScope
-@Inject(Input, Scene)
-function ActionInputHelperFactory(input, scene) {
+function ActionInputHelperFactory(input: Input, scene: Scene) {
   return function(manager) {
     return new ActionInputHelper(input, scene, manager);
   }

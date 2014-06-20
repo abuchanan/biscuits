@@ -1,4 +1,3 @@
-import {Inject} from 'di';
 // TODO if this name is missing from the module, no import error is thrown.
 //      it's just "undefined" which totally sucks.
 import {Body} from 'src/world';
@@ -23,8 +22,7 @@ class ChestConfig {
 
 
 @ObjectScope
-@Inject(Renderer, Body)
-function ChestRenderer(renderer, body) {
+function ChestRenderer(renderer: Renderer, body: Body) {
   var layer = renderer.getLayer('objects');
   var rect = body.getRectangle();
 
@@ -48,8 +46,8 @@ function ChestRenderer(renderer, body) {
 
 
 @ObjectScope
-@Inject(Body, ChestConfig, ChestRenderer)
-function ChestUseable(body, config, chestRenderer) {
+function ChestUseable(body: Body, config: ChestConfig,
+                      chestRenderer: ChestRenderer) {
 
   body.events.on('use', function(usedBy) {
     if (!config.isOpen) {

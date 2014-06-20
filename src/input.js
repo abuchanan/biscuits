@@ -1,4 +1,4 @@
-import {Inject, Provide} from 'di';
+import {Provide} from 'di';
 import Shortcut from 'lib/Shortcut';
 import {EventEmitter} from 'src/events';
 import {SceneScope} from 'src/scope';
@@ -20,10 +20,9 @@ class Input {
   }
 }
 
-@Inject(Input)
 class KeyboardInput {
 
-  constructor(input) {
+  constructor(input: Input) {
     // TODO inject this
     var shortcutjs = Shortcut();
 

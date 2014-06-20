@@ -1,4 +1,4 @@
-import {Inject, Injector} from 'di';
+import {Injector} from 'di';
 import {EventEmitter} from 'src/events';
 import {SceneScope, ObjectScope} from 'src/scope';
 
@@ -6,10 +6,9 @@ export {Scene, SceneObject, SceneLoader};
 
 
 @SceneScope
-@Inject(EventEmitter)
 class Scene {
 
-  constructor(events) {
+  constructor(events: EventEmitter) {
     this.events = events;
     this._objects = {};
   }
@@ -37,9 +36,9 @@ class Scene {
 
 
 @ObjectScope
-@Inject(Injector, EventEmitter)
 class SceneObject {
-  constructor(injector, events) {
+
+  constructor(injector: Injector, events: EventEmitter) {
     this.injector = injector;
     this.get = this.injector.get.bind(this.injector);
     this.events = events;

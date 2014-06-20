@@ -1,4 +1,3 @@
-import {Inject} from 'di';
 import PIXI from 'lib/pixi';
 import {Renderer} from 'src/render';
 import {ImageGrid} from 'src/ImageGrid';
@@ -10,8 +9,7 @@ export {BackgroundRenderer};
 
 // TODO inject deps
 @SceneScope
-@Inject(Renderer)
-function BackgroundRenderer(renderer) {
+function BackgroundRenderer(renderer: Renderer) {
   var layer = renderer.getLayer('background');
 
   // TODO clean up

@@ -1,4 +1,3 @@
-import {Inject} from 'di';
 import {SceneScope} from 'src/scope';
 import {Scene} from 'src/scene';
 // TODO need to figure out the canonical way to work with third-party modules
@@ -7,8 +6,7 @@ import FPSMeter from 'lib/fpsmeter';
 export {FPSMeterPlugin};
 
 @SceneScope
-@Inject(Scene)
-function FPSMeterPlugin(scene) {
+function FPSMeterPlugin(scene: Scene) {
 
   var meter = new FPSMeter.FPSMeter({
     top: 'auto',

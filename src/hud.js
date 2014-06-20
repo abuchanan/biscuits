@@ -1,4 +1,3 @@
-import {Inject} from 'di';
 import PIXI from 'lib/pixi';
 import {SceneScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -8,8 +7,7 @@ import {Scene} from 'src/scene';
 export {HUD};
 
 @SceneScope
-@Inject(Renderer, Scene)
-function HUD(renderer, scene) {
+function HUD(renderer: Renderer, scene: Scene) {
   var layer = renderer.getLayer('hud');
 
   var coinText = new PIXI.Text('');

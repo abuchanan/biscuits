@@ -1,13 +1,12 @@
-import {Inject, Injector, Provide} from 'di';
+import {Injector, Provide} from 'di';
 import {Scene, SceneLoader} from 'src/scene';
 import {SceneScope} from 'src/scope';
 
 export {SceneManager};
 
-@Inject(Injector)
 class SceneManager {
 
-  constructor(injector) {
+  constructor(injector: Injector) {
     this.injector = injector;
     this.defs = {};
     // TODO better name/organization for plugins?

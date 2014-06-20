@@ -1,4 +1,3 @@
-import {Inject} from 'di';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -18,8 +17,7 @@ class CoinConfig {
 
 
 @ObjectScope
-@Inject(Renderer, Body)
-function CoinRenderer(renderer, body) {
+function CoinRenderer(renderer: Renderer, body: Body) {
   var layer = renderer.getLayer('objects');
   var rect = body.getRectangle();
 
@@ -38,8 +36,9 @@ function CoinRenderer(renderer, body) {
 
 
 @ObjectScope
-@Inject(CoinConfig, Body, CoinRenderer)
-function CoinCollision(config, body, coinRenderer) {
+function CoinCollision(config: CoinConfig, body: Body,
+                       coinRenderer: CoinRenderer) {
+
   body.events.on('player collision', function(playerBody) {
     body.remove();
     var coinPurse = playerBody.obj.get(CoinPurse);

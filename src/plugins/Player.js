@@ -1,4 +1,4 @@
-import {Inject, Provide, SuperConstructor} from 'di';
+import {Provide, SuperConstructor} from 'di';
 import {Input} from 'src/input';
 import {Body} from 'src/world';
 import {Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
@@ -19,10 +19,9 @@ export {
 
 @ObjectScope
 @Provide(Body)
-@Inject(SuperConstructor)
 class PlayerBody extends Body {
 
-  constructor(superConstructor) {
+  constructor(superConstructor: SuperConstructor) {
     superConstructor();
     // TODO could use mixin(Body, BodyDirection)
     this.direction = 'down';
@@ -95,10 +94,9 @@ class CoinPurse {
 
 // TODO inject Movement
 @ObjectScope
-@Inject(ActionManager, Body)
 class PlayerActions {
 
-  constructor(manager, body) {
+  constructor(manager: ActionManager, body: Body) {
     this.manager = manager;
     this.walkUp = new Movement('walk-up', body, 'up', 0, -32);
     this.walkDown = new Movement('walk-down', body, 'down', 0, 32);
@@ -109,10 +107,10 @@ class PlayerActions {
 
 
 @ObjectScope
-@Inject(PlayerActions, ActionInputHelperFactory)
-function PlayerDriver(actions, ActionInputHelperFactory) {
+function PlayerDriver(actions: PlayerActions,
+                      createActionInputHelper: ActionInputHelperFactory) {
 
-  var inputHelper = ActionInputHelperFactory(actions.manager);
+  var inputHelper = createActionInputHelper(actions.manager);
 
   inputHelper.bind('Up', actions.walkUp);
   inputHelper.bind('Down', actions.walkDown);
@@ -122,12 +120,11 @@ function PlayerDriver(actions, ActionInputHelperFactory) {
 
 
 @ObjectScope
-@Inject(Scene, Body, Input)
-function PlayerUseAction(scene, body, input) {
+function PlayerUseAction(scene: Scene, body: Body, input: Input) {
+
     scene.events.on('scene tick', function() {
       // TODO keydown? What if the player holds the key down?
       if (input.Use) {
-        console.log('use');
         // TODO optimize?
         // TODO can only use one object?
         body.queryFront().forEach((hit) => {
@@ -150,8 +147,9 @@ function PlayerUseAction(scene, body, input) {
 
 
 @ObjectScope
-@Inject(PlayerTextures, Body, PlayerActions, Renderer, Scene)
-function PlayerRenderer(textures, body, actions, renderer, scene) {
+function PlayerRenderer(textures: PlayerTextures, body: Body,
+                        actions: PlayerActions, renderer: Renderer,
+                        scene: Scene) {
 
   var layer = renderer.getLayer('player');
   var backgroundLayer = renderer.getLayer('background');
