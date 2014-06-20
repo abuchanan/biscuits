@@ -98,10 +98,10 @@ class PlayerActions {
 
   constructor(manager: ActionManager, body: Body) {
     this.manager = manager;
-    this.walkUp = new Movement('walk-up', body, 'up', 0, -32);
-    this.walkDown = new Movement('walk-down', body, 'down', 0, 32);
-    this.walkLeft = new Movement('walk-left', body, 'left', -32, 0);
-    this.walkRight = new Movement('walk-right', body, 'right', 32, 0);
+    this.walkUp = new Movement('walk-up', body, 'up', 0, -32, 250);
+    this.walkDown = new Movement('walk-down', body, 'down', 0, 32, 250);
+    this.walkLeft = new Movement('walk-left', body, 'left', -32, 0, 250);
+    this.walkRight = new Movement('walk-right', body, 'right', 32, 0, 250);
   }
 }
 
