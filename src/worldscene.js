@@ -6,7 +6,7 @@ import {ObjectScope} from 'src/scope';
 
 export {WorldScene};
 
-function WorldScene(worldConfig, definitions, extras) {
+function WorldScene(providers, definitions, extras) {
   extras = extras || [];
 
   // TODO try to get rid of these stupid wrappers
@@ -44,5 +44,5 @@ function WorldScene(worldConfig, definitions, extras) {
     });
   }
 
-  return [getWorldConfig, loadScene];
+  return providers.concat([loadScene]);
 }

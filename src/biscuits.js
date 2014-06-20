@@ -9,9 +9,10 @@ import {PlayerBody, PlayerDriver, PlayerRenderer, PlayerUseAction, CoinPurse} fr
 import {CoinConfig, CoinRenderer, CoinCollision} from 'src/plugins/Coin';
 import {ChestConfig, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
 import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
-import {BackgroundRenderer} from 'src/background';
+import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {HUD} from 'src/hud';
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
+import PIXI from 'lib/pixi';
 
 export {start};
 
@@ -19,6 +20,36 @@ function valueProvider(token, value) {
   var fn = function() { return value; };
   fn.annotations = [new Provide(token)];
   return fn;
+}
+
+@Provide(BackgroundGrid)
+function getBackgroundGrid() {
+  // TODO clean up
+  var tex = PIXI.Texture.fromImage('media/tmw_desert_spacing.png');
+  var parts = [];
+
+  for (var i = 0; i < 6; i++) {
+    for (var j = 0; j < 6; j++) {
+      var x = 1 * i + i * 32 + 1;
+      var y = 1 * j + j * 32 + 1;
+
+      var r = new PIXI.Rectangle(x, y, 32, 32);
+      var part = new PIXI.Texture(tex, r);
+      parts.push(part);
+    }
+  }
+
+  var grid = [];
+  for (var j = -20; j < 20; j++) {
+    for (var i = -20; i < 20; i++) {
+      var x = Math.floor(Math.random() * parts.length);
+      var spr = new PIXI.Sprite(parts[x]);
+      spr.x = i * 32;
+      spr.y = j * 32;
+      grid.push(spr);
+    }
+  }
+  return grid;
 }
 
 function start() {
@@ -38,7 +69,10 @@ function start() {
   var worldConfig = new WorldConfig(-4000, -4000, 8000, 8000);
 
   // TODO mock world for debugging only
-  var mockWorld = WorldScene(worldConfig, [
+  var mockWorld = WorldScene([
+    valueProvider(WorldConfig, worldConfig),
+    getBackgroundGrid,
+  ], [
 
     {
       ID: 'player-1',
@@ -97,7 +131,6 @@ function start() {
       deps: [SquirrelBody, SquirrelDriver, SquirrelRenderer]
     },
 
-     // TODO background config
   ], [HUD, BackgroundRenderer]);
 
   manager.register('mock', mockWorld);
