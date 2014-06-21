@@ -3,20 +3,17 @@ import {WorldConfig} from 'src/world';
 import {Scene, SceneObject, SceneLoader} from 'src/scene';
 import {Renderer} from 'src/render';
 import {ObjectScope} from 'src/scope';
+import {valueProvider} from 'src/utils';
 
 export {WorldScene};
 
 function WorldScene(providers, definitions, extras) {
   extras = extras || [];
 
-  // TODO try to get rid of these stupid wrappers
-  @Provide(WorldConfig)
-  function getWorldConfig() {
-    return worldConfig;
-  }
+  var worldConfigProvider = valueProvider(WorldConfig, worldConfig);
   
   // TODO test that render layers are removed from renderer when scene is unloaded
-  // TODO maybe renderer should be scene scoped?
+  // TODO maybe renderer should be scene scoped? object scoped?
 
   @Provide(SceneLoader)
   function loadScene(injector: Injector, scene: Scene, renderer: Renderer) {

@@ -14,14 +14,10 @@ import {HUD} from 'src/hud';
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
 import PIXI from 'lib/pixi';
 import {loadMapSync} from 'src/maploader';
+import {valueProvider} from 'src/utils';
 
 export {start};
 
-function valueProvider(token, value) {
-  var fn = function() { return value; };
-  fn.annotations = [new Provide(token)];
-  return fn;
-}
 
 function start() {
 
