@@ -2,6 +2,7 @@ import {TransientScope} from 'di';
 import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 import {Input} from 'src/input';
+import {extend} from 'src/utils';
 import EventEmitter from 'lib/EventEmitter';
 
 export {
@@ -17,18 +18,6 @@ export {
 var movementDefaults = {
   deltaX: 0,
   deltaY: 0,
-};
-
-// Extend a given object with all the properties in passed-in object(s).
-function extend(obj) {
-  Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-    if (source) {
-      for (var prop in source) {
-        obj[prop] = source[prop];
-      }
-    }
-  });
-  return obj;
 };
 
 // TODO inject
