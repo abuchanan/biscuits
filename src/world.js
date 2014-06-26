@@ -24,6 +24,7 @@ export {
 //      DI should throw an error if there is no concrete provider for the
 //      interface token.
 
+@SceneScope
 class WorldConfig {
   constructor(x, y, w, h) {
     this.x = x;
@@ -33,6 +34,7 @@ class WorldConfig {
   }
 }
 
+@ObjectScope
 class BodyConfig {
   constructor(x, y, w, h, isBlock = false) {
     this.x = x;

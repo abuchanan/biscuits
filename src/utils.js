@@ -1,8 +1,13 @@
+import {Provide} from 'di';
+
 export {valueProvider, extend};
 
-function valueProvider(token, value) {
+function valueProvider(token, value, scope) {
   var fn = function() { return value; };
   fn.annotations = [new Provide(token)];
+  if (scope) {
+    fn.annotations.push(scope);
+  }
   return fn;
 }
 
@@ -16,4 +21,4 @@ function extend(obj) {
     }
   });
   return obj;
-};
+}

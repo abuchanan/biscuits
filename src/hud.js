@@ -15,7 +15,7 @@ function HUD(renderer: Renderer, scene: Scene) {
 
   // TODO hard-coded player object ID is weird
   //      player should probably be injectable anyway
-  var player = scene.getObject('player-1');
+  var player = scene.getObject('player');
   // TODO not sure I like CoinPurse after all
   var coins = player.get(CoinPurse);
 
