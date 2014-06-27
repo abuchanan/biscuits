@@ -5,12 +5,34 @@ import {SceneScope, ObjectScope} from 'src/scope';
 export {Scene, SceneObject, SceneLoader};
 
 
+class Ticker {
+  // TODO stop()
+
+  start() {
+    requestAnimationFrame(this._onTick.bind(this));
+  }
+
+  _onTick() {
+    requestAnimationFrame(this._onTick.bind(this));
+    this.onTick();
+  }
+
+  onTick() {}
+}
+
 @SceneScope
 class Scene {
 
-  constructor(events: EventEmitter) {
+  constructor(events: EventEmitter, ticker: Ticker) {
     this.events = events;
     this._objects = {};
+
+    ticker.onTick = function() {
+      // TODO rename to just "tick"
+      events.trigger('scene tick', [Date.now()]);
+    }
+
+    ticker.start();
   }
 
   // TODO promise or function that returns a promise?

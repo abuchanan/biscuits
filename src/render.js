@@ -1,17 +1,32 @@
+import {SceneScope} from 'src/scope';
+import {Scene} from 'src/scene';
 import PIXI from 'lib/pixi';
 
 export {RenderConfig, Renderer};
 
-class RenderConfig {}
+// TODO @SceneScope?
+class RenderConfig {
+  // TODO inject document?
+  constructor() {
+    this.container = document.body;
+  }
+}
 
+@SceneScope
 class Renderer {
 
-  constructor(config: RenderConfig) {
-    this.renderer = PIXI.autoDetectRenderer();
-    this.stage = new PIXI.Stage(0xffffff);
+  constructor(config: RenderConfig, scene: Scene) {
+    var renderer = this.renderer = PIXI.autoDetectRenderer();
+    var stage = this.stage = new PIXI.Stage(0xffffff);
     // TODO this was causing an error. why?
     this.stage.interactive = false;
     this._layers = {};
+
+    config.container.appendChild(renderer.view);
+
+    scene.events.on('scene tick', function() {
+      renderer.render(stage);
+    });
   }
 
   getViewDOM() {

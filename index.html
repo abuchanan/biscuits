@@ -21,8 +21,7 @@
 
         callback: function() {
           require(['src/biscuits'], function(biscuits) {
-            var view = biscuits.start();
-            container.appendChild(view);
+            biscuits.start(container);
           });
         }
       });
