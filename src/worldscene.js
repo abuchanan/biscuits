@@ -4,7 +4,6 @@ import {Scene, SceneObject, SceneLoader} from 'src/scene';
 import {Renderer} from 'src/render';
 import {ObjectScope, SceneScope} from 'src/scope';
 import {valueProvider} from 'src/utils';
-import {loadMapSync} from 'src/maploader';
 import {HUD} from 'src/hud';
 import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
@@ -30,6 +29,7 @@ class PlayerLoader {
   // TODO ugh....I have to scope all these...
   @TransientScope
   config(injector: Injector, def: ObjectDef, bodyConfig: BodyConfig) {
+    // TODO don't hard code player position and dimensions
     bodyConfig.x = 256;
     bodyConfig.y = 64;
     bodyConfig.w = 32;
@@ -142,17 +142,20 @@ var worldLoader = new WorldLoader();
 var backgroundLoader = new BackgroundLoader();
 
 
-function WorldScene(mapPath) {
+function WorldScene(getMap) {
   var extras = [HUD, BackgroundRenderer];
 
   // TODO test that render layers are removed from renderer when scene is unloaded
   // TODO maybe renderer should be scene scoped? object scoped?
 
+  @Provide(MapDef)
+  @SceneScope
+  function provideMapDef() {
+    return getMap();
+  }
+
   @Provide(SceneLoader)
   function loadScene(sceneInjector: Injector, scene: Scene, renderer: Renderer) {
-
-    var map = loadMapSync(mapPath);
-    var provideMapDef = valueProvider(MapDef, map, new SceneScope());
 
     renderer.getLayer('background');
     renderer.getLayer('objects');

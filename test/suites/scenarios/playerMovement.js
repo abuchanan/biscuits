@@ -21,90 +21,150 @@ set expectations on events that occur, such as
 var injector = new Injector();
 var scenario = injector.get(SceneScenario);
 
-var sceneOne = WorldScene({x: 0, y: 0, w: 40, h: 40}, [
-  {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
-  // TODO don't even bother having a default coin value.
-  //      require that it be defined and fail when it's not.
-  {ID: 'coin-1', x: 4, y: 1, w: 1, h: 1, type: CoinLoader},
-  {ID: 'coin-2', x: 5, y: 1, w: 1, h: 1, type: CoinLoader, coinValue: 10},
-  {ID: 'block-1', x: 3, y: 2, w: 2, h: 1, type: BlockLoader},
-  {ID: 'chest-1', x: 2, y: 2, w: 1, h: 1, type: ChestLoader},
-  {ID: 'chest-2', x: 2, y: 3, w: 1, h: 1, type: ChestLoader, coinValue: 10},
-]);
+// TODO maybe use a promise instead of a function. WorldScene will wrap argument
+//      in a promise, so if it's a value (i.e. not a promise) it will be fulfilled
+//      immediately, allowing for a nice value/promise option API.
+function getMap() {
+
+  // TODO player config
+  // {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
+
+  return {
+    height: 40,
+    width: 40,
+    tileheight: 32,
+    tilewidth: 32,
+    layers: [
+      {
+        type: "objectgroup",
+        objects: [
+          {
+            height: 1,
+            width: 2,
+            name: 'wall',
+            x: 3,
+            y: 2,
+          },
+          {
+            ID: 'coin-1',
+            height: 1,
+            width: 1,
+            name: 'coin',
+            x: 4,
+            y: 1,
+            coinValue: 1,
+          },
+          {
+            ID: 'coin-2',
+            height: 1,
+            width: 1,
+            name: 'coin',
+            x: 5,
+            y: 1,
+            coinValue: 10,
+          },
+          {
+            ID: 'chest-1',
+            height: 1,
+            width: 1,
+            name: 'chest',
+            x: 2,
+            y: 2,
+            chestValue: 1,
+          },
+          {
+            ID: 'chest-2',
+            height: 1,
+            width: 1,
+            name: 'chest',
+            x: 2,
+            y: 3,
+            chestValue: 10,
+          },
+        ]
+      }
+    ]
+  };
+}
+
+var sceneOne = WorldScene(getMap);
 
 scenario.manager.register('sceneOne', sceneOne);
 scenario.load('sceneOne');
 
-var player = scenario.manager.scene.getObject('player-1');
+var player = scenario.manager.scene.getObject('player');
+var playerBody = player.get(Body);
+var playerCoins = player.get(CoinPurse);
 
 // Default player position and direction
-assert.deepEqual(player.body.getPosition(), {x: 1, y: 1});
-assert.equal(player.body.direction, 'down');
+assert.deepEqual(playerBody.getPosition(), {x: 1, y: 1});
+assert.equal(playerBody.direction, 'down');
+
 // Default player coin balance
-assert.equal(player.coins.balance(), 0);
+assert.equal(playerCoins.balance(), 0);
 
 scenario.keypress('Right');
 
-assert.equal(player.body.direction, 'right');
+assert.equal(playerBody.direction, 'right');
 
 scenario.keypress('Right');
 
 // Player position and direction changes according to keypresses
-assert.deepEqual(player.body.getPosition(), {x: 3, y: 1});
+assert.deepEqual(playerBody.getPosition(), {x: 3, y: 1});
 
 scenario.keypress('Right');
 
 // Pick up a coin, default value is 1
-assert.equal(player.coins.balance(), 1);
+assert.equal(playerCoins.balance(), 1);
 
 scenario.keypress('Right');
 
 // Pick up a coin with a different coin value
-assert.equal(player.coins.balance(), 11);
+assert.equal(playerCoins.balance(), 11);
 
 scenario.keypress('Left');
 
 // The coin that was previously picked up is gone,
 // so the balance stays the same
-assert.equal(player.coins.balance(), 11);
+assert.equal(playerCoins.balance(), 11);
 
 scenario.keypress('Down');
 
 // Player movement down is blocked by a block (invisible wall).
 // The player's position stays the same but the direction changes.
-assert.deepEqual(player.body.getPosition(), {x: 4, y: 1});
-assert.equal(player.body.direction, 'down');
+assert.deepEqual(playerBody.getPosition(), {x: 4, y: 1});
+assert.equal(playerBody.direction, 'down');
 
 scenario.keypress('Left');
 scenario.keypress('Down');
 
 // The invisible wall has a width of two, and succeeds blocking the player.
-assert.deepEqual(player.body.getPosition(), {x: 3, y: 1});
-assert.equal(player.body.direction, 'down');
+assert.deepEqual(playerBody.getPosition(), {x: 3, y: 1});
+assert.equal(playerBody.direction, 'down');
 
 // Walk over to chest #1
 scenario.keypress('Left');
 scenario.keypress('Use');
 
 // Chest can only be opened when player is facing it
-assert.equal(player.coins.balance(), 11);
+assert.equal(playerCoins.balance(), 11);
 
 scenario.keypress('Down');
 
 // Chest blocks path
-assert.deepEqual(player.body.getPosition(), {x: 2, y: 1});
-assert.equal(player.body.direction, 'down');
+assert.deepEqual(playerBody.getPosition(), {x: 2, y: 1});
+assert.equal(playerBody.direction, 'down');
 
 scenario.keypress('Use');
 
 // Chest is opened and coins are deposited. The default coin amount is 1.
-assert.equal(player.coins.balance(), 12);
+assert.equal(playerCoins.balance(), 12);
 
 scenario.keypress('Use');
 scenario.keypress('Use');
 
 // Chest is already opened, so coins aren't deposited again.
-assert.equal(player.coins.balance(), 12);
+assert.equal(playerCoins.balance(), 12);
 
 // Walk over to chest #2 and open it.
 scenario.keypress('Left');
@@ -114,7 +174,7 @@ scenario.keypress('Right');
 scenario.keypress('Use');
 
 // Chest #2 has a greater coin value.
-assert.equal(player.coins.balance(), 22);
+assert.equal(playerCoins.balance(), 22);
 
 
 // TODO I want to test that the coin has been removed from the world.

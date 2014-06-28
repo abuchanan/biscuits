@@ -3,6 +3,7 @@ import {Renderer, RenderConfig} from 'src/render';
 import {SceneManager} from 'src/scenemanager';
 import {WorldScene} from 'src/worldscene';
 import {KeyboardInput} from 'src/input';
+import {loadMapSync} from 'src/maploader';
 
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
 
@@ -25,7 +26,11 @@ function start(container) {
   injector.get(KeyboardInput);
 
   // TODO mock world for debugging only
-  var mockWorld = WorldScene('maps/foo10.json');
+  function getMap() {
+    return loadMapSync('maps/foo10.json');
+  }
+
+  var mockWorld = WorldScene(getMap);
   
   manager.register('mock', mockWorld);
   manager.load('mock');
