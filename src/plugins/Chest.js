@@ -1,5 +1,7 @@
 // TODO if this name is missing from the module, no import error is thrown.
 //      it's just "undefined" which totally sucks.
+import {Provide, SuperConstructor} from 'di';
+import {ObjectScope} from 'src/scope';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -9,8 +11,18 @@ export {
   ChestConfig,
   ChestRenderer,
   ChestUseable,
+  ChestBody
 };
 
+@ObjectScope
+@Provide(Body)
+class ChestBody extends Body {
+
+  constructor(superConstructor: SuperConstructor) {
+    superConstructor();
+    this.isBlock = true;
+  }
+}
 // TODO contain things other than coins
 
 class ChestConfig {

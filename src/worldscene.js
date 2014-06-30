@@ -19,7 +19,7 @@ import {Loadpoint} from 'src/loadpoints';
 
 import {PlayerBody, PlayerDriver, PlayerRenderer, PlayerUseAction, CoinPurse} from 'src/plugins/Player';
 import {CoinConfig, CoinRenderer, CoinCollision} from 'src/plugins/Coin';
-import {ChestConfig, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
+import {ChestConfig, ChestBody, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
 import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
 
 
@@ -63,7 +63,7 @@ var WallLoader = loader([provideBodyConfig], [Body]);
 @ObjectScope
 @Provide(ChestConfig)
 function provideChestConfig(config: ObjectConfig) {
-  return {value: config.coinValue};
+  return {value: config.chestValue};
 }
 
 @ObjectScope
@@ -73,11 +73,11 @@ function provideCoinConfig(config: ObjectConfig) {
 }
 
 var CoinLoader = loader()
-  .provides(provideBodyConfig, provideCoinConfig)
+  .provides(provideBodyConfig, provideCoinConfig, ChestBody)
   .dependsOn(Body, CoinRenderer, CoinCollision);
 
 var ChestLoader = loader()
-  .provides(provideBodyConfig, provideChestConfig)
+  .provides(provideBodyConfig, provideChestConfig, ChestBody)
   .dependsOn(Body, ChestRenderer, ChestUseable);
 
 
