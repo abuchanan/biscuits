@@ -22,6 +22,7 @@ import {PlayerLoader} from 'src/plugins/Player';
 import {ChestLoader} from 'src/plugins/Chest';
 import {CoinLoader} from 'src/plugins/Coin';
 import {SquirrelLoader} from 'src/plugins/Squirrel';
+import {WallLoader} from 'src/plugins/wall';
 
 
 class ObjectConfigs {};
@@ -31,8 +32,6 @@ class Map {};
 
 // TODO if a requested type is undefined, the error message (from di.js?) is
 //      difficult to interpret
-
-var WallLoader = loader([provideBodyConfig], [Body]);
 
 
 @SceneScope
