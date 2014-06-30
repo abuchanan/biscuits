@@ -6,12 +6,14 @@ import {loadSpriteSheetSync} from 'src/sprite';
 import {Renderer} from 'src/render';
 import PIXI from 'lib/pixi';
 import {Body} from 'src/world';
+import {loader, provideBodyConfig} from 'src/utils';
 
 export {
   SquirrelBody,
   SquirrelActions,
   SquirrelDriver,
-  SquirrelRenderer
+  SquirrelRenderer,
+  SquirrelLoader
 }
 
 
@@ -193,6 +195,10 @@ function SquirrelRenderer(textures: SquirrelTextures, renderer: Renderer,
 
     });
 }
+
+var SquirrelLoader = loader()
+  .provides(provideBodyConfig, SquirrelBody)
+  .dependsOn(SquirrelBody, SquirrelDriver, SquirrelRenderer);
 
 
 // TODO this is all one big hack!

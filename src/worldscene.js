@@ -21,18 +21,12 @@ import {Loadpoint} from 'src/loadpoints';
 import {PlayerLoader} from 'src/plugins/Player';
 import {ChestLoader} from 'src/plugins/Chest';
 import {CoinLoader} from 'src/plugins/Coin';
-
-import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
+import {SquirrelLoader} from 'src/plugins/Squirrel';
 
 
 class ObjectConfigs {};
 class MapConfig {};
 class Map {};
-
-
-var SquirrelLoader = loader()
-  .provides(provideBodyConfig, SquirrelBody)
-  .dependsOn(SquirrelBody, SquirrelDriver, SquirrelRenderer);
 
 
 // TODO if a requested type is undefined, the error message (from di.js?) is
