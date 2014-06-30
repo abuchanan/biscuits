@@ -6,12 +6,15 @@ import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {CoinPurse} from 'src/plugins/Player';
+import {loader, provideBodyConfig} from 'src/utils';
+import {ObjectConfig} from 'src/config';
 
 export {
   ChestConfig,
   ChestRenderer,
   ChestUseable,
-  ChestBody
+  ChestBody,
+  ChestLoader
 };
 
 @ObjectScope
@@ -72,3 +75,14 @@ function ChestUseable(body: Body, config: ChestConfig,
     }
   });
 }
+
+
+@ObjectScope
+@Provide(ChestConfig)
+function provideChestConfig(config: ObjectConfig) {
+  return {value: config.chestValue};
+}
+
+var ChestLoader = loader()
+  .provides(provideBodyConfig, provideChestConfig, ChestBody)
+  .dependsOn(Body, ChestRenderer, ChestUseable);

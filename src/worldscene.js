@@ -2,12 +2,13 @@ import {Injector, Provide} from 'di';
 import {Scene, SceneObject, SceneLoader} from 'src/scene';
 import {Renderer, RendererConfig} from 'src/render';
 import {ObjectScope, SceneScope} from 'src/scope';
-import {valueProvider, loader} from 'src/utils';
+import {valueProvider, loader, provideBodyConfig} from 'src/utils';
 import {HUD} from 'src/hud';
 import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
 import {loadMapSync} from 'src/maploader';
-import {BiscuitsConfig} from 'src/config';
+import {BiscuitsConfig, ObjectConfig} from 'src/config';
+
 // TODO this is a great example of a problem with both ES6 and di.js
 //      This import was undefined. Some code below has a dependency on Loadpoint
 //      so it was depending on a token of "undefined". di.js can easily catch that.
@@ -18,22 +19,15 @@ import {BiscuitsConfig} from 'src/config';
 import {Loadpoint} from 'src/loadpoints';
 
 import {PlayerBody, PlayerDriver, PlayerRenderer, PlayerUseAction, CoinPurse} from 'src/plugins/Player';
+import {ChestLoader} from 'src/plugins/Chest';
+
 import {CoinConfig, CoinRenderer, CoinCollision} from 'src/plugins/Coin';
-import {ChestConfig, ChestBody, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
 import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
 
 
 class ObjectConfigs {};
-class ObjectConfig {};
 class MapConfig {};
 class Map {};
-
-
-@ObjectScope
-@Provide(BodyConfig)
-function provideBodyConfig(config: ObjectConfig) {
-  return new BodyConfig(config.x, config.y, config.w, config.h, config.isBlock || false);
-}
 
 
 var SquirrelLoader = loader()
@@ -61,24 +55,15 @@ var PlayerLoader = loader()
 var WallLoader = loader([provideBodyConfig], [Body]);
 
 @ObjectScope
-@Provide(ChestConfig)
-function provideChestConfig(config: ObjectConfig) {
-  return {value: config.chestValue};
-}
-
-@ObjectScope
 @Provide(CoinConfig)
 function provideCoinConfig(config: ObjectConfig) {
   return {value: config.coinValue};
 }
 
 var CoinLoader = loader()
-  .provides(provideBodyConfig, provideCoinConfig, ChestBody)
+  .provides(provideBodyConfig, provideCoinConfig)
   .dependsOn(Body, CoinRenderer, CoinCollision);
 
-var ChestLoader = loader()
-  .provides(provideBodyConfig, provideChestConfig, ChestBody)
-  .dependsOn(Body, ChestRenderer, ChestUseable);
 
 
 @SceneScope
@@ -168,7 +153,12 @@ function loadScene(sceneInjector: Injector, scene: Scene, objectConfigs: ObjectC
     // TODO the error message from this probably sucks. how to improve?
     //      that is, if dep is undefined.
     loader.deps.forEach((dep) => {
-      objectInjector.get(dep);
+      try {
+        objectInjector.get(dep);
+      } catch (e) {
+        console.log(dep);
+        throw e;
+      }
     });
 
     var obj = objectInjector.get(SceneObject);
