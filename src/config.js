@@ -1,0 +1,2 @@
+export {BiscuitsConfig};
+class BiscuitsConfig {};

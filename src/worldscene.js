@@ -1,226 +1,210 @@
-import {Injector, Provide, TransientScope} from 'di';
-import {WorldConfig} from 'src/world';
+import {Injector, Provide} from 'di';
 import {Scene, SceneObject, SceneLoader} from 'src/scene';
-import {Renderer} from 'src/render';
+import {Renderer, RendererConfig} from 'src/render';
 import {ObjectScope, SceneScope} from 'src/scope';
-import {valueProvider} from 'src/utils';
+import {valueProvider, loader} from 'src/utils';
 import {HUD} from 'src/hud';
 import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
+import {loadMapSync} from 'src/maploader';
+import {BiscuitsConfig} from 'src/config';
+// TODO this is a great example of a problem with both ES6 and di.js
+//      This import was undefined. Some code below has a dependency on Loadpoint
+//      so it was depending on a token of "undefined". di.js can easily catch that.
+//
+//      but, javascript should error when a token can't be imported. this might
+//      be related to require.js
+//import {Loadpoint} from 'src/scenemanager';
+import {Loadpoint} from 'src/loadpoints';
 
 import {PlayerBody, PlayerDriver, PlayerRenderer, PlayerUseAction, CoinPurse} from 'src/plugins/Player';
 import {CoinConfig, CoinRenderer, CoinCollision} from 'src/plugins/Coin';
 import {ChestConfig, ChestRenderer, ChestUseable} from 'src/plugins/Chest';
 import {SquirrelBody, SquirrelDriver, SquirrelRenderer} from 'src/plugins/squirrel';
 
-export {WorldScene};
+
+class ObjectConfigs {};
+class ObjectConfig {};
+class MapConfig {};
+class Map {};
 
 
-class ObjectDef {};
-class MapDef {};
-
-class PlayerLoader {
-  
-  constructor() {
-    this.providers = [PlayerBody];
-    this.deps = [PlayerBody, PlayerDriver, PlayerRenderer, CoinPurse, PlayerUseAction];
-  }
-
-  // TODO ugh....I have to scope all these...
-  @TransientScope
-  config(injector: Injector, def: ObjectDef, bodyConfig: BodyConfig) {
-    // TODO don't hard code player position and dimensions
-    bodyConfig.x = 256;
-    bodyConfig.y = 64;
-    bodyConfig.w = 32;
-    bodyConfig.h = 32;
-  }
-}
-
-class WallLoader {
-  constructor() {
-    this.providers = [];
-    this.deps = [Body];
-  }
-
-  // TODO if one of these types is undefined, the error message (from di.js?) is
-  //      difficult to interpret
-  @TransientScope
-  config(def: ObjectDef, bodyConfig: BodyConfig) {
-    // TODO very frequent pattern, helper? 
-    bodyConfig.x = def.x;
-    bodyConfig.y = def.y;
-    bodyConfig.w = def.w;
-    bodyConfig.h = def.h;
-  }
-}
-
-class CoinLoader {
-  constructor() {
-    this.providers = [];
-    this.deps = [Body, CoinRenderer, CoinCollision];
-  }
-
-  @TransientScope
-  config(def: ObjectDef, bodyConfig: BodyConfig, coinConfig: CoinConfig) {
-    bodyConfig.x = def.x;
-    bodyConfig.y = def.y;
-    bodyConfig.w = def.w;
-    bodyConfig.h = def.h;
-    coinConfig.value = def.coinValue;
-  }
-}
-
-class ChestLoader {
-  constructor() {
-    this.providers = [];
-    this.deps = [Body, ChestRenderer, ChestUseable];
-  }
-
-  @TransientScope
-  config(def: ObjectDef, bodyConfig: BodyConfig, chestConfig: ChestConfig) {
-    bodyConfig.x = def.x;
-    bodyConfig.y = def.y;
-    bodyConfig.w = def.w;
-    bodyConfig.h = def.h;
-    bodyConfig.isBlock = true;
-    chestConfig.value = def.chestValue;
-    // TODO ChestBody?
-  }
-}
-
-class SquirrelLoader {
-  
-  constructor() {
-    this.providers = [SquirrelBody];
-    this.deps = [SquirrelBody, SquirrelDriver, SquirrelRenderer];
-  }
-
-  @TransientScope
-  config(def: ObjectDef, bodyConfig: BodyConfig) {
-    bodyConfig.x = def.x;
-    bodyConfig.y = def.y;
-    bodyConfig.w = def.w;
-    bodyConfig.h = def.h;
-  }
-          //ID: def.name, //'squirrel-1',
-}
-
-class WorldLoader {
-
-  @TransientScope
-  config(mapDef: MapDef, worldConfig: WorldConfig) {
-    worldConfig.x = 0;
-    worldConfig.y = 0;
-    worldConfig.w = mapDef.mapData.width * mapDef.mapData.tilewidth;
-    worldConfig.h = mapDef.mapData.height * mapDef.mapData.tileheight;
-  }
+@ObjectScope
+@Provide(BodyConfig)
+function provideBodyConfig(config: ObjectConfig) {
+  return new BodyConfig(config.x, config.y, config.w, config.h, config.isBlock || false);
 }
 
 
-class BackgroundLoader {
+var SquirrelLoader = loader()
+  .provides(provideBodyConfig, SquirrelBody)
+  .dependsOn(SquirrelBody, SquirrelDriver, SquirrelRenderer);
 
-  @TransientScope
-  config(mapDef: MapDef, grid: BackgroundGrid) {
-    mapDef.tilelayers.forEach((layer) => {
-      layer.forEach((sprite) => {
-        grid.sprites.push(sprite);
-      });
+
+// TODO don't hard code player position and dimensions
+var PlayerLoader = loader()
+  .provides(
+    valueProvider(BodyConfig, new BodyConfig(256, 64, 32, 32)),
+    PlayerBody
+  )
+  .dependsOn(
+    PlayerBody,
+    PlayerDriver,
+    PlayerRenderer,
+    CoinPurse,
+    PlayerUseAction
+  );
+
+// TODO if a requested type is undefined, the error message (from di.js?) is
+//      difficult to interpret
+
+var WallLoader = loader([provideBodyConfig], [Body]);
+
+@ObjectScope
+@Provide(ChestConfig)
+function provideChestConfig(config: ObjectConfig) {
+  return {value: config.coinValue};
+}
+
+@ObjectScope
+@Provide(CoinConfig)
+function provideCoinConfig(config: ObjectConfig) {
+  return {value: config.coinValue};
+}
+
+var CoinLoader = loader()
+  .provides(provideBodyConfig, provideCoinConfig)
+  .dependsOn(Body, CoinRenderer, CoinCollision);
+
+var ChestLoader = loader()
+  .provides(provideBodyConfig, provideChestConfig)
+  .dependsOn(Body, ChestRenderer, ChestUseable);
+
+
+@SceneScope
+@Provide(WorldConfig)
+function provideWorldConfig(map: Map) {
+  var w = map.mapData.width * map.mapData.tilewidth;
+  var h = map.mapData.height * map.mapData.tileheight;
+  // TODO using "new"?
+  return new WorldConfig(0, 0, w, h);
+}
+
+@SceneScope
+@Provide(Map)
+function provideMap(mapConfig: MapConfig) {
+  // TODO integrate this with loadMapSync better
+  //      in the future it will have pluggable loaders that can recognize different
+  //      file types/paths
+  var path = `maps/${mapConfig.mapID}.json`;
+  return loadMapSync(path);
+}
+
+// TODO needed? loadpoint covers this.
+@SceneScope
+@Provide(MapConfig)
+function provideMapConfig(loadpoint: Loadpoint) {
+  return {mapID: loadpoint.mapID};
+}
+
+@SceneScope
+@Provide(RendererConfig)
+function provideRendererConfig(biscuitsConfig: BiscuitsConfig) {
+  return {
+    container: biscuitsConfig.container,
+    layers: ['background', 'objects', 'player', 'hud'],
+  }
+}
+
+@SceneScope
+@Provide(BackgroundGrid)
+function provideBackgroundGrid(map: Map) {
+  var grid = [];
+
+  map.tilelayers.forEach((layer) => {
+    layer.forEach((sprite) => {
+      grid.push(sprite);
     });
-  }
+  });
+
+  return grid;
 }
 
 var typeLoaderMap = {
-  "squirrel": new SquirrelLoader(),
-  "coin": new CoinLoader(),
-  "chest": new ChestLoader(),
-  "wall": new WallLoader(),
-  "player": new PlayerLoader()
+  'squirrel': SquirrelLoader,
+  'coin': CoinLoader,
+  'chest': ChestLoader,
+  'wall': WallLoader
 };
 
-var worldLoader = new WorldLoader();
-var backgroundLoader = new BackgroundLoader();
 
+@SceneScope
+@Provide(ObjectConfigs)
+function provideObjectConfigs(map: Map) {
+  var configs = [];
 
-function WorldScene(getMap) {
-  var extras = [HUD, BackgroundRenderer];
-
-  // TODO test that render layers are removed from renderer when scene is unloaded
-  // TODO maybe renderer should be scene scoped? object scoped?
-
-  @Provide(MapDef)
-  @SceneScope
-  function provideMapDef() {
-    return getMap();
-  }
-
-  @Provide(SceneLoader)
-  function loadScene(sceneInjector: Injector, scene: Scene, renderer: Renderer) {
-
-    renderer.getLayer('background');
-    renderer.getLayer('objects');
-    renderer.getLayer('player');
-    renderer.getLayer('hud');
-
-    // TODO there's probably a better way
-    var worldInjector = sceneInjector.createChild([provideMapDef]);
-    worldInjector.get(worldLoader.config);
-
-    var backgroundInjector = sceneInjector.createChild([provideMapDef]);
-    backgroundInjector.get(backgroundLoader.config);
-
-
-    var objectDefs = [];
-
-    // TODO optimize
-    map.objectlayers.forEach((layer) => {
-      layer.forEach((def) => {
-        objectDefs.push(def);
-      });
+  map.objectlayers.forEach((layer) => {
+    layer.forEach((config) => {
+      // TODO error handling for unknown type
+      config.loader = typeLoaderMap[config.type];
+      configs.push(config);
     });
+  });
 
-    objectDefs.push({
-      type: 'player',
-      ID: 'player',
-    });
-
-
-    objectDefs.forEach((def) => {
-        var loader = typeLoaderMap[def.type];
-
-        if (!loader) {
-          // TODO
-          throw `Error: no loader found for type "${def.type}"`;
-        }
-
-        var provideObjectDef = valueProvider(ObjectDef, def);
-        var providers = [provideMapDef, provideObjectDef];
-
-        if (loader.providers) {
-          providers.push.apply(providers, loader.providers);
-        }
-
-        var objectInjector = sceneInjector.createChild(providers, [ObjectScope]);
-        objectInjector.get(loader.config);
-
-        // TODO the error message from this probably sucks. how to improve?
-        //      that is, if dep is undefined.
-        // TODO move this to Loader base class?
-        loader.deps.forEach((dep) => {
-          objectInjector.get(dep);
-        });
-
-        var obj = objectInjector.get(SceneObject);
-        // TODO don't want "ID || name". just ID
-        scene.addObject(def.ID || def.name, obj);
-    });
-
-    // TODO the error message from this sucks. how to improve?
-    //      that is, if extra is undefined.
-    extras.forEach((extra) => {
-      sceneInjector.get(extra);
-    });
-  }
-
-  return [loadScene];
+  return configs;
 }
+
+
+@SceneScope
+function loadScene(sceneInjector: Injector, scene: Scene, objectConfigs: ObjectConfigs) {
+  objectConfigs.forEach((objectConfig) => {
+
+    var loader = sceneInjector.get(objectConfig.loader);
+    var provideObjectConfig = valueProvider(ObjectConfig, objectConfig);
+    loader.providers.push(provideObjectConfig);
+
+    var objectInjector = sceneInjector.createChild(loader.providers, [ObjectScope]);
+
+    // TODO the error message from this probably sucks. how to improve?
+    //      that is, if dep is undefined.
+    loader.deps.forEach((dep) => {
+      objectInjector.get(dep);
+    });
+
+    var obj = objectInjector.get(SceneObject);
+    // TODO don't want "ID || name". just ID
+    // TODO object loaders should add themselves to scene?
+    scene.addObject(objectConfig.ID || objectConfig.name, obj);
+
+  });
+
+  // TODO
+  var playerLoader = sceneInjector.get(PlayerLoader);
+  var objectInjector = sceneInjector.createChild(playerLoader.providers, [ObjectScope]);
+  playerLoader.deps.forEach((dep) => {
+    objectInjector.get(dep);
+  });
+  var playerObj = objectInjector.get(SceneObject);
+  scene.addObject('player', playerObj);
+}
+
+var WorldSceneLoader = loader()
+  .provides(
+    provideWorldConfig,
+    provideMapConfig,
+    provideRendererConfig,
+    provideMap,
+    provideBackgroundGrid,
+    provideObjectConfigs
+  )
+  .dependsOn(
+    loadScene,
+    HUD,
+    BackgroundRenderer
+  );
+
+// TODO this is at the bottom only in this file?
+export {WorldSceneLoader};
+
+// TODO test that render layers are removed from renderer when scene is unloaded
+// TODO maybe renderer should be scene scoped? object scoped?

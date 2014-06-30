@@ -6,18 +6,13 @@ import {SceneScope} from 'src/scope';
 
 export {BackgroundRenderer, BackgroundGrid};
 
-class BackgroundGrid {
-  constructor() {
-    // TODO grid should have an array-like API
-    this.sprites = [];
-  }
-}
+class BackgroundGrid {}
 
 // TODO inject deps
 @SceneScope
 function BackgroundRenderer(renderer: Renderer, grid: BackgroundGrid) {
   var layer = renderer.getLayer('background');
-  var renderable = new TileBatchRenderable(grid.sprites.forEach.bind(grid.sprites));
+  var renderable = new TileBatchRenderable(grid.forEach.bind(grid));
   layer.addChild(renderable);
 
   // TODO fix active background region. separate it from renderer.

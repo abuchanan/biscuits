@@ -1,6 +1,6 @@
-import {Provide} from 'di';
+import {Provide, TransientScope} from 'di';
 
-export {valueProvider, extend};
+export {valueProvider, extend, loader};
 
 function valueProvider(token, value, scope) {
   var fn = function() { return value; };
@@ -21,4 +21,27 @@ function extend(obj) {
     }
   });
   return obj;
+}
+
+function loader(providers, deps) {
+  providers = providers || [];
+  deps = deps || [];
+
+  function loader() {
+    return {
+      providers: providers.slice(0),
+      deps: deps.slice(0),
+    };
+  }
+  loader.annotations = [new TransientScope()];
+
+  loader.provides = function(..._providers) {
+    providers.push.apply(providers, _providers);
+    return loader;
+  };
+  loader.dependsOn = function(..._deps) {
+    deps.push.apply(deps, _deps);
+    return loader;
+  };
+  return loader;
 }

@@ -1,37 +1,31 @@
-import {Injector} from 'di';
-import {Renderer, RenderConfig} from 'src/render';
+import {Injector, Provide} from 'di';
+import {valueProvider} from 'src/utils';
 import {SceneManager} from 'src/scenemanager';
-import {WorldScene} from 'src/worldscene';
+import {Loadpoints} from 'src/loadpoints';
 import {KeyboardInput} from 'src/input';
-import {loadMapSync} from 'src/maploader';
-
 import {FPSMeterPlugin} from 'src/plugins/FPSMeter';
+import {WorldSceneLoader} from 'src/worldscene';
+import {BiscuitsConfig} from 'src/config';
 
 export {start};
 
+// TODO mock world for debugging only
+@Provide(Loadpoints)
+class MockLoadpoints {
+  get(ID) {
+    return {mapID: 'foo10', loader: WorldSceneLoader};
+  }
+}
 
+// TODO make this into a Loader convention or something
+//      so that it's easy to plug in something like MockLoadpoints
 function start(container) {
 
-  var injector = new Injector();
-
-  // TODO find the appropriate place for this
-  //      probably WorldScene?
-  var renderConfig = injector.get(RenderConfig);
-  renderConfig.container = container;
-
-  var manager = injector.get(SceneManager);
-
-  manager.plugins.push(FPSMeterPlugin);
-
+  var provideBiscuitsConfig = valueProvider(BiscuitsConfig, {container});
+  var injector = new Injector([provideBiscuitsConfig, MockLoadpoints]);
   injector.get(KeyboardInput);
 
-  // TODO mock world for debugging only
-  function getMap() {
-    return loadMapSync('maps/foo10.json');
-  }
-
-  var mockWorld = WorldScene(getMap);
-  
-  manager.register('mock', mockWorld);
-  manager.load('mock');
+  var manager = injector.get(SceneManager);
+  manager.plugins.push(FPSMeterPlugin);
+  manager.load('default');
 }
