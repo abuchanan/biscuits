@@ -1,19 +1,22 @@
 import {Provide, SuperConstructor} from 'di';
 import {Input} from 'src/input';
-import {Body} from 'src/world';
+import {Body, BodyConfig} from 'src/world';
 import {Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {loadSpriteSheetSync} from 'src/sprite';
 import PIXI from 'lib/pixi';
+import {loader, valueProvider, provideBodyConfig} from 'src/utils';
+import {ObjectConfig} from 'src/config';
 
 export {
   PlayerBody,
   PlayerDriver,
   PlayerRenderer,
   PlayerUseAction,
-  CoinPurse
+  CoinPurse,
+  PlayerLoader
 };
 
 
@@ -274,3 +277,17 @@ function PlayerTextures() {
     ],
   };
 }
+
+// TODO don't hard code player position and dimensions
+var PlayerLoader = loader()
+  .provides(
+    valueProvider(BodyConfig, new BodyConfig(256, 64, 32, 32)),
+    PlayerBody
+  )
+  .dependsOn(
+    PlayerBody,
+    PlayerDriver,
+    PlayerRenderer,
+    CoinPurse,
+    PlayerUseAction
+  );

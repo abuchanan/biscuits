@@ -18,7 +18,7 @@ import {BiscuitsConfig, ObjectConfig} from 'src/config';
 //import {Loadpoint} from 'src/scenemanager';
 import {Loadpoint} from 'src/loadpoints';
 
-import {PlayerBody, PlayerDriver, PlayerRenderer, PlayerUseAction, CoinPurse} from 'src/plugins/Player';
+import {PlayerLoader} from 'src/plugins/Player';
 import {ChestLoader} from 'src/plugins/Chest';
 import {CoinLoader} from 'src/plugins/Coin';
 
@@ -34,20 +34,6 @@ var SquirrelLoader = loader()
   .provides(provideBodyConfig, SquirrelBody)
   .dependsOn(SquirrelBody, SquirrelDriver, SquirrelRenderer);
 
-
-// TODO don't hard code player position and dimensions
-var PlayerLoader = loader()
-  .provides(
-    valueProvider(BodyConfig, new BodyConfig(256, 64, 32, 32)),
-    PlayerBody
-  )
-  .dependsOn(
-    PlayerBody,
-    PlayerDriver,
-    PlayerRenderer,
-    CoinPurse,
-    PlayerUseAction
-  );
 
 // TODO if a requested type is undefined, the error message (from di.js?) is
 //      difficult to interpret
@@ -130,7 +116,9 @@ function provideObjectConfigs(map: Map) {
 
 
 @SceneScope
-function loadScene(sceneInjector: Injector, scene: Scene, objectConfigs: ObjectConfigs) {
+function loadScene(sceneInjector: Injector, scene: Scene,
+                   objectConfigs: ObjectConfigs, playerLoader: PlayerLoader) {
+
   objectConfigs.forEach((objectConfig) => {
 
     var loader = sceneInjector.get(objectConfig.loader);
@@ -157,8 +145,7 @@ function loadScene(sceneInjector: Injector, scene: Scene, objectConfigs: ObjectC
 
   });
 
-  // TODO
-  var playerLoader = sceneInjector.get(PlayerLoader);
+  // TODO DRY with code above
   var objectInjector = sceneInjector.createChild(playerLoader.providers, [ObjectScope]);
   playerLoader.deps.forEach((dep) => {
     objectInjector.get(dep);
