@@ -1,15 +1,38 @@
-import {Inject, Injector, Provide} from 'di';
+import {Injector, Provide} from 'di';
 import {SceneManager} from 'src/scenemanager';
 import {Input} from 'src/input';
+import {Loadpoints} from 'src/loadpoints';
+import {MapLoader} from 'src/maploader';
+import {WorldSceneLoader} from 'src/worldscene';
 
 export {SceneScenario};
 
-@Inject(Input, SceneManager)
+
 class SceneScenario {
 
-  constructor(input, manager) {
-    this.input = input;
-    this.manager = manager;
+  constructor() {
+
+    var maps = this.maps = {};
+
+    // TODO this setup is pretty verbose
+    @Provide(Loadpoints)
+    class MockLoadpoints {
+      get(ID) {
+        return {mapID: ID, loader: WorldSceneLoader};
+      }
+    }
+
+    // TODO could use map cache in the future
+    @Provide(MapLoader)
+    class MockMapLoader {
+      load(ID) {
+        return maps[ID];
+      }
+    }
+
+    this.injector = new Injector([MockLoadpoints, MockMapLoader]);
+    this.input = this.injector.get(Input);
+    this.manager = this.injector.get(SceneManager);
   }
 
   load(name) {

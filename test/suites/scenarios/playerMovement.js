@@ -1,11 +1,4 @@
-import {Injector} from 'di';
 import {SceneScenario} from 'test/utils/SceneScenario';
-import {WorldScene, Scene} from 'src/scene';
-
-import {CoinLoader} from 'src/plugins/Coin';
-import {PlayerLoader} from 'src/plugins/Player';
-import {ChestLoader} from 'src/plugins/Chest';
-import {BlockLoader} from 'src/plugins/Block';
 
 /*
 TODO
@@ -18,79 +11,68 @@ set expectations on events that occur, such as
 - etc
 */
 
-var injector = new Injector();
 var scenario = injector.get(SceneScenario);
 
-// TODO maybe use a promise instead of a function. WorldScene will wrap argument
-//      in a promise, so if it's a value (i.e. not a promise) it will be fulfilled
-//      immediately, allowing for a nice value/promise option API.
-function getMap() {
+// TODO player config
+// {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
+scenario.maps['mock'] = {
+  height: 40,
+  width: 40,
+  tileheight: 32,
+  tilewidth: 32,
+  layers: [
+    {
+      type: "objectgroup",
+      objects: [
+        {
+          height: 1,
+          width: 2,
+          name: 'wall',
+          x: 3,
+          y: 2,
+        },
+        {
+          ID: 'coin-1',
+          height: 1,
+          width: 1,
+          name: 'coin',
+          x: 4,
+          y: 1,
+          coinValue: 1,
+        },
+        {
+          ID: 'coin-2',
+          height: 1,
+          width: 1,
+          name: 'coin',
+          x: 5,
+          y: 1,
+          coinValue: 10,
+        },
+        {
+          ID: 'chest-1',
+          height: 1,
+          width: 1,
+          name: 'chest',
+          x: 2,
+          y: 2,
+          chestValue: 1,
+        },
+        {
+          ID: 'chest-2',
+          height: 1,
+          width: 1,
+          name: 'chest',
+          x: 2,
+          y: 3,
+          chestValue: 10,
+        },
+      ]
+    }
+  ]
+};
 
-  // TODO player config
-  // {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
-
-  return {
-    height: 40,
-    width: 40,
-    tileheight: 32,
-    tilewidth: 32,
-    layers: [
-      {
-        type: "objectgroup",
-        objects: [
-          {
-            height: 1,
-            width: 2,
-            name: 'wall',
-            x: 3,
-            y: 2,
-          },
-          {
-            ID: 'coin-1',
-            height: 1,
-            width: 1,
-            name: 'coin',
-            x: 4,
-            y: 1,
-            coinValue: 1,
-          },
-          {
-            ID: 'coin-2',
-            height: 1,
-            width: 1,
-            name: 'coin',
-            x: 5,
-            y: 1,
-            coinValue: 10,
-          },
-          {
-            ID: 'chest-1',
-            height: 1,
-            width: 1,
-            name: 'chest',
-            x: 2,
-            y: 2,
-            chestValue: 1,
-          },
-          {
-            ID: 'chest-2',
-            height: 1,
-            width: 1,
-            name: 'chest',
-            x: 2,
-            y: 3,
-            chestValue: 10,
-          },
-        ]
-      }
-    ]
-  };
-}
-
-var sceneOne = WorldScene(getMap);
-
-scenario.manager.register('sceneOne', sceneOne);
-scenario.load('sceneOne');
+scenario.load('mock');
 
 var player = scenario.manager.scene.getObject('player');
 var playerBody = player.get(Body);
