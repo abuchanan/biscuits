@@ -49,5 +49,5 @@ gulp.task('serve', function() {
 });
 
 gulp.task('watch', function() {
-  gulp.watch(es6Files, ['build']);
+  gulp.watch(es6Files.concat(copyFiles), ['build']);
 });
