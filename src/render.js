@@ -1,13 +1,14 @@
 import {SceneScope} from 'src/scope';
 import {Scene} from 'src/scene';
+import {Document} from 'src/document';
 import PIXI from 'lib/pixi';
 
 export {RendererConfig, Renderer};
 
-// TODO @SceneScope?
+@SceneScope
 class RendererConfig {
-  // TODO inject document?
-  constructor() {
+  // TODO this is really useless because WorldLoader just creates a new object
+  constructor(document: Document) {
     this.container = document.body;
   }
 }
@@ -45,7 +46,6 @@ class Renderer {
   }
 
   render() {
-    // TODO this.masterLayer.invokeFrameListeners();
     this.renderer.render(this.stage);
   }
 
@@ -66,15 +66,6 @@ class Renderer {
   setSize: function(width, height) {
     renderer.width = width;
     renderer.height = height;
-  },
-
-  start: function(loadPoint) {
-    stage.visible = true;
-  },
-
-  stop: function() {
-    stage.visible = false;
-    removeListener();
   },
   */
 }
