@@ -20,9 +20,13 @@
         },
 
         callback: function() {
-          require(['src/biscuits'], function(biscuits) {
-            biscuits.start(container);
-          });
+          require(['src/biscuits', 'src/dev', 'src/plugins/FPSMeter'],
+            function(biscuits, dev, fps) {
+              var app = new biscuits.Biscuits({container: container});
+              app.provides(dev.MockLoadpoints);
+              app.dependsOn(fps.FPSMeterPlugin);
+              app.start();
+            });
         }
       });
 
