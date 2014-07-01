@@ -6,7 +6,7 @@ import {valueProvider, loader, provideBodyConfig} from 'src/utils';
 import {HUD} from 'src/hud';
 import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
-import {loadMapSync} from 'src/maploader';
+import {MapLoader} from 'src/maploader';
 import {BiscuitsConfig, ObjectConfig} from 'src/config';
 
 // TODO this is a great example of a problem with both ES6 and di.js
@@ -24,6 +24,7 @@ import {CoinLoader} from 'src/plugins/Coin';
 import {SquirrelLoader} from 'src/plugins/Squirrel';
 import {WallLoader} from 'src/plugins/wall';
 
+export {WorldSceneLoader};
 
 class ObjectConfigs {};
 class MapConfig {};
@@ -45,19 +46,8 @@ function provideWorldConfig(map: Map) {
 
 @SceneScope
 @Provide(Map)
-function provideMap(mapConfig: MapConfig) {
-  // TODO integrate this with loadMapSync better
-  //      in the future it will have pluggable loaders that can recognize different
-  //      file types/paths
-  var path = `maps/${mapConfig.mapID}.json`;
-  return loadMapSync(path);
-}
-
-// TODO needed? loadpoint covers this.
-@SceneScope
-@Provide(MapConfig)
-function provideMapConfig(loadpoint: Loadpoint) {
-  return {mapID: loadpoint.mapID};
+function provideMap(loadpoint: Loadpoint, mapLoader: MapLoader) {
+  return mapLoader.load(loadpoint.mapID);
 }
 
 @SceneScope
@@ -150,7 +140,6 @@ function loadScene(sceneInjector: Injector, scene: Scene,
 var WorldSceneLoader = loader()
   .provides(
     provideWorldConfig,
-    provideMapConfig,
     provideRendererConfig,
     provideMap,
     provideBackgroundGrid,
@@ -161,9 +150,6 @@ var WorldSceneLoader = loader()
     HUD,
     BackgroundRenderer
   );
-
-// TODO this is at the bottom only in this file?
-export {WorldSceneLoader};
 
 // TODO test that render layers are removed from renderer when scene is unloaded
 // TODO maybe renderer should be scene scoped? object scoped?

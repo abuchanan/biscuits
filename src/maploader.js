@@ -1,6 +1,6 @@
 import PIXI from 'lib/pixi';
 
-export {loadMapSync};
+export {loadMapSync, MapLoader};
 
 function parseTileset(tilesets) {
     var slices = {};
@@ -155,4 +155,13 @@ function loadMapSync(src) {
   var data = parseMap(d);
 
   return data;
+}
+
+
+// TODO pluggable loaders that can recognize different file types/paths
+class MapLoader {
+  load(ID) {
+    var path = `maps/${ID}.json`;
+    return loadMapSync(path);
+  }
 }
