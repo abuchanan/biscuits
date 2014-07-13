@@ -1,3 +1,5 @@
+export var skip = true;
+
 var Actions = require('src/Actions.js');
 var MockBody = require('test/mocks/Body');
 

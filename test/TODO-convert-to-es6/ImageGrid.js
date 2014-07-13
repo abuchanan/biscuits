@@ -1,3 +1,5 @@
+export var skip = true;
+
 var ImageGrid = require('../../src/ImageGrid');
 
 /*

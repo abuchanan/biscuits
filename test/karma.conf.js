@@ -10,6 +10,8 @@ module.exports = function(config) {
     files: [
       'test/lib/assert.js',
       'test/bootstrap.js',
+      {pattern: 'test/runner.js', included: false},
+      {pattern: 'test/annotations.js', included: false},
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
@@ -20,6 +22,8 @@ module.exports = function(config) {
     preprocessors: {
       'lib/di.js/**/*.js': ['traceur'],
       'src/**/*.js': ['traceur'],
+      'test/runner.js': ['traceur'],
+      'test/annotations.js': ['traceur'],
       'test/utils/**/*.js': ['traceur'],
       'test/suites/**/*.js': ['traceur'],
     },

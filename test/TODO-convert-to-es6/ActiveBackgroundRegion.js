@@ -1,3 +1,5 @@
+export var skip = true;
+
 var ActiveBackgroundRegion = require('../../src/ActiveBackgroundRegion');
 
 var tiles, callback;

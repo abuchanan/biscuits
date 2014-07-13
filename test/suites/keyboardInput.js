@@ -6,8 +6,6 @@ export function testKeyboardInput() {
   var injector = new Injector();
   var helper = KeyEventsHelper(document);
 
-  console.log('keyboard');
-
   injector.get(KeyboardInput);
   var input = injector.get(Input);
 

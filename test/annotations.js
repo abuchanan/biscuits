@@ -1,0 +1,3 @@
+export {SkipTest};
+
+class SkipTest {};
