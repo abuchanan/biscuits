@@ -8,7 +8,20 @@ export {MockLoadpoints};
 // TODO mock world for debugging only
 @Provide(Loadpoints)
 class MockLoadpoints {
-  get(ID) {
-    return {mapID: 'foo10', loader: WorldSceneLoader};
+
+  constructor() {
+    this.loadpoints = {};
   }
+
+  get(ID) {
+    return this.loadpoints[ID];
+  }
+
+  addWorldScene(ID, mapPath) {
+    this.loadpoints[ID] = {mapID: mapPath, loader: WorldSceneLoader};
+  }
+}
+
+function mockLoadpointsData(loadpoints: Loadpoints) {
+  loadpoints.addWorldScene('default', 'maps/foo10.json');
 }

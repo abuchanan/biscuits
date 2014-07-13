@@ -4,33 +4,32 @@ import {Input} from 'src/input';
 import {Loadpoints} from 'src/loadpoints';
 import {MapLoader} from 'src/maploader';
 import {WorldSceneLoader} from 'src/worldscene';
+import {MockLoadpoints} from 'src/dev';
+import {RendererConfig} from 'src/render';
+import {BiscuitsConfig} from 'src/config';
+import {valueProvider} from 'src/utils';
+import {PlayerRenderer} from 'src/plugins/Player';
 
 export {SceneScenario};
 
+// Don't bother rendering the player, and avoid loading player rendering
+// resources (which would fail since this is a test server).
+// TODO(abuchanan) over time, it might be nice to find a better way to easily
+//                 mock out all renderers.
+@Provide(PlayerRenderer)
+function MockPlayerRenderer() {}
 
 class SceneScenario {
 
   constructor() {
 
-    var maps = this.maps = {};
+    var biscuitsConfig = valueProvider(BiscuitsConfig, {
+      container: document.createElement('div'),
+    });
 
-    // TODO this setup is pretty verbose
-    @Provide(Loadpoints)
-    class MockLoadpoints {
-      get(ID) {
-        return {mapID: ID, loader: WorldSceneLoader};
-      }
-    }
+    this.injector = new Injector([MockLoadpoints, biscuitsConfig, MockPlayerRenderer]);
+    this.loadpoints = this.injector.get(Loadpoints);
 
-    // TODO could use map cache in the future
-    @Provide(MapLoader)
-    class MockMapLoader {
-      load(ID) {
-        return maps[ID];
-      }
-    }
-
-    this.injector = new Injector([MockLoadpoints, MockMapLoader]);
     this.input = this.injector.get(Input);
     this.manager = this.injector.get(SceneManager);
   }

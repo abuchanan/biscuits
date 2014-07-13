@@ -21,7 +21,7 @@ import {Loadpoint} from 'src/loadpoints';
 import {PlayerLoader} from 'src/plugins/Player';
 import {ChestLoader} from 'src/plugins/Chest';
 import {CoinLoader} from 'src/plugins/Coin';
-import {SquirrelLoader} from 'src/plugins/Squirrel';
+import {SquirrelLoader} from 'src/plugins/squirrel';
 import {WallLoader} from 'src/plugins/wall';
 
 export {WorldSceneLoader};
@@ -50,13 +50,12 @@ function provideMap(loadpoint: Loadpoint, mapLoader: MapLoader) {
   return mapLoader.load(loadpoint.mapID);
 }
 
-@SceneScope
-@Provide(RendererConfig)
-function provideRendererConfig(biscuitsConfig: BiscuitsConfig) {
-  return {
-    container: biscuitsConfig.container,
-    layers: ['background', 'objects', 'player', 'hud'],
-  }
+function setupRendererConfig(biscuitsConfig: BiscuitsConfig,
+                             rendererConfig: RendererConfig) {
+
+  rendererConfig.container = biscuitsConfig.container;
+  // TODO extend, not overwrite
+  rendererConfig.layers = ['background', 'objects', 'player', 'hud'];
 }
 
 @SceneScope
@@ -116,7 +115,9 @@ function loadScene(sceneInjector: Injector, scene: Scene,
       try {
         objectInjector.get(dep);
       } catch (e) {
+        console.error('scene dependency error');
         console.log(dep);
+        console.log(e);
         throw e;
       }
     });
@@ -139,13 +140,14 @@ function loadScene(sceneInjector: Injector, scene: Scene,
 
 var WorldSceneLoader = loader()
   .provides(
+    // TODO move these to setupFoo like I did for renderer config
     provideWorldConfig,
-    provideRendererConfig,
     provideMap,
     provideBackgroundGrid,
     provideObjectConfigs
   )
   .dependsOn(
+    setupRendererConfig,
     loadScene,
     HUD,
     BackgroundRenderer

@@ -15,6 +15,7 @@ module.exports = function(config) {
       {pattern: 'lib/**/*.js', included: false},
       {pattern: 'src/**/*.js', included: false},
       {pattern: 'test/**/*.js', included: false},
+      {pattern: 'test/maps/*.json', included: false},
     ],
 
     // preprocess matching files before serving them to the browser

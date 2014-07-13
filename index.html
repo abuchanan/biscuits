@@ -24,8 +24,9 @@
             function(biscuits, dev, fps) {
               var app = new biscuits.Biscuits({container: container});
               app.provides(dev.MockLoadpoints);
+              app.dependsOn(dev.mockLoadpointsData);
               app.dependsOn(fps.FPSMeterPlugin);
-              app.start();
+              app.start('default');
             });
         }
       });

@@ -151,6 +151,8 @@ function loadMapSync(src) {
   req.open('get', src, false);
   req.send();
 
+  // TODO handle 404
+
   var d = JSON.parse(req.responseText);
   var data = parseMap(d);
 
@@ -160,8 +162,7 @@ function loadMapSync(src) {
 
 // TODO pluggable loaders that can recognize different file types/paths
 class MapLoader {
-  load(ID) {
-    var path = `maps/${ID}.json`;
+  load(path) {
     return loadMapSync(path);
   }
 }

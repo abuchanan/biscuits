@@ -1,6 +1,6 @@
-//import {SceneScenario} from 'test/utils/SceneScenario';
-
-export var skipAll = true;
+import {Body} from 'src/world';
+import {CoinPurse} from 'src/plugins/Player';
+import {SceneScenario} from 'test/utils/SceneScenario';
 
 /*
 TODO
@@ -13,67 +13,12 @@ set expectations on events that occur, such as
 - etc
 */
 export function testPlayerMovement() {
-  var scenario = injector.get(SceneScenario);
+  var scenario = new SceneScenario();
 
   // TODO player config
   // {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
-  scenario.maps['mock'] = {
-    height: 40,
-    width: 40,
-    tileheight: 32,
-    tilewidth: 32,
-    layers: [
-      {
-        type: "objectgroup",
-        objects: [
-          {
-            height: 1,
-            width: 2,
-            name: 'wall',
-            x: 3,
-            y: 2,
-          },
-          {
-            ID: 'coin-1',
-            height: 1,
-            width: 1,
-            name: 'coin',
-            x: 4,
-            y: 1,
-            coinValue: 1,
-          },
-          {
-            ID: 'coin-2',
-            height: 1,
-            width: 1,
-            name: 'coin',
-            x: 5,
-            y: 1,
-            coinValue: 10,
-          },
-          {
-            ID: 'chest-1',
-            height: 1,
-            width: 1,
-            name: 'chest',
-            x: 2,
-            y: 2,
-            chestValue: 1,
-          },
-          {
-            ID: 'chest-2',
-            height: 1,
-            width: 1,
-            name: 'chest',
-            x: 2,
-            y: 3,
-            chestValue: 10,
-          },
-        ]
-      }
-    ]
-  };
 
+  scenario.loadpoints.addWorldScene('mock', '/base/test/maps/mock-1.json');
   scenario.load('mock');
 
   var player = scenario.manager.scene.getObject('player');
@@ -163,3 +108,4 @@ export function testPlayerMovement() {
 
   // TODO I want to test that the coin has been removed from the world.
 }
+

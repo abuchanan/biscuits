@@ -40,7 +40,7 @@ class Biscuits {
     this._deps.push.apply(this._deps, deps);
   }
 
-  start() {
+  start(scene) {
     if (this._started) {
       throw 'Already started';
     }
@@ -52,7 +52,6 @@ class Biscuits {
       injector.get(dep);
     });
 
-    // TODO allow default scene to be configured?
-    injector.get(SceneManager).load('default');
+    injector.get(SceneManager).load(scene);
   }
 }
