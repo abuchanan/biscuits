@@ -86,7 +86,7 @@ function SquirrelDriver(scene: Scene, actions: SquirrelActions) {
       actions.walkRight,
     ];
 
-    scene.events.on('scene tick', function() {
+    scene.events.on('tick', function() {
       var state = actions.manager.getState();
 
       if (state.action == 'stop') {
@@ -168,7 +168,7 @@ function SquirrelRenderer(textures: SquirrelTextures, renderer: Renderer,
     layer.addChild(clip);
 
     // TODO need deregistration function
-    scene.events.on('scene tick', function() {
+    scene.events.on('tick', function() {
       var state = actions.manager.getState();
 
       // TODO exactly same code as player renderer. DRY

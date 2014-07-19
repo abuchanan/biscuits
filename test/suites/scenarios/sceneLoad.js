@@ -30,7 +30,7 @@ export function testSceneLoad() {
 
       // TODO make a helper for this pattern
       //      maybe just trigger events on scene.events
-      scene.events.on('scene tick', function() {
+      scene.events.on('tick', function() {
         if (input.event == 'Use keydown') {
           obj.useCallback();
         }

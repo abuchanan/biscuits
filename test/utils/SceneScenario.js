@@ -51,6 +51,6 @@ class SceneScenario {
 
   tick(n) {
     this._time += n;
-    this.manager.scene.events.trigger('scene tick', [this._time]);
+    this.manager.scene.events.trigger('tick', [this._time]);
   }
 }

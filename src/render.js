@@ -36,7 +36,7 @@ class Renderer {
 
     config.container.appendChild(renderer.view);
 
-    scene.events.on('scene tick', function() {
+    scene.events.on('tick', function() {
       renderer.render(stage);
     });
   }

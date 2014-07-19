@@ -28,8 +28,7 @@ class Scene {
     this._objects = {};
 
     ticker.onTick = function() {
-      // TODO rename to just "tick"
-      events.trigger('scene tick', [Date.now()]);
+      events.trigger('tick', [Date.now()]);
     }
 
     ticker.start();

@@ -20,8 +20,8 @@ function FPSMeterPlugin(sceneManager: SceneManager) {
   //      forget it and the whole app breaks
   @SceneScope
   function startMeter(scene: Scene) {
-    // TODO not sure if scene tick should be directly related to frame tick or not
-    scene.events.on('scene tick', meter.tick.bind(meter));
+    // TODO not sure if tick should be directly related to frame tick or not
+    scene.events.on('tick', meter.tick.bind(meter));
   }
 
   sceneManager.plugins.push(startMeter);

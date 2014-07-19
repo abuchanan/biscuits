@@ -19,7 +19,7 @@ function HUD(renderer: Renderer, scene: Scene) {
   // TODO not sure I like CoinPurse after all
   var coins = player.get(CoinPurse);
 
-  scene.events.on('scene tick', function() {
+  scene.events.on('tick', function() {
     coinText.setText('Player coins: ' + coins.balance());
   });
 }

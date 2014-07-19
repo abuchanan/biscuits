@@ -137,7 +137,7 @@ function ActionManager(scene: Scene) {
     }
   }
 
-  scene.events.on('scene tick', tick);
+  scene.events.on('tick', tick);
 
   function State(action) {
     return {
@@ -191,7 +191,7 @@ class ActionInputHelper {
   constructor(input, scene, manager) {
     var actions = this._actions = {};
 
-    scene.events.on('scene tick', function() {
+    scene.events.on('tick', function() {
 
       // TODO optimize?
       for (var name in actions) {

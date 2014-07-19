@@ -128,7 +128,7 @@ function PlayerDriver(actions: PlayerActions,
 @ObjectScope
 function PlayerUseAction(scene: Scene, body: Body, input: Input) {
 
-    scene.events.on('scene tick', function() {
+    scene.events.on('tick', function() {
       // TODO keydown? What if the player holds the key down?
       if (input.Use) {
         // TODO optimize?
@@ -176,7 +176,7 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
   clip.position.x = renderer.renderer.width / 2;
   clip.position.y = renderer.renderer.height / 2;
 
-  scene.events.on('scene tick', function(time) {
+  scene.events.on('tick', function(time) {
     var state = actions.manager.getState();
 
     // TODO try to remove this stop special case. Maybe actions should be
@@ -187,7 +187,7 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
     //      Something to ask: how would concurrent actions/states be handled?
 
     // TODO maybe the renderer could hook in via some sort of action tick event.
-    //      then it wouldn't need to depend on scene tick, it wouldn't need
+    //      then it wouldn't need to depend on tick, it wouldn't need
     //      interpolatePosition, 
     if (state.action == 'stop') {
 
