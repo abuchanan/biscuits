@@ -80,7 +80,7 @@ function ChestUseable(body: Body, config: ChestConfig,
 @ObjectScope
 @Provide(ChestConfig)
 function provideChestConfig(config: ObjectConfig) {
-  return {value: config.chestValue};
+  return {value: parseInt(config.chestValue)};
 }
 
 var ChestLoader = loader()

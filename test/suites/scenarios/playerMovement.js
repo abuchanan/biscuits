@@ -15,36 +15,58 @@ set expectations on events that occur, such as
 export function testPlayerMovement() {
   var scenario = new SceneScenario();
 
-  // TODO player config
-  // {ID: 'player-1', x: 1, y: 1, w: 1, h: 1, type: PlayerLoader},
+  var playerConfig = {x: 0, y: 0};
 
-  scenario.loadpoints.addWorldScene('mock', '/base/test/maps/mock-1.json');
+  scenario.loadpoints.addWorldScene('mock', '/base/test/maps/mock-1.json', playerConfig);
   scenario.load('mock');
 
   var player = scenario.manager.scene.getObject('player');
   var playerBody = player.get(Body);
   var playerCoins = player.get(CoinPurse);
 
+  var coinBody = scenario.manager.scene.getObject('chest-1').get(Body);
+  console.log(coinBody.getPosition());
+
   // Default player position and direction
-  assert.deepEqual(playerBody.getPosition(), {x: 1, y: 1});
+  assert.deepEqual(playerBody.getPosition(), {x: 0, y: 0});
   assert.equal(playerBody.direction, 'down');
 
   // Default player coin balance
   assert.equal(playerCoins.balance(), 0);
 
   scenario.keypress('Right');
-
   assert.equal(playerBody.direction, 'right');
 
-  scenario.keypress('Right');
+  // Player position and direction changes according to keypresses
+  assert.deepEqual(playerBody.getPosition(), {x: 32, y: 0});
+
+  scenario.keypress('Down');
 
   // Player position and direction changes according to keypresses
-  assert.deepEqual(playerBody.getPosition(), {x: 3, y: 1});
+  assert.deepEqual(playerBody.getPosition(), {x: 32, y: 32});
+  assert.equal(playerBody.direction, 'down');
+
+  scenario.keypress('Right');
+  scenario.keypress('Down');
+
+  assert.deepEqual(playerBody.getPosition(), {x: 64, y: 32});
+  assert.equal(playerBody.direction, 'down');
+
+  scenario.keypress('Right');
+  scenario.keypress('Down');
+
+  assert.deepEqual(playerBody.getPosition(), {x: 96, y: 32});
+  assert.equal(playerBody.direction, 'down');
 
   scenario.keypress('Right');
 
   // Pick up a coin, default value is 1
   assert.equal(playerCoins.balance(), 1);
+
+  scenario.keypress('Down');
+
+  assert.deepEqual(playerBody.getPosition(), {x: 128, y: 32});
+  assert.equal(playerBody.direction, 'down');
 
   scenario.keypress('Right');
 
@@ -57,54 +79,26 @@ export function testPlayerMovement() {
   // so the balance stays the same
   assert.equal(playerCoins.balance(), 11);
 
-  scenario.keypress('Down');
-
-  // Player movement down is blocked by a block (invisible wall).
-  // The player's position stays the same but the direction changes.
-  assert.deepEqual(playerBody.getPosition(), {x: 4, y: 1});
-  assert.equal(playerBody.direction, 'down');
-
+  scenario.keypress('Left');
+  scenario.keypress('Left');
   scenario.keypress('Left');
   scenario.keypress('Down');
 
-  // The invisible wall has a width of two, and succeeds blocking the player.
-  assert.deepEqual(playerBody.getPosition(), {x: 3, y: 1});
-  assert.equal(playerBody.direction, 'down');
-
-  // Walk over to chest #1
-  scenario.keypress('Left');
-  scenario.keypress('Use');
+  assert.deepEqual(playerBody.getPosition(), {x: 32, y: 64});
 
   // Chest can only be opened when player is facing it
+  scenario.keypress('Use');
   assert.equal(playerCoins.balance(), 11);
 
-  scenario.keypress('Down');
-
-  // Chest blocks path
-  assert.deepEqual(playerBody.getPosition(), {x: 2, y: 1});
-  assert.equal(playerBody.direction, 'down');
-
+  // Now face the chest and open it
+  scenario.keypress('Right');
   scenario.keypress('Use');
-
-  // Chest is opened and coins are deposited. The default coin amount is 1.
   assert.equal(playerCoins.balance(), 12);
 
-  scenario.keypress('Use');
-  scenario.keypress('Use');
-
-  // Chest is already opened, so coins aren't deposited again.
-  assert.equal(playerCoins.balance(), 12);
-
-  // Walk over to chest #2 and open it.
-  scenario.keypress('Left');
-  scenario.keypress('Down');
   scenario.keypress('Down');
   scenario.keypress('Right');
   scenario.keypress('Use');
-
-  // Chest #2 has a greater coin value.
   assert.equal(playerCoins.balance(), 22);
-
 
   // TODO I want to test that the coin has been removed from the world.
 }

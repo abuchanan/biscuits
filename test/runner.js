@@ -4,6 +4,7 @@ import {SkipTest} from 'test/annotations';
 export {BiscuitsTestRunner};
 
 // TODO extract this to a standalone node module?
+// TODO(abuchanan) implement test only
 
 function shouldSkipTest(testFunc) {
   var skip = false;
@@ -34,6 +35,7 @@ function runTest(testFunc) {
       testFunc();
     } catch (e) {
       success = false;
+      // TODO(abuchanan) this turns out with a different message in firefox vs chrome
       log.push(e.stack);
     }
     time = Date.now() - start;
@@ -103,14 +105,12 @@ class BiscuitsTestRunner {
           }
         });
 
-        console.log('resolve');
         resolve();
       });
     });
   }
 
   run(karma) {
-    console.log('run');
 
     karma.info({
       total: this.tests.length,

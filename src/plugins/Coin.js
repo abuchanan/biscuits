@@ -55,7 +55,7 @@ function CoinCollision(config: CoinConfig, body: Body,
 @ObjectScope
 @Provide(CoinConfig)
 function provideCoinConfig(config: ObjectConfig) {
-  return {value: config.coinValue};
+  return {value: parseInt(config.coinValue)};
 }
 
 var CoinLoader = loader()

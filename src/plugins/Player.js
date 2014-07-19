@@ -9,6 +9,7 @@ import {loadSpriteSheetSync} from 'src/sprite';
 import PIXI from 'lib/pixi';
 import {loader, valueProvider, provideBodyConfig} from 'src/utils';
 import {ObjectConfig} from 'src/config';
+import {Loadpoint} from 'src/loadpoints';
 
 export {
   PlayerBody,
@@ -77,6 +78,8 @@ class CoinPurse {
     this._balance = 0;
   }
 
+  // TODO needs type checking, should be integer
+  //      best if it happens at compile time?
   deposit(amount) {
     this._balance += amount;
   }
@@ -278,13 +281,22 @@ function PlayerTextures() {
   };
 }
 
-// TODO don't hard code player position and dimensions
+@ObjectScope
+function setupBodyConfig(loadpoint: Loadpoint, bodyConfig: BodyConfig) {
+  console.log('loadpoint', loadpoint);
+  bodyConfig.x = loadpoint.playerConfig.x;
+  bodyConfig.y = loadpoint.playerConfig.y;
+  // TODO don't hard code player dimensions?
+  bodyConfig.w = 32;
+  bodyConfig.h = 32;
+}
+
 var PlayerLoader = loader()
   .provides(
-    valueProvider(BodyConfig, new BodyConfig(256, 64, 32, 32)),
     PlayerBody
   )
   .dependsOn(
+    setupBodyConfig,
     PlayerBody,
     PlayerDriver,
     PlayerRenderer,

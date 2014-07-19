@@ -17,8 +17,8 @@ class MockLoadpoints {
     return this.loadpoints[ID];
   }
 
-  addWorldScene(ID, mapPath) {
-    this.loadpoints[ID] = {mapID: mapPath, loader: WorldSceneLoader};
+  addWorldScene(ID, mapPath, playerConfig) {
+    this.loadpoints[ID] = {mapID: mapPath, loader: WorldSceneLoader, playerConfig};
   }
 }
 

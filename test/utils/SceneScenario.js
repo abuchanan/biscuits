@@ -41,11 +41,11 @@ class SceneScenario {
   }
 
   // TODO default to 200 or 1 for keyupTime?
-  keypress(name, keydownTime = 1, keyupTime = 200) {
-    this.input.event = name + ' keydown';
+  keypress(name, keydownTime = 1, keyupTime = 300) {
+    this.input[name] = true;
     this.tick(keydownTime);
 
-    this.input.event = name + ' keyup';
+    this.input[name] = false;
     this.tick(keyupTime);
   }
 
