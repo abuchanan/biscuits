@@ -9,6 +9,7 @@ export {
   KeyConfig,
   KeyRenderer,
   KeyCollision,
+  KeyPurse,
   KeyLoader
 };
 
