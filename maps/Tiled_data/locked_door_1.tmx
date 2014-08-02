@@ -15,5 +15,6 @@
   <object name="right wall" type="wall" x="448" y="0" width="32" height="480"/>
   <object name="top left wall" type="wall" x="0" y="0" width="224" height="32"/>
   <object name="top right wall" type="wall" x="256" y="0" width="224" height="32"/>
+  <object name="locked_door_1" type="locked-door" x="224" y="0" width="32" height="32"/>
  </objectgroup>
 </map>

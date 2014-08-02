@@ -24,6 +24,7 @@ import {CoinLoader} from 'src/plugins/Coin';
 import {SquirrelLoader} from 'src/plugins/squirrel';
 import {WallLoader} from 'src/plugins/wall';
 import {KeyLoader} from 'src/plugins/key';
+import {LockedDoorLoader} from 'src/plugins/LockedDoor';
 
 export {WorldSceneLoader};
 
@@ -80,6 +81,7 @@ var typeLoaderMap = {
   'chest': ChestLoader,
   'wall': WallLoader,
   'key': KeyLoader,
+  'locked-door': LockedDoorLoader,
 };
 
 
