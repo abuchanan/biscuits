@@ -2,7 +2,10 @@ import {Provide} from 'di';
 import {Loadpoints} from 'src/loadpoints';
 import {WorldSceneLoader} from 'src/worldscene';
 
-export {MockLoadpoints};
+export {
+  MockLoadpoints,
+  mockLoadpointsData
+};
 
 
 // TODO mock world for debugging only
@@ -23,5 +26,6 @@ class MockLoadpoints {
 }
 
 function mockLoadpointsData(loadpoints: Loadpoints) {
-  loadpoints.addWorldScene('default', 'maps/foo10.json');
+  // TODO important to note that player position is in pixels, not tiles
+  loadpoints.addWorldScene('default', 'maps/locked_door_1.json', {x: 224, y: 224});
 }

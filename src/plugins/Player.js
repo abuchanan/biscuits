@@ -71,6 +71,7 @@ class PlayerBody extends Body {
 
 // TODO load player coins from game save service
 // TODO basic validation/balance checking
+// TODO move to coin plugin
 @ObjectScope
 class CoinPurse {
 
@@ -297,9 +298,19 @@ var PlayerLoader = loader()
   )
   .dependsOn(
     setupBodyConfig,
-    PlayerBody,
+    // TODO wow, fuck. that was a confusing bug to track down.
+    //      which is becoming typical of di.js. If s/Body/PlayerBody/
+    //      then the PlayerBody constructor is called twice....
+    //      Is this a bug with di.js? Maybe it should use the @Provided
+    //      token?
+    Body,
     PlayerDriver,
     PlayerRenderer,
     CoinPurse,
     PlayerUseAction
   );
+
+
+// TODO maybe di.js could attach its get() function to the function/class
+//      in order to improve the debugging experience? The call stack isn't
+//      very readable when there a bunch of get(), create(), etc... lines

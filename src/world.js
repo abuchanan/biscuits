@@ -105,6 +105,7 @@ class Body {
   constructor(events: EventEmitter, world: World, config: BodyConfig,
               obj: SceneObject) {
 
+    console.log('body config', config);
     // TODO needed?
     this.events = events;
     this.world = world;

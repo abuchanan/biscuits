@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="50" height="50" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="Bg" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="../media/tmw_desert_spacing.png" width="265" height="199"/>
+  <terraintypes>
+   <terrain name="Brick" tile="-1"/>
+   <terrain name="Dirt" tile="-1"/>
+   <terrain name="Stone" tile="-1"/>
+   <terrain name="Sand" tile="-1"/>
+  </terraintypes>
+  <tile id="0" terrain="3,3,3,0">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="1" terrain="3,3,0,0">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="2" terrain="3,3,0,3">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="3" terrain="1,1,1,3"/>
+  <tile id="4" terrain="1,1,3,1"/>
+  <tile id="5" terrain="3,3,3,1"/>
+  <tile id="6" terrain="3,3,1,1"/>
+  <tile id="7" terrain="3,3,1,3"/>
+  <tile id="8" terrain="3,0,3,0">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="9" terrain="0,0,0,0"/>
+  <tile id="10" terrain="0,3,0,3">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="11" terrain="1,3,1,1"/>
+  <tile id="12" terrain="3,1,1,1"/>
+  <tile id="13" terrain="3,1,3,1"/>
+  <tile id="14" terrain="1,1,1,1"/>
+  <tile id="15" terrain="1,3,1,3"/>
+  <tile id="16" terrain="3,0,3,3">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="17" terrain="0,0,3,3">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="18" terrain="0,3,3,3">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="19" terrain="0,0,0,3">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="20" terrain="0,0,3,0">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="21" terrain="3,1,3,3"/>
+  <tile id="22" terrain="1,1,3,3"/>
+  <tile id="23" terrain="1,3,3,3"/>
+  <tile id="24" terrain="3,3,3,2"/>
+  <tile id="25" terrain="3,3,2,2"/>
+  <tile id="26" terrain="3,3,2,3"/>
+  <tile id="27" terrain="0,3,0,0">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="28" terrain="3,0,0,0">
+   <properties>
+    <property name="isWall" value="true"/>
+   </properties>
+  </tile>
+  <tile id="29" terrain="3,3,3,3"/>
+  <tile id="32" terrain="3,2,3,2"/>
+  <tile id="33" terrain="2,2,2,2"/>
+  <tile id="34" terrain="2,3,2,3"/>
+  <tile id="35" terrain="2,2,2,3"/>
+  <tile id="36" terrain="2,2,3,2"/>
+  <tile id="40" terrain="3,2,3,3"/>
+  <tile id="41" terrain="2,2,3,3"/>
+  <tile id="42" terrain="2,3,3,3"/>
+  <tile id="43" terrain="2,3,2,2"/>
+  <tile id="44" terrain="3,2,2,2"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="50" height="50">
+  <data encoding="base64" compression="zlib">
+   eJztl7EOgzAMBU2ZaKa2dGv5/89spCoSC65RHeKgG26zYp3Aid8iIstJGDKXThlXHlPm2ikJj1DgEQs8YoFHLPCIBR6xWHvcMndnnkrv2bHPQ+rs7WWP1r5xcuxba29PhjMtNa3nAw888NjmJd975P1nTWuPo8FDp7zVlvdcq2ntcZY5xwMPPGJ6eOaokmssHh59yVFx/ys88MDjGA9yFB7kqN/n9j7neOCBR0yPGjlKO9NSs7ffB6E/ckY=
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="50" height="50">
+  <object name="player-start-1" type="loadpoint" x="832" y="1536" width="32" height="32"/>
+ </objectgroup>
+</map>

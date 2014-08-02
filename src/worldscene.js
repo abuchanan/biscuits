@@ -23,6 +23,7 @@ import {ChestLoader} from 'src/plugins/Chest';
 import {CoinLoader} from 'src/plugins/Coin';
 import {SquirrelLoader} from 'src/plugins/squirrel';
 import {WallLoader} from 'src/plugins/wall';
+import {KeyLoader} from 'src/plugins/key';
 
 export {WorldSceneLoader};
 
@@ -72,11 +73,13 @@ function provideBackgroundGrid(map: Map) {
   return grid;
 }
 
+// TODO auto-discover or otherwise make this easily manageable
 var typeLoaderMap = {
   'squirrel': SquirrelLoader,
   'coin': CoinLoader,
   'chest': ChestLoader,
-  'wall': WallLoader
+  'wall': WallLoader,
+  'key': KeyLoader,
 };
 
 
@@ -85,10 +88,19 @@ var typeLoaderMap = {
 function provideObjectConfigs(map: Map) {
   var configs = [];
 
+  // TODO have a compile-time checker that ensures every object
+  //      in a large map can be loaded properly
   map.objectlayers.forEach((layer) => {
     layer.forEach((config) => {
-      // TODO error handling for unknown type
-      config.loader = typeLoaderMap[config.type];
+      var loader = typeLoaderMap[config.type];
+
+      // TODO maybe don't crash when an object is unrecognized
+      //      just log a warning and skip it.
+      if (!loader) {
+        throw 'Unknown object type: ' + config.type;
+      }
+
+      config.loader = loader;
       configs.push(config);
     });
   });

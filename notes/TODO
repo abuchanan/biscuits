@@ -1,10 +1,11 @@
 allow plugins to return a promise?
 
-I don't like browserify. It doesn't need to walk the AST, because pretty
-much every file is going to be included anyway. What I need is a simple
-name resolver that can be run client-side. Walking the AST create lots
-of complexity and doesn't allow for something like requiring a module
-dynamically. It also makes the build/test cycle slower and more complex.
+
+You have a dungeon with two adjacent rooms. When you're in one room, you
+should not be able to see the other room. sometimes?
 
 
-Probably will end up needing some way to find an object by name/ID
+check background tile images for properties to I can use isWall
+
+
+pre-process map files for loadpoints. save somewhere. load in app.
