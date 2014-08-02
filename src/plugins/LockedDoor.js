@@ -14,8 +14,7 @@ class LockedDoorBody extends Body {
 
   constructor(superConstructor: SuperConstructor) {
     superConstructor();
-    // TODO problem, can't collide with a wall.
-    //this.isBlock = true;
+    this.isBlock = true;
   }
 }
 
@@ -42,9 +41,7 @@ function LockedDoorRenderer(renderer: Renderer, body: Body) {
 @ObjectScope
 function Collision(body: Body, renderer: LockedDoorRenderer) {
 
-  // TODO problem, can't collide with a wall.
   body.events.on('player collision', function(playerBody) {
-    console.log('collision');
     var purse = playerBody.obj.get(KeyPurse);
 
     // TODO test for this

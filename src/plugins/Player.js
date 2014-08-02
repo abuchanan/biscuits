@@ -32,10 +32,15 @@ class PlayerBody extends Body {
   }
 
   setPosition(x, y) {
-    if (!this._isBlocked(x, y)) {
+    var blocks = this._isBlocked(x, y);
+
+    if (blocks.length == 0) {
       super.setPosition(x, y);
       this._triggerCollisions();
     } else {
+      for (var i = 0, ii = blocks.length; i < ii; i++) {
+        blocks[i].events.trigger('player collision', [this]);
+      }
       throw 'blocked';
     }
   }
@@ -44,15 +49,16 @@ class PlayerBody extends Body {
     // TODO extract to world.containsBlock()?
     var rect = this.getRectangle();
     var bodies = this.world.query(x, y, rect.w, rect.h);
+    var blocks = [];
 
     // Check if the next tile is blocked.
     for (var i = 0, ii = bodies.length; i < ii; i++) {
       if (bodies[i] !== this && bodies[i].isBlock) {
-        return true;
+        blocks.push(bodies[i]);
       }
     }
 
-    return false;
+    return blocks;
   }
 
   _triggerCollisions() {
