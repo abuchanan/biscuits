@@ -6,7 +6,11 @@ import {Renderer} from 'src/render';
 import {ObjectConfig} from 'src/config';
 import {Scene} from 'src/scene';
 
-export {SwitchedDoorLoader, DoorSwitchLoader};
+export {
+  SwitchedDoorLoader,
+  DoorSwitchLoader,
+  UseableDoorSwitchLoader,
+};
 
 
 @ObjectScope
@@ -41,7 +45,7 @@ function SwitchedDoorRenderer(renderer: Renderer, body: Body) {
 
 @ObjectScope
 function Collision(body: Body, config: ObjectConfig, scene: Scene) {
-  body.events.on('player collision', function(playerBody) {
+  body.events.on('player collision', function() {
     var door = scene.getObject(config.target);
     console.log('collision', door);
     // TODO allow open()/close() methods on the door object
@@ -65,3 +69,19 @@ var DoorSwitchLoader = loader()
     provideBodyConfig
   )
   .dependsOn(Collision);
+
+
+@ObjectScope
+function Useable(body: Body, config: ObjectConfig, scene: Scene) {
+  body.events.on('use', function() {
+    var door = scene.getObject(config.target);
+    console.log('collision', door);
+    // TODO allow open()/close() methods on the door object
+    door.get(SwitchedDoorRenderer).clear();
+    door.get(Body).isBlock = false;
+  });
+}
+
+var UseableDoorSwitchLoader = loader()
+  .provides(provideBodyConfig)
+  .dependsOn(Useable);
