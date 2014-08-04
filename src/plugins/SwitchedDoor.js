@@ -4,7 +4,7 @@ import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {ObjectConfig} from 'src/config';
-import {Scene} from 'src/scene';
+import {Scene, SceneObject} from 'src/scene';
 
 export {
   SwitchedDoorLoader,
@@ -44,13 +44,34 @@ function SwitchedDoorRenderer(renderer: Renderer, body: Body) {
 
 
 @ObjectScope
+@Provide(SceneObject)
+class SwitchedDoor extends SceneObject {
+
+  // TODO can't inject Body here because it creates a circular dependency,
+  //      Body -> SceneObject -> Body.
+  //      Body and World need to be rethought, refactored. Maybe a Body
+  //      shouldn't be adding itself to the World? For now I'm working
+  //      around this using `this.get(Body)`
+  //
+  //      Turns out I can't inject SwitchedDoorRenderer for the same reason
+  //      so it's pretty bad to have Body depend on SceneObject
+  //      SceneObjects need to have Bodies and SceneObjects need to be
+  //      added to a World outside of the Body constructor.
+  //constructor(superConstructor: SuperConstructor,
+  //            body: Body,
+  //            renderer: SwitchedDoorRenderer) {
+
+  open() {
+    this.get(Body).isBlock = false;
+    this.get(SwitchedDoorRenderer).clear();
+  }
+}
+
+
+@ObjectScope
 function Collision(body: Body, config: ObjectConfig, scene: Scene) {
   body.events.on('player collision', function() {
-    var door = scene.getObject(config.target);
-    console.log('collision', door);
-    // TODO allow open()/close() methods on the door object
-    door.get(SwitchedDoorRenderer).clear();
-    door.get(Body).isBlock = false;
+    scene.getObject(config.target).open();
   });
 }
 
@@ -58,7 +79,8 @@ function Collision(body: Body, config: ObjectConfig, scene: Scene) {
 var SwitchedDoorLoader = loader()
   .provides(
     provideBodyConfig,
-    SwitchedDoorBody
+    SwitchedDoorBody,
+    SwitchedDoor
   )
   .dependsOn(Body, SwitchedDoorRenderer);
 
@@ -74,11 +96,7 @@ var DoorSwitchLoader = loader()
 @ObjectScope
 function Useable(body: Body, config: ObjectConfig, scene: Scene) {
   body.events.on('use', function() {
-    var door = scene.getObject(config.target);
-    console.log('collision', door);
-    // TODO allow open()/close() methods on the door object
-    door.get(SwitchedDoorRenderer).clear();
-    door.get(Body).isBlock = false;
+    scene.getObject(config.target).open();
   });
 }
 
