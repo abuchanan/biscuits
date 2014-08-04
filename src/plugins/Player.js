@@ -1,7 +1,7 @@
 import {Provide, SuperConstructor} from 'di';
 import {Input} from 'src/input';
 import {Body, BodyConfig} from 'src/world';
-import {Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
+import {Action, Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -15,7 +15,6 @@ export {
   PlayerBody,
   PlayerDriver,
   PlayerRenderer,
-  PlayerUseAction,
   CoinPurse,
   PlayerLoader
 };
@@ -111,10 +110,33 @@ class PlayerActions {
 
   constructor(manager: ActionManager, body: Body) {
     this.manager = manager;
+    // TODO using "new" here. Movement and Action should be injected
     this.walkUp = new Movement('walk-up', body, 'up', 0, -32, 250);
     this.walkDown = new Movement('walk-down', body, 'down', 0, 32, 250);
     this.walkLeft = new Movement('walk-left', body, 'left', -32, 0, 250);
     this.walkRight = new Movement('walk-right', body, 'right', 32, 0, 250);
+
+    this.use = new UseAction(body);
+  }
+}
+
+
+class UseAction extends Action {
+
+  constructor(body) {
+    var duration = 1000;
+    super(duration);
+    this._body = body;
+  }
+
+  start(time, done) {
+    super.start(time, done);
+
+    // TODO optimize?
+    // TODO can only use one object?
+    this._body.queryFront().forEach((hit) => {
+      hit.events.trigger('use', [this._body]);
+    });
   }
 }
 
@@ -129,23 +151,9 @@ function PlayerDriver(actions: PlayerActions,
   inputHelper.bind('Down', actions.walkDown);
   inputHelper.bind('Left', actions.walkLeft);
   inputHelper.bind('Right', actions.walkRight);
+  inputHelper.bind('Use', actions.use);
 }
 
-
-@ObjectScope
-function PlayerUseAction(scene: Scene, body: Body, input: Input) {
-
-    scene.events.on('tick', function() {
-      // TODO keydown? What if the player holds the key down?
-      if (input.Use) {
-        // TODO optimize?
-        // TODO can only use one object?
-        body.queryFront().forEach((hit) => {
-          hit.events.trigger('use', [body]);
-        });
-      }
-    });
-}
 
 // TODO Chasing down scope dependencies is pretty confusing.
 //      Maybe some sort of dependency graph analysis (static?) would
@@ -210,16 +218,21 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
 
     } else {
 
-      var textureName = state.action.name;
-      clip.textures = textures[textureName];
+      // TODO need a way to split up the rendering of various movements
+      //      into discrete pieces. i.e. make action/movement rendering
+      //      pluggable
+      if (state.action instanceof Movement) {
+        var textureName = state.action.name;
+        clip.textures = textures[textureName];
 
-      var pos = state.action.interpolatePosition();
-      objectsLayer.x = Math.floor((objectsLayer.width / 2) - pos.x);
-      objectsLayer.y = Math.floor((objectsLayer.height / 2) - pos.y);
-      backgroundLayer.x = Math.floor((backgroundLayer.width / 2) - pos.x);
-      backgroundLayer.y = Math.floor((backgroundLayer.height / 2) - pos.y);
+        var pos = state.action.interpolatePosition();
+        objectsLayer.x = Math.floor((objectsLayer.width / 2) - pos.x);
+        objectsLayer.y = Math.floor((objectsLayer.height / 2) - pos.y);
+        backgroundLayer.x = Math.floor((backgroundLayer.width / 2) - pos.x);
+        backgroundLayer.y = Math.floor((backgroundLayer.height / 2) - pos.y);
 
-      clip.play();
+        clip.play();
+      }
     }
   });
 }
@@ -308,12 +321,16 @@ var PlayerLoader = loader()
     //      which is becoming typical of di.js. If s/Body/PlayerBody/
     //      then the PlayerBody constructor is called twice....
     //      Is this a bug with di.js? Maybe it should use the @Provided
-    //      token?
+    //      token? Or, injector.get() should require an interface?
+    //
+    //      Or, maybe I should give up this idea that it's better to use
+    //      symbols than strings. I don't really care about the minification
+    //      savings and it'd probably make my code more concise and avoid
+    //      issues with missing imports.
     Body,
     PlayerDriver,
     PlayerRenderer,
-    CoinPurse,
-    PlayerUseAction
+    CoinPurse
   );
 
 

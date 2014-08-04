@@ -21,13 +21,23 @@ var movementDefaults = {
 };
 
 // TODO inject
+// TODO some duplication with Movement
 class Action {
   constructor(duration = 150) {
     // TODO duration cannot be less than 0. check this.
     this.duration = duration;
+    this._startTime;
   }
-  start() {}
-  tick() {}
+
+  start(time, done) {
+    this._startTime = time;
+  }
+
+  tick(time, done) {
+    if (time >= this._startTime + this.duration) {
+      done();
+    }
+  }
 }
 
 
@@ -73,6 +83,7 @@ class Movement extends Action {
     this.body.direction = this.direction;
 
     try {
+      // TODO refactor these out of the "try" body
       var pos = this.body.getPosition();
       this._startTime = startTime;
 
