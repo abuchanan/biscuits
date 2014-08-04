@@ -41,6 +41,13 @@ function LockedDoorRenderer(renderer: Renderer, body: Body) {
 @ObjectScope
 function Collision(body: Body, renderer: LockedDoorRenderer) {
 
+  // TODO problem here is that the player must wait for the next action cycle
+  //      in order to walk through the cleared door, instead of being able to
+  //      walk through immediately, which creates a small delay that's a poor
+  //      UE
+  //
+  //      when looking for collisions, maybe ask object whether to block or not
+  //      like, maybe this callback could return true/false? or some other API
   body.events.on('player collision', function(playerBody) {
     var purse = playerBody.obj.get(KeyPurse);
 

@@ -27,5 +27,5 @@ class MockLoadpoints {
 
 function mockLoadpointsData(loadpoints: Loadpoints) {
   // TODO important to note that player position is in pixels, not tiles
-  loadpoints.addWorldScene('default', 'maps/locked_door_1.json', {x: 224, y: 224});
+  loadpoints.addWorldScene('default', 'maps/door_switch_1.json', {x: 224, y: 224});
 }

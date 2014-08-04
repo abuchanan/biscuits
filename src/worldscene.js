@@ -25,6 +25,7 @@ import {SquirrelLoader} from 'src/plugins/squirrel';
 import {WallLoader} from 'src/plugins/wall';
 import {KeyLoader} from 'src/plugins/key';
 import {LockedDoorLoader} from 'src/plugins/LockedDoor';
+import {SwitchedDoorLoader, DoorSwitchLoader} from 'src/plugins/SwitchedDoor';
 
 export {WorldSceneLoader};
 
@@ -82,6 +83,8 @@ var typeLoaderMap = {
   'wall': WallLoader,
   'key': KeyLoader,
   'locked-door': LockedDoorLoader,
+  'switched-door': SwitchedDoorLoader,
+  'door-switch': DoorSwitchLoader,
 };
 
 
