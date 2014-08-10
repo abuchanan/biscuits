@@ -1,15 +1,16 @@
-import {Provide, TransientScope} from 'di';
-import {ObjectScope} from 'src/scope';
-import {BodyConfig} from 'src/world';
-import {ObjectConfig} from 'src/config';
+import {Inject, Injector, Provide, TransientScope} from 'di';
 
-export {valueProvider, extend, loader, provideBodyConfig};
+export {
+  valueProvider,
+  extend,
+  Loader,
+};
 
-function valueProvider(token, value, scope) {
+function valueProvider(token, value, ScopeCls) {
   var fn = function() { return value; };
   fn.annotations = [new Provide(token)];
-  if (scope) {
-    fn.annotations.push(scope);
+  if (ScopeCls) {
+    fn.annotations.push(new ScopeCls.constructor());
   }
   return fn;
 }
@@ -26,32 +27,62 @@ function extend(obj) {
   return obj;
 }
 
-function loader(providers, deps) {
-  providers = providers || [];
-  deps = deps || [];
 
-  function loader() {
-    return {
-      providers: providers.slice(0),
-      deps: deps.slice(0),
-    };
-  }
-  loader.annotations = [new TransientScope()];
+function Loader(providers = [], deps = [], scope = TransientScope) {
 
-  loader.provides = function(..._providers) {
-    providers.push.apply(providers, _providers);
-    return loader;
+  var func = function(injector) {
+    var scopes = [];
+    if (scope) {
+      scopes.push(scope);
+    }
+
+    var childInjector = injector.createChild(providers, scopes);
+
+    // TODO the error message from this probably sucks. how to improve?
+    //      that is, if dep is undefined.
+    for (var dep of deps) {
+      try {
+        childInjector.get(dep);
+      } catch (e) {
+        console.error('load dependency error');
+        console.log(dep);
+        console.log(e);
+        throw e;
+      }
+    }
+
+    return childInjector;
   };
-  loader.dependsOn = function(..._deps) {
-    deps.push.apply(deps, _deps);
-    return loader;
+  func.annotations = [new Inject(Injector), new TransientScope()];
+
+  func.binds = function(token, value, scope) {
+    var p = valueProvider(token, value, scope);
+    return func.provides(p);
   };
-  return loader;
+
+  func.provides = function(...args) {
+    return Loader(flatten(providers, ...args), deps, scope);
+  };
+
+  func.runs = function(...args) {
+    return Loader(providers, flatten(deps, ...args), scope);
+  };
+
+  func.hasScope = function(s) {
+    return Loader(providers, deps, s);
+  };
+
+  return func;
 }
 
-
-@ObjectScope
-@Provide(BodyConfig)
-function provideBodyConfig(config: ObjectConfig) {
-  return new BodyConfig(config.x, config.y, config.w, config.h, config.isBlock || false);
+function flatten(...args) {
+  var res = [];
+  for (var x of args) {
+    if (Array.isArray(x)) {
+      res.push.apply(res, x);
+    } else {
+      res.push(x);
+    }
+  }
+  return res;
 }

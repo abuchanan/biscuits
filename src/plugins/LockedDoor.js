@@ -1,11 +1,10 @@
 import {Provide, SuperConstructor} from 'di';
-import {loader, provideBodyConfig} from 'src/utils';
+import {Types} from 'src/worldscene';
+import {Loader} from 'src/utils';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {KeyPurse} from 'src/plugins/key';
-
-export {LockedDoorLoader};
 
 
 @ObjectScope
@@ -60,10 +59,11 @@ function Collision(body: Body, renderer: LockedDoorRenderer) {
   });
 }
 
-var LockedDoorLoader = loader()
-  .provides(
-    provideBodyConfig,
-    // TODO one downside to this approach is that I can't put a comma at the end here
-    LockedDoorBody
-  )
-  .dependsOn(Body, LockedDoorRenderer, Collision);
+
+Types['locked-door']= Loader()
+  .provides(LockedDoorBody)
+  .runs([
+    Body,
+    LockedDoorRenderer,
+    Collision,
+  ]);

@@ -2,16 +2,9 @@ import {Provide} from 'di';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
-import {loader, provideBodyConfig} from 'src/utils';
+import {Types} from 'src/worldscene';
+import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
-
-export {
-  KeyConfig,
-  KeyRenderer,
-  KeyCollision,
-  KeyPurse,
-  KeyLoader
-};
 
 
 class KeyConfig {}
@@ -75,8 +68,6 @@ function KeyCollision(config: KeyConfig, body: Body,
   });
 }
 
-var KeyLoader = loader()
-  .provides(provideBodyConfig)
-  .dependsOn(Body, KeyRenderer, KeyCollision);
+Types['key'] = Loader().runs(Body, KeyRenderer, KeyCollision);
 
 // TODO test that renderables are removed from renderer when scene is unloaded

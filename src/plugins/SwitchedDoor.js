@@ -1,5 +1,6 @@
 import {Provide, SuperConstructor} from 'di';
-import {loader, provideBodyConfig} from 'src/utils';
+import {Types} from 'src/worldscene';
+import {Loader} from 'src/utils';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -76,23 +77,6 @@ function Collision(body: Body, config: ObjectConfig, scene: Scene) {
 }
 
 
-var SwitchedDoorLoader = loader()
-  .provides(
-    provideBodyConfig,
-    SwitchedDoorBody,
-    SwitchedDoor
-  )
-  .dependsOn(Body, SwitchedDoorRenderer);
-
-
-var DoorSwitchLoader = loader()
-  .provides(
-    // TODO I hate putting this everywhere
-    provideBodyConfig
-  )
-  .dependsOn(Collision);
-
-
 @ObjectScope
 function Useable(body: Body, config: ObjectConfig, scene: Scene) {
   body.events.on('use', function() {
@@ -100,6 +84,11 @@ function Useable(body: Body, config: ObjectConfig, scene: Scene) {
   });
 }
 
-var UseableDoorSwitchLoader = loader()
-  .provides(provideBodyConfig)
-  .dependsOn(Useable);
+
+Types['switched-door'] = Loader()
+  .provides(SwitchedDoorBody, SwitchedDoor)
+  .runs(Body, SwitchedDoorRenderer);
+
+Types['door-switch'] = Loader().runs(Collision);
+
+Types['useable-door-switch'] = Loader().runs(Useable);

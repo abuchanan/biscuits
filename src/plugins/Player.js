@@ -7,16 +7,13 @@ import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {loadSpriteSheetSync} from 'src/sprite';
 import PIXI from 'lib/pixi';
-import {loader, valueProvider, provideBodyConfig} from 'src/utils';
+import {Types} from 'src/worldscene';
+import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
 import {Loadpoint} from 'src/loadpoints';
 
 export {
-  PlayerBody,
-  PlayerDriver,
-  PlayerRenderer,
   CoinPurse,
-  PlayerLoader
 };
 
 
@@ -311,11 +308,9 @@ function setupBodyConfig(loadpoint: Loadpoint, bodyConfig: BodyConfig) {
   bodyConfig.h = 32;
 }
 
-var PlayerLoader = loader()
-  .provides(
-    PlayerBody
-  )
-  .dependsOn(
+Types['player'] = Loader()
+  .provides(PlayerBody)
+  .runs([
     setupBodyConfig,
     // TODO wow, fuck. that was a confusing bug to track down.
     //      which is becoming typical of di.js. If s/Body/PlayerBody/
@@ -330,8 +325,8 @@ var PlayerLoader = loader()
     Body,
     PlayerDriver,
     PlayerRenderer,
-    CoinPurse
-  );
+    CoinPurse,
+  ]);
 
 
 // TODO maybe di.js could attach its get() function to the function/class

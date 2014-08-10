@@ -2,7 +2,7 @@ import {Injector, Provide} from 'di';
 import {Scene, SceneObject, SceneLoader} from 'src/scene';
 import {Renderer, RendererConfig} from 'src/render';
 import {ObjectScope, SceneScope} from 'src/scope';
-import {valueProvider, loader, provideBodyConfig} from 'src/utils';
+import {Loader} from 'src/utils';
 import {HUD} from 'src/hud';
 import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
@@ -16,23 +16,21 @@ import {BiscuitsConfig, ObjectConfig} from 'src/config';
 //      but, javascript should error when a token can't be imported. this might
 //      be related to require.js
 //import {Loadpoint} from 'src/scenemanager';
+
 import {Loadpoint} from 'src/loadpoints';
 
-import {PlayerLoader} from 'src/plugins/Player';
-import {ChestLoader} from 'src/plugins/Chest';
-import {CoinLoader} from 'src/plugins/Coin';
-import {SquirrelLoader} from 'src/plugins/squirrel';
-import {WallLoader} from 'src/plugins/wall';
-import {KeyLoader} from 'src/plugins/key';
-import {LockedDoorLoader} from 'src/plugins/LockedDoor';
-import {SwitchedDoorLoader, DoorSwitchLoader, UseableDoorSwitchLoader} from 'src/plugins/SwitchedDoor';
 
-export {WorldSceneLoader};
+export {
+  WorldSceneLoader,
+  Types,
+};
 
 class ObjectConfigs {};
 class MapConfig {};
 class Map {};
 
+
+var Types = {};
 
 // TODO if a requested type is undefined, the error message (from di.js?) is
 //      difficult to interpret
@@ -41,6 +39,7 @@ class Map {};
 @SceneScope
 @Provide(WorldConfig)
 function provideWorldConfig(map: Map) {
+  console.log('provide world config');
   var w = map.mapData.width * map.mapData.tilewidth;
   var h = map.mapData.height * map.mapData.tileheight;
   // TODO using "new"?
@@ -75,19 +74,6 @@ function provideBackgroundGrid(map: Map) {
   return grid;
 }
 
-// TODO auto-discover or otherwise make this easily manageable
-var typeLoaderMap = {
-  'squirrel': SquirrelLoader,
-  'coin': CoinLoader,
-  'chest': ChestLoader,
-  'wall': WallLoader,
-  'key': KeyLoader,
-  'locked-door': LockedDoorLoader,
-  'switched-door': SwitchedDoorLoader,
-  'door-switch': DoorSwitchLoader,
-  'useable-door-switch': UseableDoorSwitchLoader,
-};
-
 
 @SceneScope
 @Provide(ObjectConfigs)
@@ -96,19 +82,33 @@ function provideObjectConfigs(map: Map) {
 
   // TODO have a compile-time checker that ensures every object
   //      in a large map can be loaded properly
+  // TODO replace forEach() with for..of
   map.objectlayers.forEach((layer) => {
     layer.forEach((config) => {
-      var loader = typeLoaderMap[config.type];
 
-      // TODO maybe don't crash when an object is unrecognized
-      //      just log a warning and skip it.
-      if (!loader) {
-        throw 'Unknown object type: ' + config.type;
-      }
+      var types = config.type.split(/[, ]+/);
+      config.loaders = [];
 
-      config.loader = loader;
+      types.forEach((type) => {
+        var loader = Types[type];
+
+        // TODO maybe don't crash when an object is unrecognized
+        //      just log a warning and skip it.
+        if (!loader) {
+          throw 'Unknown object type: ' + type;
+        }
+
+        config.loaders.push(loader);
+      });
+
       configs.push(config);
     });
+  });
+
+  // TODO handle error when no player type is registered
+  configs.push({
+    ID: 'player',
+    loaders: [Types['player']],
   });
 
   return configs;
@@ -116,60 +116,46 @@ function provideObjectConfigs(map: Map) {
 
 
 @SceneScope
-function loadScene(sceneInjector: Injector, scene: Scene,
-                   objectConfigs: ObjectConfigs, playerLoader: PlayerLoader) {
+function loadObjects(injector: Injector, configs: ObjectConfigs) {
 
-  objectConfigs.forEach((objectConfig) => {
+  for (var config of configs) {
 
-    var loader = sceneInjector.get(objectConfig.loader);
-    var provideObjectConfig = valueProvider(ObjectConfig, objectConfig);
-    loader.providers.push(provideObjectConfig);
+    for (var loader of config.loaders) {
 
-    var objectInjector = sceneInjector.createChild(loader.providers, [ObjectScope]);
+      var bodyConfig = new BodyConfig(config.x, config.y, config.w, config.h,
+                                      config.isBlock || false);
 
-    // TODO the error message from this probably sucks. how to improve?
-    //      that is, if dep is undefined.
-    loader.deps.forEach((dep) => {
-      try {
-        objectInjector.get(dep);
-      } catch (e) {
-        console.error('scene dependency error');
-        console.log(dep);
-        console.log(e);
-        throw e;
-      }
-    });
+      loader = loader
+        .hasScope(ObjectScope)
+        .binds(BodyConfig, bodyConfig, ObjectScope)
+        .binds(ObjectConfig, config, ObjectScope)
+        .runs(addToScene);
 
-    var obj = objectInjector.get(SceneObject);
-    // TODO don't want "ID || name". just ID
-    // TODO object loaders should add themselves to scene?
-    scene.addObject(objectConfig.ID || objectConfig.name, obj);
-
-  });
-
-  // TODO DRY with code above
-  var objectInjector = sceneInjector.createChild(playerLoader.providers, [ObjectScope]);
-  playerLoader.deps.forEach((dep) => {
-    objectInjector.get(dep);
-  });
-  var playerObj = objectInjector.get(SceneObject);
-  scene.addObject('player', playerObj);
+      injector.get(loader);
+    }
+  }
 }
 
-var WorldSceneLoader = loader()
-  .provides(
+@SceneScope
+function addToScene(object: SceneObject, config: ObjectConfig, scene: Scene) {
+  scene.addObject(config.ID || config.name, object);
+}
+
+
+var WorldSceneLoader = Loader()
+  .provides([
     // TODO move these to setupFoo like I did for renderer config
     provideWorldConfig,
     provideMap,
     provideBackgroundGrid,
-    provideObjectConfigs
-  )
-  .dependsOn(
+    provideObjectConfigs,
+  ])
+  .runs([
     setupRendererConfig,
-    loadScene,
+    loadObjects,
     HUD,
-    BackgroundRenderer
-  );
+    BackgroundRenderer,
+  ]);
 
 // TODO test that render layers are removed from renderer when scene is unloaded
 // TODO maybe renderer should be scene scoped? object scoped?

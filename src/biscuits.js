@@ -1,5 +1,5 @@
 import {Injector} from 'di';
-import {valueProvider, loader} from 'src/utils';
+import {valueProvider} from 'src/utils';
 import {SceneManager} from 'src/scenemanager';
 import {KeyboardInput} from 'src/input';
 import {BiscuitsConfig} from 'src/config';

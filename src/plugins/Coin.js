@@ -3,15 +3,10 @@ import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {CoinPurse} from 'src/plugins/Player';
-import {loader, provideBodyConfig} from 'src/utils';
+import {Types} from 'src/worldscene';
+import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
 
-export {
-  CoinConfig,
-  CoinRenderer,
-  CoinCollision,
-  CoinLoader
-};
 
 class CoinConfig {
   constructor(value = 1) {
@@ -58,8 +53,9 @@ function provideCoinConfig(config: ObjectConfig) {
   return {value: parseInt(config.coinValue)};
 }
 
-var CoinLoader = loader()
-  .provides(provideBodyConfig, provideCoinConfig)
-  .dependsOn(Body, CoinRenderer, CoinCollision);
+
+Types['coin'] = Loader()
+  .provides(provideCoinConfig)
+  .runs(Body, CoinRenderer, CoinCollision);
 
 // TODO test that renderables are removed from renderer when scene is unloaded

@@ -20,7 +20,19 @@
         },
 
         callback: function() {
-          require(['src/biscuits', 'src/dev', 'src/plugins/FPSMeter'],
+          require([
+              'src/biscuits',
+              'src/dev',
+              'src/plugins/FPSMeter',
+              'src/plugins/Chest',
+              'src/plugins/Coin',
+              'src/plugins/Jar',
+              'src/plugins/LockedDoor',
+              'src/plugins/Player',
+              'src/plugins/SwitchedDoor',
+              'src/plugins/key',
+              'src/plugins/wall',
+            ],
             function(biscuits, dev, fps) {
               var app = new biscuits.Biscuits({container: container});
               app.provides(dev.MockLoadpoints);

@@ -1,8 +1,7 @@
 import {Injector, Provide} from 'di';
-import {Scene, SceneLoader} from 'src/scene';
+import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
 import {Loadpoints, Loadpoint} from 'src/loadpoints';
-import {valueProvider} from 'src/utils';
 
 export {SceneManager};
 
@@ -21,8 +20,11 @@ class SceneManager {
 
   load(ID) {
     var loadpoint = this.loadpoints.get(ID);
-    var loader = this.injector.get(loadpoint.loader);
-    loader.providers.push(valueProvider(Loadpoint, loadpoint, new SceneScope()));
+
+    var loader = loadpoint.loader
+      .hasScope(SceneScope)
+      .binds(Loadpoint, loadpoint, SceneScope)
+      .runs(this.plugins);
 
     // TODO allow unload to be blocked
     // TODO I don't think I'm actually using this anywhere
@@ -31,16 +33,7 @@ class SceneManager {
       this.scene.events.trigger('unload');
     }
 
-    var childInjector = this.injector.createChild(loader.providers, [SceneScope]);
-
-    loader.deps.forEach((dep) => {
-      childInjector.get(dep);
-    });
-
-    this.plugins.forEach((plugin) => {
-      childInjector.get(plugin);
-    });
-
-    this.scene = childInjector.get(Scene);
+    var sceneInjector = this.injector.get(loader);
+    this.scene = sceneInjector.get(Scene);
   }
 }

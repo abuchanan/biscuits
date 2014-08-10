@@ -1,9 +1,8 @@
 import {Provide, SuperConstructor} from 'di';
-import {loader, provideBodyConfig} from 'src/utils';
+import {Types} from 'src/worldscene';
+import {Loader} from 'src/utils';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
-
-export {WallLoader};
 
 
 @ObjectScope
@@ -16,4 +15,6 @@ class WallBody extends Body {
   }
 }
 
-var WallLoader = loader([provideBodyConfig], [WallBody]);
+Types['wall'] = Loader()
+  .provides(WallBody)
+  .runs(Body);
