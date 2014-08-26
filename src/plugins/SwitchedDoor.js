@@ -37,7 +37,10 @@ function SwitchedDoorRenderer(renderer: Renderer, body: Body) {
   layer.addChild(g);
 
   return {
-    clear: function() {
+    show: function() {
+      layer.addChild(g);
+    },
+    hide: function() {
       layer.removeChild(g);
     }
   }
@@ -62,25 +65,51 @@ class SwitchedDoor extends SceneObject {
   //            body: Body,
   //            renderer: SwitchedDoorRenderer) {
 
-  open() {
-    this.get(Body).isBlock = false;
-    this.get(SwitchedDoorRenderer).clear();
+  constructor(superConstructor: SuperConstructor) {
+    superConstructor();
+    this._locks = {};
+  }
+
+  unlock(ID) {
+    delete this._locks[ID];
+
+    if (Object.keys(this._locks).length == 0) {
+      this.get(Body).isBlock = false;
+      this.get(SwitchedDoorRenderer).hide();
+    }
+  }
+
+  lock(ID) {
+    console.log('lock', ID);
+    this._locks[ID] = true;
+    this.get(Body).isBlock = true;
+    this.get(SwitchedDoorRenderer).show();
   }
 }
 
 
 @ObjectScope
-function Collision(body: Body, config: ObjectConfig, scene: Scene) {
+function Collision(body: Body, config: ObjectConfig, object: SceneObject, scene: Scene) {
+
+  scene.events.on('loaded', function() {
+    scene.getObject(config.target).lock(object.ID);
+  });
+
   body.events.on('player collision', function() {
-    scene.getObject(config.target).open();
+    scene.getObject(config.target).unlock(object.ID);
   });
 }
 
 
 @ObjectScope
-function Useable(body: Body, config: ObjectConfig, scene: Scene) {
+function Useable(body: Body, config: ObjectConfig, object: SceneObject, scene: Scene) {
+
+  scene.events.on('loaded', function() {
+    scene.getObject(config.target).lock(object.ID);
+  });
+
   body.events.on('use', function() {
-    scene.getObject(config.target).open();
+    scene.getObject(config.target).unlock(object.ID);
   });
 }
 

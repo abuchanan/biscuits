@@ -136,11 +136,16 @@ function loadObjects(injector: Injector, configs: ObjectConfigs) {
   }
 }
 
-@SceneScope
-function addToScene(object: SceneObject, config: ObjectConfig, scene: Scene) {
-  scene.addObject(config.ID || config.name, object);
+@ObjectScope
+function addToScene(object: SceneObject, scene: Scene) {
+  scene.addObject(object);
 }
 
+
+@SceneScope
+function triggerLoadedEvent(scene: Scene) {
+  scene.events.trigger('loaded');
+}
 
 var WorldSceneLoader = Loader()
   .provides([
@@ -155,6 +160,7 @@ var WorldSceneLoader = Loader()
     loadObjects,
     HUD,
     BackgroundRenderer,
+    triggerLoadedEvent
   ]);
 
 // TODO test that render layers are removed from renderer when scene is unloaded

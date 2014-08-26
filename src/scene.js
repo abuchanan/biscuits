@@ -1,6 +1,7 @@
 import {Injector} from 'di';
 import {EventEmitter} from 'src/events';
 import {SceneScope, ObjectScope} from 'src/scope';
+import {ObjectConfig} from 'src/config';
 
 export {Scene, SceneObject, SceneLoader};
 
@@ -44,9 +45,9 @@ class Scene {
   }
   */
 
-  addObject(ID, obj) {
+  addObject(obj) {
     // TODO catch duplicate ID
-    this._objects[ID] = obj;
+    this._objects[obj.ID] = obj;
   }
 
   getObject(ID) {
@@ -59,7 +60,9 @@ class Scene {
 @ObjectScope
 class SceneObject {
 
-  constructor(injector: Injector, events: EventEmitter) {
+  constructor(injector: Injector, events: EventEmitter, config: ObjectConfig) {
+    // TODO don't want both name and ID
+    this.ID = config.name || config.ID;
     this.injector = injector;
     this.get = this.injector.get.bind(this.injector);
     this.events = events;
