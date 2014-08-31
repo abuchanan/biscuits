@@ -1,6 +1,6 @@
 import {Provide, SuperConstructor} from 'di';
 import {Body} from 'src/world';
-import {SceneObject} from 'src/scene';
+import {Scene, SceneObject} from 'src/scene';
 import {ObjectScope} from 'src/scope';
 // TODO rename Renderer to Graphics
 import {Renderer} from 'src/render';
@@ -46,6 +46,24 @@ function JarRenderer(renderer: Renderer, body: Body, sceneObject: SceneObject) {
 }
 
 
+@ObjectScope
+function Hitable(body: Body, config: ObjectConfig, sceneObject: SceneObject, scene: Scene) {
+
+  // TODO code duplicated with SwitchedDoor Useable
+  scene.events.on('loaded', function() {
+    scene.getObject(config.target).lock(sceneObject.ID);
+  });
+
+  // TODO one of the jars gets a double hit sometimes....
+  body.events.on('hit', function() {
+    console.log('jar hit');
+    body.remove();
+    scene.getObject(config.target).unlock(sceneObject.ID);
+    sceneObject.events.trigger('destruct');
+  });
+}
+
+
 Types['jar'] = Loader()
   .provides(JarBody)
-  .runs(Body, JarRenderer);
+  .runs(Body, JarRenderer, Hitable);

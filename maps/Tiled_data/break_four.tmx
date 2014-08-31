@@ -17,22 +17,22 @@
   <object name="switched_door_1" type="switched-door" x="224" y="0" width="32" height="32"/>
   <object name="Jar 2" type="jar" x="64" y="352" width="32" height="32">
    <properties>
-    <property name="blocksDoor" value="switched_door_1"/>
+    <property name="target" value="switched_door_1"/>
    </properties>
   </object>
-  <object name="Jar 2" type="jar" x="224" y="384" width="32" height="32">
+  <object name="Jar 3" type="jar" x="224" y="384" width="32" height="32">
    <properties>
-    <property name="blocksDoor" value="switched_door_1"/>
+    <property name="target" value="switched_door_1"/>
    </properties>
   </object>
-  <object name="Jar 2" type="jar" x="352" y="352" width="32" height="32">
+  <object name="Jar 4" type="jar" x="352" y="352" width="32" height="32">
    <properties>
-    <property name="blocksDoor" value="switched_door_1"/>
+    <property name="target" value="switched_door_1"/>
    </properties>
   </object>
-  <object name="Jar 2" type="jar" x="352" y="192" width="32" height="32">
+  <object name="Jar 1" type="jar" x="352" y="192" width="32" height="32">
    <properties>
-    <property name="blocksDoor" value="switched_door_1"/>
+    <property name="target" value="switched_door_1"/>
    </properties>
   </object>
  </objectgroup>

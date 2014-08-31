@@ -135,6 +135,9 @@ class AttackAction extends Action {
 
     console.log('attack!');
     this._sounds.swingSword.play();
+    this._body.queryFront().forEach((hit) => {
+      hit.events.trigger('hit', [this._body]);
+    });
   }
 }
 
