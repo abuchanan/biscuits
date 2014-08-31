@@ -1,7 +1,7 @@
 import {Provide, SuperConstructor} from 'di';
 import {Input} from 'src/input';
 import {Body, BodyConfig} from 'src/world';
-import {Action, Movement, ActionManager, ActionInputHelperFactory} from 'src/Actions';
+import {Action, Movement, ActionManager, ActionInput} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -106,8 +106,7 @@ class CoinPurse {
 @ObjectScope
 class PlayerActions {
 
-  constructor(manager: ActionManager, body: Body, sounds: Sounds) {
-    this.manager = manager;
+  constructor(body: Body, sounds: Sounds) {
     // TODO using "new" here. Movement and Action should be injected
     this.walkUp = new Movement('walk-up', body, 'up', 0, -32, 250);
     this.walkDown = new Movement('walk-down', body, 'down', 0, 32, 250);
@@ -162,17 +161,14 @@ class UseAction extends Action {
 
 
 @ObjectScope
-function PlayerDriver(actions: PlayerActions,
-                      createActionInputHelper: ActionInputHelperFactory) {
+function PlayerDriver(actions: PlayerActions, actionInput: ActionInput) {
 
-  var inputHelper = createActionInputHelper(actions.manager);
-
-  inputHelper.bind('Up', actions.walkUp);
-  inputHelper.bind('Down', actions.walkDown);
-  inputHelper.bind('Left', actions.walkLeft);
-  inputHelper.bind('Right', actions.walkRight);
-  inputHelper.bind('Use', actions.use);
-  inputHelper.bind('Attack', actions.attack);
+  actionInput.bind('Up', actions.walkUp);
+  actionInput.bind('Down', actions.walkDown);
+  actionInput.bind('Left', actions.walkLeft);
+  actionInput.bind('Right', actions.walkRight);
+  actionInput.bind('Use', actions.use);
+  actionInput.bind('Attack', actions.attack);
 }
 
 
@@ -190,7 +186,7 @@ function PlayerDriver(actions: PlayerActions,
 
 @ObjectScope
 function PlayerRenderer(textures: PlayerTextures, body: Body,
-                        actions: PlayerActions, renderer: Renderer,
+                        actionManager: ActionManager, renderer: Renderer,
                         scene: Scene) {
 
   var layer = renderer.getLayer('player');
@@ -213,7 +209,7 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
   clip.position.y = renderer.renderer.height / 2;
 
   scene.events.on('tick', function(time) {
-    var state = actions.manager.getState();
+    var state = actionManager.getState();
 
     // TODO try to remove this stop special case. Maybe actions should be
     //      DFAs. After each walk action, it would move to a "stop-{direction"

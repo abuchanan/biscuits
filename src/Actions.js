@@ -1,6 +1,5 @@
-import {TransientScope} from 'di';
 import {Scene} from 'src/scene';
-import {SceneScope} from 'src/scope';
+import {SceneScope, ObjectScope} from 'src/scope';
 import {Input} from 'src/input';
 import {extend} from 'src/utils';
 import EventEmitter from 'lib/EventEmitter';
@@ -10,8 +9,7 @@ export {
   Action,
   Movement,
   ActionManager,
-  ActionInputHelperFactory,
-  ActionInputHelper
+  ActionInput,
 };
 
 
@@ -113,7 +111,8 @@ class Movement extends Action {
 }
 
 
-@TransientScope
+// TODO does an object need multiple managers?
+@ObjectScope
 function ActionManager(scene: Scene) {
 
   var state = false;
@@ -190,16 +189,10 @@ function ActionManager(scene: Scene) {
   };
 }
 
-// TODO I don't like this "...Factory" name pattern
-@SceneScope
-function ActionInputHelperFactory(input: Input, scene: Scene) {
-  return function(manager) {
-    return new ActionInputHelper(input, scene, manager);
-  }
-}
+@ObjectScope
+class ActionInput {
 
-class ActionInputHelper {
-  constructor(input, scene, manager) {
+  constructor(input: Input, scene: Scene, manager: ActionManager) {
     var actions = this._actions = {};
 
     scene.events.on('tick', function() {
