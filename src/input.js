@@ -16,7 +16,7 @@ class Input {
     this.Left = false;
     this.Right = false;
     this.Use = false;
-    this.Sword = false;
+    this.Attack = false;
   }
 }
 
@@ -55,6 +55,6 @@ class KeyboardInput {
     add('Left');
     add('Right');
     add('E', 'Use');
-    add('F', 'Sword');
+    add('F', 'Attack');
   }
 }

@@ -11,6 +11,7 @@ import {Types} from 'src/worldscene';
 import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
 import {Loadpoint} from 'src/loadpoints';
+import {Sounds} from 'src/sounds';
 
 export {
   CoinPurse,
@@ -105,7 +106,7 @@ class CoinPurse {
 @ObjectScope
 class PlayerActions {
 
-  constructor(manager: ActionManager, body: Body) {
+  constructor(manager: ActionManager, body: Body, sounds: Sounds) {
     this.manager = manager;
     // TODO using "new" here. Movement and Action should be injected
     this.walkUp = new Movement('walk-up', body, 'up', 0, -32, 250);
@@ -114,9 +115,28 @@ class PlayerActions {
     this.walkRight = new Movement('walk-right', body, 'right', 32, 0, 250);
 
     this.use = new UseAction(body);
+    this.attack = new AttackAction(body, sounds);
   }
 }
 
+
+// TODO these don't fit with DI
+class AttackAction extends Action {
+
+  constructor(body, sounds) {
+    var duration = 200;
+    super(duration);
+    this._body = body;
+    this._sounds = sounds;
+  }
+
+  start(time, done) {
+    super.start(time, done);
+
+    console.log('attack!');
+    this._sounds.swingSword.play();
+  }
+}
 
 class UseAction extends Action {
 
@@ -149,6 +169,7 @@ function PlayerDriver(actions: PlayerActions,
   inputHelper.bind('Left', actions.walkLeft);
   inputHelper.bind('Right', actions.walkRight);
   inputHelper.bind('Use', actions.use);
+  inputHelper.bind('Attack', actions.attack);
 }
 
 
@@ -308,10 +329,19 @@ function setupBodyConfig(loadpoint: Loadpoint, bodyConfig: BodyConfig) {
   bodyConfig.h = 32;
 }
 
+
+@ObjectScope
+function setupSounds(sounds: Sounds) {
+  sounds.swingSword = sounds.create({
+    urls: ['media/sounds/swings.wav'],
+  });
+}
+
 Types['player'] = Loader()
   .provides(PlayerBody)
   .runs([
     setupBodyConfig,
+    setupSounds,
     // TODO wow, fuck. that was a confusing bug to track down.
     //      which is becoming typical of di.js. If s/Body/PlayerBody/
     //      then the PlayerBody constructor is called twice....

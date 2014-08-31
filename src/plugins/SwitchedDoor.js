@@ -6,7 +6,7 @@ import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {ObjectConfig} from 'src/config';
 import {Scene, SceneObject} from 'src/scene';
-import {Sounds, SoundsConfig} from 'src/sounds';
+import {Sounds} from 'src/sounds';
 
 export {
   SwitchedDoorLoader,
