@@ -125,11 +125,12 @@ function setupSounds(sounds: Sounds) {
 }
 
 
-Types['switched-door'] = Loader()
+Types['switched-door'] = new Loader()
   .provides(SwitchedDoorBody, SwitchedDoor)
   .runs(Body, SwitchedDoorRenderer);
 
-Types['door-switch'] = Loader()
+Types['door-switch'] = new Loader()
   .runs(setupSounds, Collision);
 
-Types['useable-door-switch'] = Loader().runs(Useable);
+Types['useable-door-switch'] = new Loader()
+  .runs(Useable);

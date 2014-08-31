@@ -77,7 +77,7 @@ function provideChestConfig(config: ObjectConfig) {
 }
 
 
-Types['chest'] = Loader()
+Types['chest'] = new Loader()
   .provides([
     provideChestConfig,
     ChestBody,

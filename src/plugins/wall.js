@@ -15,6 +15,6 @@ class WallBody extends Body {
   }
 }
 
-Types['wall'] = Loader()
+Types['wall'] = new Loader()
   .provides(WallBody)
   .runs(Body);

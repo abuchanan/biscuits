@@ -54,7 +54,7 @@ function provideCoinConfig(config: ObjectConfig) {
 }
 
 
-Types['coin'] = Loader()
+Types['coin'] = new Loader()
   .provides(provideCoinConfig)
   .runs(Body, CoinRenderer, CoinCollision);
 

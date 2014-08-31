@@ -336,7 +336,7 @@ function setupSounds(sounds: Sounds) {
   });
 }
 
-Types['player'] = Loader()
+Types['player'] = new Loader()
   .provides(PlayerBody)
   .runs([
     setupBodyConfig,

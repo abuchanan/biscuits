@@ -60,7 +60,7 @@ function Collision(body: Body, renderer: LockedDoorRenderer) {
 }
 
 
-Types['locked-door']= Loader()
+Types['locked-door']= new Loader()
   .provides(LockedDoorBody)
   .runs([
     Body,

@@ -131,7 +131,7 @@ function loadObjects(injector: Injector, configs: ObjectConfigs) {
         .binds(ObjectConfig, config, ObjectScope)
         .runs(addToScene);
 
-      injector.get(loader);
+      injector.get(loader.Injector);
     }
   }
 }
@@ -147,7 +147,7 @@ function triggerLoadedEvent(scene: Scene) {
   scene.events.trigger('loaded');
 }
 
-var WorldSceneLoader = Loader()
+var WorldSceneLoader = new Loader()
   .provides([
     // TODO move these to setupFoo like I did for renderer config
     provideWorldConfig,

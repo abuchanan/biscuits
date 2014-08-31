@@ -33,7 +33,7 @@ class SceneManager {
       this.scene.events.trigger('unload');
     }
 
-    var sceneInjector = this.injector.get(loader);
+    var sceneInjector = this.injector.get(loader.Injector);
     this.scene = sceneInjector.get(Scene);
   }
 }

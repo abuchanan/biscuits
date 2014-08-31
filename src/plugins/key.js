@@ -68,6 +68,7 @@ function KeyCollision(config: KeyConfig, body: Body,
   });
 }
 
-Types['key'] = Loader().runs(Body, KeyRenderer, KeyCollision);
+Types['key'] = new Loader()
+  .runs(Body, KeyRenderer, KeyCollision);
 
 // TODO test that renderables are removed from renderer when scene is unloaded

@@ -28,52 +28,65 @@ function extend(obj) {
 }
 
 
-function Loader(providers = [], deps = [], scope = TransientScope) {
+class Loader {
 
-  var func = function(injector) {
+  constructor(providers = [], deps = [], scope = TransientScope) {
+    this._providers = providers;
+    this._deps = deps;
+    this._scope = scope;
+
+    var loader = this;
+    this.Injector = function(injector) {
+      return loader._Injector(injector);
+    };
+    this.Injector.annotations = [new Inject(Injector), new TransientScope()];
+  }
+
+  _Injector(injector) {
     var scopes = [];
-    if (scope) {
-      scopes.push(scope);
+    if (this._scope) {
+      scopes.push(this._scope);
     }
 
-    var childInjector = injector.createChild(providers, scopes);
+    var childInjector = injector.createChild(this._providers, scopes);
 
     // TODO the error message from this probably sucks. how to improve?
     //      that is, if dep is undefined.
-    for (var dep of deps) {
+    for (var dep of this._deps) {
       try {
         childInjector.get(dep);
       } catch (e) {
         console.error('load dependency error');
         console.log(dep);
+        console.log(this._deps, this._providers);
         console.log(e);
         throw e;
       }
     }
 
     return childInjector;
-  };
-  func.annotations = [new Inject(Injector), new TransientScope()];
+  }
 
-  func.binds = function(token, value, scope) {
+  binds(token, value, scope) {
     var p = valueProvider(token, value, scope);
-    return func.provides(p);
-  };
+    return this.provides(p);
+  }
 
-  func.provides = function(...args) {
-    return Loader(flatten(providers, ...args), deps, scope);
-  };
+  provides(...args) {
+    var providers = flatten(this._providers, ...args);
+    return new this.constructor(providers, this._deps, this._scope);
+  }
 
-  func.runs = function(...args) {
-    return Loader(providers, flatten(deps, ...args), scope);
-  };
+  runs(...args) {
+    var deps = flatten(this._deps, ...args);
+    return new this.constructor(this._providers, deps, this._scope);
+  }
 
-  func.hasScope = function(s) {
-    return Loader(providers, deps, s);
-  };
-
-  return func;
+  hasScope(scope) {
+    return new this.constructor(this._providers, this._deps, scope);
+  }
 }
+
 
 function flatten(...args) {
   var res = [];

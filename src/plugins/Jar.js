@@ -64,6 +64,6 @@ function Hitable(body: Body, config: ObjectConfig, sceneObject: SceneObject, sce
 }
 
 
-Types['jar'] = Loader()
+Types['jar'] = new Loader()
   .provides(JarBody)
   .runs(Body, JarRenderer, Hitable);
