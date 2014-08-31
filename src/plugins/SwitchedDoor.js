@@ -6,6 +6,7 @@ import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {ObjectConfig} from 'src/config';
 import {Scene, SceneObject} from 'src/scene';
+import {Sounds, SoundsConfig} from 'src/sounds';
 
 export {
   SwitchedDoorLoader,
@@ -89,13 +90,15 @@ class SwitchedDoor extends SceneObject {
 
 
 @ObjectScope
-function Collision(body: Body, config: ObjectConfig, object: SceneObject, scene: Scene) {
+function Collision(body: Body, config: ObjectConfig, object: SceneObject, scene: Scene,
+                   sounds: Sounds) {
 
   scene.events.on('loaded', function() {
     scene.getObject(config.target).lock(object.ID);
   });
 
   body.events.on('player collision', function() {
+    sounds.movingBlock.play();
     scene.getObject(config.target).unlock(object.ID);
   });
 }
@@ -114,10 +117,19 @@ function Useable(body: Body, config: ObjectConfig, object: SceneObject, scene: S
 }
 
 
+@ObjectScope
+function setupSounds(sounds: Sounds) {
+  sounds.movingBlock = sounds.create({
+    urls: ['media/sounds/blocks-moving.wav'],
+  });
+}
+
+
 Types['switched-door'] = Loader()
   .provides(SwitchedDoorBody, SwitchedDoor)
   .runs(Body, SwitchedDoorRenderer);
 
-Types['door-switch'] = Loader().runs(Collision);
+Types['door-switch'] = Loader()
+  .runs(setupSounds, Collision);
 
 Types['useable-door-switch'] = Loader().runs(Useable);

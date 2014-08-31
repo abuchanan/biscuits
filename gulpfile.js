@@ -19,6 +19,7 @@ var copyFiles = [
   'media/**/*',
   'maps/*',
   'lib/EventEmitter.js',
+  'lib/howler.js',
   'lib/Shortcut.js',
   'lib/require.js',
   'lib/traceur-runtime.js',
