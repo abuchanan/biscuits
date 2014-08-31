@@ -9,8 +9,6 @@ export {KeyboardInput, Input};
 
 class Input {
   constructor() {
-    // TODO doesn't work for multiple keys at once
-    //      think walking and firing at same time
     this.Up = false;
     this.Down = false;
     this.Left = false;
@@ -22,17 +20,13 @@ class Input {
 
 class KeyboardInput {
 
-  constructor(input: Input) {
-    // TODO inject this
-    var shortcutjs = Shortcut();
+  constructor(input: Input, shortcutjs: Shortcut) {
 
     var keyDownOptions = {
       propagate: false,
-      //target: target,
     };
 
     var keyUpOptions = {
-      //target: target,
       type: 'keyup',
     };
 
@@ -40,12 +34,10 @@ class KeyboardInput {
       eventname = eventname || keyname;
 
       shortcutjs.add(keyname, function() {
-          //input.event = eventname + ' keydown';
           input[eventname] = true;
       }, keyDownOptions);
 
       shortcutjs.add(keyname, function() {
-          //input.event = eventname + ' keyup';
           input[eventname] = false;
       }, keyUpOptions);
     }
