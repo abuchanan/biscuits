@@ -51,6 +51,6 @@ gulp.task('serve', function() {
   });
 });
 
-gulp.task('watch', function() {
+gulp.task('watch', ['build'], function() {
   gulp.watch(es6Files.concat(copyFiles), ['build']);
 });
