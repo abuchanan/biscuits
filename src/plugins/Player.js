@@ -1,7 +1,6 @@
 import {Provide, SuperConstructor} from 'di';
-import {Input} from 'src/input';
 import {Body, BodyConfig} from 'src/world';
-import {Action, Movement, ActionManager, ActionInput} from 'src/Actions';
+import {Action, Movement, ActionDriver, ActionManager} from 'src/Actions';
 import {Scene} from 'src/scene';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
@@ -102,75 +101,6 @@ class CoinPurse {
 //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
 //      window focus/blur events?
 
-// TODO inject Movement
-@ObjectScope
-class PlayerActions {
-
-  constructor(body: Body, sounds: Sounds) {
-    // TODO using "new" here. Movement and Action should be injected
-    this.walkUp = new Movement('walk-up', body, 'up', 0, -32, 250);
-    this.walkDown = new Movement('walk-down', body, 'down', 0, 32, 250);
-    this.walkLeft = new Movement('walk-left', body, 'left', -32, 0, 250);
-    this.walkRight = new Movement('walk-right', body, 'right', 32, 0, 250);
-
-    this.use = new UseAction(body);
-    this.attack = new AttackAction(body, sounds);
-  }
-}
-
-
-// TODO these don't fit with DI
-class AttackAction extends Action {
-
-  constructor(body, sounds) {
-    var duration = 200;
-    super(duration);
-    this._body = body;
-    this._sounds = sounds;
-  }
-
-  start(time, done) {
-    super.start(time, done);
-
-    console.log('attack!');
-    this._sounds.swingSword.play();
-    this._body.queryFront().forEach((hit) => {
-      hit.events.trigger('hit', [this._body]);
-    });
-  }
-}
-
-class UseAction extends Action {
-
-  constructor(body) {
-    var duration = 1000;
-    super(duration);
-    this._body = body;
-  }
-
-  start(time, done) {
-    super.start(time, done);
-
-    // TODO optimize?
-    // TODO can only use one object?
-    this._body.queryFront().forEach((hit) => {
-      hit.events.trigger('use', [this._body]);
-    });
-  }
-}
-
-
-@ObjectScope
-function PlayerDriver(actions: PlayerActions, actionInput: ActionInput) {
-
-  actionInput.bind('Up', actions.walkUp);
-  actionInput.bind('Down', actions.walkDown);
-  actionInput.bind('Left', actions.walkLeft);
-  actionInput.bind('Right', actions.walkRight);
-  actionInput.bind('Use', actions.use);
-  actionInput.bind('Attack', actions.attack);
-}
-
 
 // TODO Chasing down scope dependencies is pretty confusing.
 //      Maybe some sort of dependency graph analysis (static?) would
@@ -208,7 +138,7 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
   clip.position.x = renderer.renderer.width / 2;
   clip.position.y = renderer.renderer.height / 2;
 
-  scene.events.on('tick', function(time) {
+  scene.events.on('tick', function() {
     var state = actionManager.getState();
 
     // TODO try to remove this stop special case. Maybe actions should be
@@ -221,7 +151,7 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
     // TODO maybe the renderer could hook in via some sort of action tick event.
     //      then it wouldn't need to depend on tick, it wouldn't need
     //      interpolatePosition, 
-    if (state.action == 'stop') {
+    if (!state) {
 
       var pos = body.getPosition();
       objectsLayer.x = (objectsLayer.width / 2) - pos.x;
@@ -238,11 +168,11 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
       // TODO need a way to split up the rendering of various movements
       //      into discrete pieces. i.e. make action/movement rendering
       //      pluggable
-      if (state.action instanceof Movement) {
-        var textureName = state.action.name;
+      if (state instanceof Movement) {
+        var textureName = state.config.name;
         clip.textures = textures[textureName];
 
-        var pos = state.action.interpolatePosition();
+        var pos = state.interpolatePosition();
         objectsLayer.x = Math.floor((objectsLayer.width / 2) - pos.x);
         objectsLayer.y = Math.floor((objectsLayer.height / 2) - pos.y);
         backgroundLayer.x = Math.floor((backgroundLayer.width / 2) - pos.x);
@@ -336,8 +266,148 @@ function setupSounds(sounds: Sounds) {
   });
 }
 
+
+@ObjectScope
+class WalkUp extends Movement {
+
+  constructor(superConstructor: SuperConstructor) {
+    superConstructor();
+
+    this.configure({
+      name: 'walk-up',
+      direction: 'up',
+      deltaY: -32,
+      duration: 250,
+    });
+  }
+}
+
+
+@ObjectScope
+class WalkDown extends Movement {
+
+  constructor(superConstructor: SuperConstructor) {
+    superConstructor();
+
+    this.configure({
+      name: 'walk-down',
+      direction: 'down', 
+      deltaY: 32,
+      duration: 250,
+    });
+  }
+}
+
+
+@ObjectScope
+class WalkLeft extends Movement {
+
+  constructor(superConstructor: SuperConstructor) {
+    superConstructor();
+
+    this.configure({
+      name: 'walk-left',
+      direction: 'left',
+      deltaX: -32, 
+      duration: 250,
+    });
+  }
+}
+
+
+@ObjectScope
+class WalkRight extends Movement {
+
+  constructor(superConstructor: SuperConstructor) {
+    superConstructor();
+
+    this.configure({
+      name: 'walk-right',
+      direction: 'right',
+      deltaX: 32, 
+      duration: 250,
+    });
+  }
+}
+
+
+@ObjectScope
+class Use extends Action {
+
+  constructor(superConstructor: SuperConstructor, body: Body) {
+    superConstructor();
+    this.body = body;
+
+    this.configure({
+      name: 'use',
+      duration: 1000,
+    });
+  }
+
+  start() {
+    super.start();
+
+    // TODO optimize?
+    // TODO can only use one object?
+    var body = this.body;
+    body.queryFront().forEach(function(hit) {
+      hit.events.trigger('use', [body]);
+    });
+  }
+}
+
+
+@ObjectScope
+class Attack extends Action {
+
+  constructor(superConstructor: SuperConstructor, body: Body, sounds: Sounds) {
+    superConstructor();
+    this.body = body;
+    this.sounds = sounds;
+
+    this.configure({
+      name: 'attack',
+      duration: 200,
+    });
+  }
+
+  start() {
+    super.start();
+    console.log('attack!');
+
+    this.sounds.swingSword.play();
+
+    // TODO optimize?
+    // TODO can only use one object?
+    var body = this.body;
+    body.queryFront().forEach(function(hit) {
+      hit.events.trigger('hit', [body]);
+    });
+  }
+}
+
+
+var PlayerDriver = ActionDriver({
+  'Left': WalkLeft,
+  'Right': WalkRight,
+  'Up': WalkUp,
+  'Down': WalkDown,
+  'Use': Use,
+  'Attack': Attack,
+});
+
+
 Types['player'] = new Loader()
+  .hasScope(ObjectScope)
   .provides(PlayerBody)
+
+  // TODO the problem with this is that it's not testable. You can't mock out
+  //      anything in the runs() section. You'd have to rebuild the loader.
+  //      On the other hand, a test shouldn't have to mock initialization tasks
+  //      it should mock the dependencies of the init tasks?
+  //
+  //      On another note, maybe the providers should mark themselves as wanting
+  //      an init on load, instead of maintain this centralized list.
   .runs([
     setupBodyConfig,
     setupSounds,
@@ -356,7 +426,6 @@ Types['player'] = new Loader()
     PlayerRenderer,
     CoinPurse,
   ]);
-
 
 // TODO maybe di.js could attach its get() function to the function/class
 //      in order to improve the debugging experience? The call stack isn't

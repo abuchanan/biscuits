@@ -36,19 +36,19 @@ class Loader {
     this._scope = scope;
 
     var loader = this;
-    this.Injector = function(injector) {
-      return loader._Injector(injector);
+    this.Injector = function(parentInjector) {
+      return loader._getInjector(parentInjector);
     };
     this.Injector.annotations = [new Inject(Injector), new TransientScope()];
   }
 
-  _Injector(injector) {
+  _getInjector(parentInjector) {
     var scopes = [];
     if (this._scope) {
       scopes.push(this._scope);
     }
 
-    var childInjector = injector.createChild(this._providers, scopes);
+    var childInjector = parentInjector.createChild(this._providers, scopes);
 
     // TODO the error message from this probably sucks. how to improve?
     //      that is, if dep is undefined.
