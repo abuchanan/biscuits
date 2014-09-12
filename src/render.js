@@ -7,9 +7,10 @@ export {RendererConfig, Renderer};
 
 @SceneScope
 class RendererConfig {
-  // TODO this is really useless because WorldLoader just creates a new object
+
   constructor(document: Document) {
     this.container = document.body;
+    this.layers = [];
   }
 }
 
@@ -23,7 +24,7 @@ class Renderer {
     this.stage.interactive = false;
 
     var layers = this._layers = {};
-    var layerNames = config.layers || [];
+    var layerNames = config.layers;
     layerNames.forEach((name) => {
       var layer = layers[name] = new PIXI.DisplayObjectContainer();
 

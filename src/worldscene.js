@@ -56,8 +56,12 @@ function setupRendererConfig(biscuitsConfig: BiscuitsConfig,
                              rendererConfig: RendererConfig) {
 
   rendererConfig.container = biscuitsConfig.container;
-  // TODO extend, not overwrite
-  rendererConfig.layers = ['background', 'objects', 'player', 'hud'];
+  Array.prototype.push.apply(rendererConfig.layers, [
+    'background',
+    'objects',
+    'player',
+    'hud'
+  ]);
 }
 
 @SceneScope
