@@ -3,15 +3,35 @@ import {Renderer} from 'src/render';
 import {ImageGrid} from 'src/ImageGrid';
 import {Scene} from 'src/scene';
 import {SceneScope} from 'src/scope';
+import {Map} from 'src/maploader';
 
 export {BackgroundRenderer, BackgroundGrid};
 
-class BackgroundGrid {}
 
-// TODO inject deps
+@SceneScope
+class BackgroundGrid {
+
+  constructor(map: Map) {
+
+    var grid = this.grid = [];
+
+    map.tilelayers.forEach((layer) => {
+      layer.forEach((sprite) => {
+        grid.push(sprite);
+      });
+    });
+
+  }
+
+  forEach(cb) {
+    this.grid.forEach(cb);
+  }
+}
+
 @SceneScope
 function BackgroundRenderer(renderer: Renderer, grid: BackgroundGrid) {
   var layer = renderer.getLayer('background');
+  // TODO figure out how to inject TileBatchRenderable
   var renderable = new TileBatchRenderable(grid.forEach.bind(grid));
   layer.addChild(renderable);
 

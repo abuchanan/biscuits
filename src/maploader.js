@@ -1,6 +1,9 @@
 import PIXI from 'lib/pixi';
 
-export {loadMapSync, MapLoader};
+export {loadMapSync, Map, MapConfig, MapLoader};
+
+class Map {};
+class MapConfig {};
 
 function parseTileset(tilesets) {
     var slices = {};

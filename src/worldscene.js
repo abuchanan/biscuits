@@ -6,7 +6,7 @@ import {Loader} from 'src/utils';
 import {HUD} from 'src/hud';
 import {BackgroundRenderer, BackgroundGrid} from 'src/background';
 import {WorldConfig, BodyConfig, Body} from 'src/world';
-import {MapLoader} from 'src/maploader';
+import {MapConfig, Map, MapLoader} from 'src/maploader';
 import {BiscuitsConfig, ObjectConfig} from 'src/config';
 
 // TODO this is a great example of a problem with both ES6 and di.js
@@ -26,8 +26,6 @@ export {
 };
 
 class ObjectConfigs {};
-class MapConfig {};
-class Map {};
 
 
 var Types = {};
@@ -62,20 +60,6 @@ function setupRendererConfig(biscuitsConfig: BiscuitsConfig,
     'player',
     'hud'
   ]);
-}
-
-@SceneScope
-@Provide(BackgroundGrid)
-function provideBackgroundGrid(map: Map) {
-  var grid = [];
-
-  map.tilelayers.forEach((layer) => {
-    layer.forEach((sprite) => {
-      grid.push(sprite);
-    });
-  });
-
-  return grid;
 }
 
 
@@ -156,7 +140,6 @@ var WorldSceneLoader = new Loader()
     // TODO move these to setupFoo like I did for renderer config
     provideWorldConfig,
     provideMap,
-    provideBackgroundGrid,
     provideObjectConfigs,
   ])
   .runs([
