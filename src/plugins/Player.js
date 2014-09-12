@@ -151,8 +151,8 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
     // TODO maybe the renderer could hook in via some sort of action tick event.
     //      then it wouldn't need to depend on tick, it wouldn't need
     //      interpolatePosition, 
-    if (!state) {
 
+    function renderStopped() {
       var pos = body.getPosition();
       objectsLayer.x = (objectsLayer.width / 2) - pos.x;
       objectsLayer.y = (objectsLayer.height / 2) - pos.y;
@@ -162,6 +162,11 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
       var textureName = 'stop-' + body.direction;
       clip.textures = textures[textureName];
       clip.gotoAndStop(0);
+    }
+
+
+    if (!state) {
+      renderStopped();
 
     } else {
 
@@ -179,8 +184,10 @@ function PlayerRenderer(textures: PlayerTextures, body: Body,
         backgroundLayer.y = Math.floor((backgroundLayer.height / 2) - pos.y);
 
         clip.play();
+      } else {
+        renderStopped();
       }
-    }
+    } 
   });
 }
 
