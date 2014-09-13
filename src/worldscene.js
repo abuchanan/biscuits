@@ -117,16 +117,10 @@ function loadObjects(injector: Injector, configs: ObjectConfigs) {
         .hasScope(ObjectScope)
         .binds(BodyConfig, bodyConfig, ObjectScope)
         .binds(ObjectConfig, config, ObjectScope)
-        .runs(addToScene);
 
       injector.get(loader.Injector);
     }
   }
-}
-
-@ObjectScope
-function addToScene(object: SceneObject, scene: Scene) {
-  scene.addObject(object);
 }
 
 

@@ -60,12 +60,14 @@ class Scene {
 @ObjectScope
 class SceneObject {
 
-  constructor(injector: Injector, events: EventEmitter, config: ObjectConfig) {
+  constructor(injector: Injector, events: EventEmitter, config: ObjectConfig, scene: Scene) {
     // TODO don't want both name and ID
     this.ID = config.name || config.ID;
     this.injector = injector;
     this.get = this.injector.get.bind(this.injector);
     this.events = events;
+
+    scene.addObject(this);
   }
 }
 
