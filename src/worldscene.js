@@ -33,10 +33,11 @@ var Types = {};
 // TODO if a requested type is undefined, the error message (from di.js?) is
 //      difficult to interpret
 
+class WorldMap {}
 
 @SceneScope
 @Provide(WorldConfig)
-function provideWorldConfig(map: Map) {
+function provideWorldConfig(map: WorldMap) {
   console.log('provide world config');
   var w = map.mapData.width * map.mapData.tilewidth;
   var h = map.mapData.height * map.mapData.tileheight;
@@ -45,7 +46,7 @@ function provideWorldConfig(map: Map) {
 }
 
 @SceneScope
-@Provide(Map)
+@Provide(WorldMap)
 function provideMap(loadpoint: Loadpoint, mapLoader: MapLoader) {
   return mapLoader.load(loadpoint.mapID);
 }
@@ -103,7 +104,9 @@ function provideObjectConfigs(map: Map) {
 }
 
 
-@SceneScope
+class RegionScope {}
+
+@RegionScope
 function loadObjects(injector: Injector, configs: ObjectConfigs) {
 
   for (var config of configs) {
@@ -116,11 +119,34 @@ function loadObjects(injector: Injector, configs: ObjectConfigs) {
       loader = loader
         .hasScope(ObjectScope)
         .binds(BodyConfig, bodyConfig, ObjectScope)
-        .binds(ObjectConfig, config, ObjectScope)
+        .binds(ObjectConfig, config, ObjectScope);
 
       injector.get(loader.Injector);
     }
   }
+}
+
+
+@RegionScope
+@Provide(Renderer)
+class RegionRenderer {
+}
+
+
+@RegionScope
+@Provide(Map)
+class RegionMap {
+  constructor(
+}
+
+
+function loadRegions() {
+  // TODO needs custom region map
+  .provides(RegionMap)
+  .runs([
+    loadObjects,
+    BackgroundRenderer,
+  ]);
 }
 
 
@@ -129,18 +155,18 @@ function triggerLoadedEvent(scene: Scene) {
   scene.events.trigger('loaded');
 }
 
+
 var WorldSceneLoader = new Loader()
   .provides([
     // TODO move these to setupFoo like I did for renderer config
     provideWorldConfig,
-    provideMap,
-    provideObjectConfigs,
+    provideWorldMap,
+    provideObjectConfigs
   ])
   .runs([
     setupRendererConfig,
-    loadObjects,
+    loadRegions,
     HUD,
-    BackgroundRenderer,
     triggerLoadedEvent
   ]);
 

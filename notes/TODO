@@ -5,7 +5,11 @@ You have a dungeon with two adjacent rooms. When you're in one room, you
 should not be able to see the other room. sometimes?
 
 
-check background tile images for properties to I can use isWall
+check background tile images for properties to I can use isWall? Or maybe move away from
+this one-image-per-tile thing and use bigger background tiles.
 
 
 pre-process map files for loadpoints. save somewhere. load in app.
+
+
+"use" action could take different times depending on what is being used.
