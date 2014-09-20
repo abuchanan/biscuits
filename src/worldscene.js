@@ -47,7 +47,7 @@ function provideWorldConfig(map: WorldMap) {
 
 @SceneScope
 @Provide(WorldMap)
-function provideMap(loadpoint: Loadpoint, mapLoader: MapLoader) {
+function provideWorldMap(loadpoint: Loadpoint, mapLoader: MapLoader) {
   return mapLoader.load(loadpoint.mapID);
 }
 
@@ -133,20 +133,60 @@ class RegionRenderer {
 }
 
 
-@RegionScope
-@Provide(Map)
-class RegionMap {
-  constructor(
-}
+@SceneScope
+function loadRegions(map: WorldMap) {
 
+  console.log(map);
+  // TODO index all background and objects
 
-function loadRegions() {
-  // TODO needs custom region map
-  .provides(RegionMap)
-  .runs([
-    loadObjects,
-    BackgroundRenderer,
-  ]);
+  function getItemsInRegion(region) {
+    var items = [];
+
+    function inRegion(item) {
+      var iw = item.w || item.width;
+      var ih = item.h || item.height;
+      var ix1 = item.x;
+      var iy1 = item.y;
+      var ix2 = ix1 + iw;
+      var iy2 = iy1 + ih;
+
+      var rw = region.w;
+      var rh = region.h;
+      var rx1 = region.x;
+      var ry1 = region.y;
+      var rx2 = rx1 + rw;
+      var ry2 = ry1 + rh;
+
+      return ix2 >= rx1 && ix1 <= rx2 && iy2 >= ry1 && iy1 <= ry2;
+    }
+
+    map.objectlayers.forEach(function(layer) {
+      layer.forEach(function(object) {
+        if (object.type != 'region') {
+          items.push(object);
+        }
+      });
+    });
+
+    map.tilelayers.forEach(function(layer) {
+      layer.forEach(function(tile) {
+        if (inRegion(tile)) {
+          items.push(tile);
+        }
+      });
+    });
+
+    return items;
+  }
+
+  map.objectlayers.forEach(function(layer) {
+    layer.forEach(function(object) {
+      if (object.type == 'region') {
+
+        var regionObjects = getItemsInRegion(object);
+      }
+    });
+  });
 }
 
 
@@ -166,8 +206,8 @@ var WorldSceneLoader = new Loader()
   .runs([
     setupRendererConfig,
     loadRegions,
-    HUD,
-    triggerLoadedEvent
+    //HUD,
+    //triggerLoadedEvent
   ]);
 
 // TODO test that render layers are removed from renderer when scene is unloaded
