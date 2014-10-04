@@ -1,6 +1,6 @@
 import {Injector, Provide} from 'di';
 import {ObjectScope, SceneScope} from 'src/scope';
-import {Scene} from 'src/scene';
+import {Scene, SceneObject} from 'src/scene';
 import {ObjectConfig} from 'src/config';
 import {Types} from 'src/types';
 import {WorldMap} from 'src/worldmap';
@@ -50,7 +50,9 @@ class ObjectLoader {
       .binds(BodyConfig, bodyConfig, ObjectScope)
       .binds(ObjectConfig, config, ObjectScope);
 
-    return this._injector.get(loader.Injector);
+    var objectInjector = this._injector.get(loader.Injector);
+    objectInjector.get(SceneObject);
+    return objectInjector;
 
     // TODO this should be able to return the loaded object
   }
@@ -174,16 +176,18 @@ be able to query objects and background efficiently
   objects can move between regions. need to query from world?
 */
 // For the short term, I might just brute force this
-  _loadRegionObjects(region) {
+  _loadRegionObjects(regionConfig) {
 
-    var key = [region.x, region.y, region.w, region.h].join('-');
+    var key = [regionConfig.x, regionConfig.y, regionConfig.w, regionConfig.h].join('-');
+    var region = this._cachedRegions[key];
 
-    if (!this._cachedRegions[key]) {
-
-      var region = this._loader.load(region).get(Region);
-      region.load();
-      this._cachedRegions[key] = true;
+    // TODO there's a difference between loaded and active
+    if (!region) {
+      region = this._loader.load(regionConfig).get(Region);
+      this._cachedRegions[key] = region;
     }
+
+    region.load();
   }
 }
 
@@ -259,15 +263,20 @@ class Region {
     this._map = map;
     this._regionConfig = regionConfig;
     this._backgroundGrid = backgroundGrid;
-    this.active = true;
+    this.enabled = true;
+    this.loaded = false;
 
     console.log('cstr region');
   }
 
   load() {
-    if (!this.active) {
+    if (!this.enabled || this.loaded) {
       return;
     }
+
+    // TODO improve on this?
+    this.loaded = true;
+    console.log('doing region load');
 
     var objectLoader = this._objectLoader;
     var map = this._map;
