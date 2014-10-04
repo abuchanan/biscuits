@@ -52,8 +52,12 @@ function parseObjectLayer(layer, map) {
         y: obj.y,
         w: obj.width,
         h: obj.height,
-        type: obj.type,
+        types: obj.type.split(/[, ]+/),
         name: obj.name,
+
+        hasType: function(type) {
+          return this.types.indexOf(type) !== -1;
+        }
       };
 
       var parsedObj = extend({}, layer.properties, obj.properties, pos);

@@ -7,6 +7,7 @@ import {WorldMap} from 'src/worldmap';
 import {Player} from 'src/plugins/Player';
 import {BodyConfig, Body} from 'src/world';
 import {BackgroundGrid} from 'src/background';
+import {Loader} from 'src/utils';
 
 export {ActiveRegion};
 
@@ -16,7 +17,6 @@ export {ActiveRegion};
   TODO 
   need to:
   - be able to query all objects in a given rectangle
-  - send active/inactive events to those objects
   - those objects should render appropriately
 
   questions:
@@ -36,24 +36,21 @@ class ObjectLoader {
 
   load(config) {
 
-    var loaders = this._getLoaders(config);
+    var loader = this._getLoader(config);
 
-    for (var loader of loaders) {
+    // TODO this doesn't seem right
+    var bodyConfig = new BodyConfig(config.x, config.y, config.w, config.h,
+                                    config.isBlock || false);
 
-      // TODO this doesn't seem right
-      var bodyConfig = new BodyConfig(config.x, config.y, config.w, config.h,
-                                      config.isBlock || false);
+    // TODO this seems broken. isn't this creating a separate injector for
+    //   each loader? but one object and all its loaders should share the
+    //   same scope and injector
+    loader = loader
+      .hasScope(ObjectScope)
+      .binds(BodyConfig, bodyConfig, ObjectScope)
+      .binds(ObjectConfig, config, ObjectScope);
 
-      // TODO this seems broken. isn't this creating a separate injector for
-      //   each loader? but one object and all its loaders should share the
-      //   same scope and injector
-      loader = loader
-        .hasScope(ObjectScope)
-        .binds(BodyConfig, bodyConfig, ObjectScope)
-        .binds(ObjectConfig, config, ObjectScope);
-
-      this._injector.get(loader.Injector);
-    }
+    return this._injector.get(loader.Injector);
 
     // TODO this should be able to return the loaded object
   }
@@ -61,12 +58,13 @@ class ObjectLoader {
 
   // TODO have a compile-time checker that ensures every object
   //      in a large map can be loaded properly
-  _getLoaders(config) {
+  _getLoader(config) {
 
-    var types = config.type.split(/[, ]+/);
-    var loaders = [];
+    // TODO this is a mess. loaders have been a mess. combining them,
+    //   especially here, is a mess
+    var combinedLoader = new Loader();
 
-    types.forEach((type) => {
+    config.types.forEach((type) => {
       var loader = Types[type];
 
       // TODO maybe don't crash when an object is unrecognized
@@ -75,10 +73,13 @@ class ObjectLoader {
         throw 'Unknown object type: ' + type;
       }
 
-      loaders.push(loader);
+      combinedLoader = combinedLoader
+        .provides(loader._providers)
+        .runs(loader._deps)
+        .hasScope(loader._scope);
     });
 
-    return loaders;
+    return combinedLoader;
   }
 }
 
@@ -112,7 +113,7 @@ class Regions {
     //      in pieces
     this._map.objectlayers.forEach(function(layer) {
       layer.forEach(function(objectConfig) {
-        if (objectConfig.type === 'region' && regions._inRegion(q, objectConfig)) {
+        if (objectConfig.hasType('region') && regions._inRegion(q, objectConfig)) {
           ret.push(objectConfig);
         }
       });
@@ -148,11 +149,9 @@ class Regions {
 @SceneScope
 class RegionLoader {
 
-  constructor(map: WorldMap, loader: ObjectLoader, regions: Regions, backgroundGrid: BackgroundGrid) {
-    this._map = map;
+  constructor(loader: ObjectLoader, regions: Regions) {
     this._loader = loader;
     this._regions = regions;
-    this._backgroundGrid = backgroundGrid;
     this._cachedRegions = {};
   }
 
@@ -161,7 +160,7 @@ class RegionLoader {
     var loader = this;
 
     regions.forEach(function(region) {
-      loader._loadRegion(region);
+      loader._loadRegionObjects(region);
     });
   }
 
@@ -175,53 +174,15 @@ be able to query objects and background efficiently
   objects can move between regions. need to query from world?
 */
 // For the short term, I might just brute force this
-  _loadRegion(region) {
+  _loadRegionObjects(region) {
 
     var key = [region.x, region.y, region.w, region.h].join('-');
 
     if (!this._cachedRegions[key]) {
 
-    console.log('region');
-      var regionLoader = this;
-
-      // TODO in the future this won't have access to map, since map will be loaded
-      //      in pieces
-      this._map.objectlayers.forEach(function(layer) {
-        layer.forEach(function(objectConfig) {
-          if (objectConfig.type !== 'region' && regionLoader._inRegion(region, objectConfig)) {
-            regionLoader._loader.load(objectConfig);
-          }
-        });
-      });
-
-      this._map.tilelayers.forEach(function(layer) {
-        layer.forEach(function(tile) {
-          if (regionLoader._inRegion(region, tile)) {
-            regionLoader._backgroundGrid.grid.push(tile);
-          }
-        });
-      });
-
+      var region = this._loader.load(region).get(Region);
       this._cachedRegions[key] = true;
     }
-  }
-
-  _inRegion(region, item) {
-    var iw = item.w || item.width;
-    var ih = item.h || item.height;
-    var ix1 = item.x;
-    var iy1 = item.y;
-    var ix2 = ix1 + iw;
-    var iy2 = iy1 + ih;
-
-    var rw = region.w;
-    var rh = region.h;
-    var rx1 = region.x;
-    var ry1 = region.y;
-    var rx2 = rx1 + rw;
-    var ry2 = ry1 + rh;
-
-    return ix2 >= rx1 && ix1 <= rx2 && iy2 >= ry1 && iy1 <= ry2;
   }
 }
 
@@ -285,3 +246,52 @@ class ActiveRegion {
     this._update();
   }
 }
+
+
+@ObjectScope
+class Region {
+
+  constructor(objectLoader: ObjectLoader, map: WorldMap, regionConfig: ObjectConfig,
+              backgroundGrid: BackgroundGrid) {
+
+    console.log('cstr region');
+
+    // TODO in the future this won't have access to map, since map will be loaded
+    //      in pieces
+    map.objectlayers.forEach(function(layer) {
+      layer.forEach(function(objectConfig) {
+        if (!objectConfig.hasType('region') && inRegion(objectConfig)) {
+          objectLoader.load(objectConfig);
+        }
+      });
+    });
+
+    map.tilelayers.forEach(function(layer) {
+      layer.forEach(function(tile) {
+        if (inRegion(tile)) {
+          backgroundGrid.grid.push(tile);
+        }
+      });
+    });
+
+    function inRegion(item) {
+      var iw = item.w || item.width;
+      var ih = item.h || item.height;
+      var ix1 = item.x;
+      var iy1 = item.y;
+      var ix2 = ix1 + iw;
+      var iy2 = iy1 + ih;
+
+      var rw = regionConfig.w;
+      var rh = regionConfig.h;
+      var rx1 = regionConfig.x;
+      var ry1 = regionConfig.y;
+      var rx2 = rx1 + rw;
+      var ry2 = ry1 + rh;
+
+      return ix2 >= rx1 && ix1 <= rx2 && iy2 >= ry1 && iy1 <= ry2;
+    }
+  }
+}
+
+Types['region'] = new Loader().runs(Region);

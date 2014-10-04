@@ -144,6 +144,19 @@
                  "width":416,
                  "x":32,
                  "y":1088
+                }, 
+                {
+                 "height":32,
+                 "name":"Coin 7",
+                 "properties":
+                    {
+
+                    },
+                 "type":"coin",
+                 "visible":true,
+                 "width":32,
+                 "x":160,
+                 "y":1216
                 }],
          "opacity":1,
          "type":"objectgroup",
