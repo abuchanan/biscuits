@@ -2,7 +2,7 @@ import {Provide} from 'di';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
-import {Types} from 'src/worldscene';
+import {Types} from 'src/types';
 import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
 

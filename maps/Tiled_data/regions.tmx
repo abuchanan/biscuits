@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="15" height="15" tilewidth="32" tileheight="32">
+<map version="1.0" orientation="orthogonal" width="15" height="40" tilewidth="32" tileheight="32">
  <tileset firstgid="1" name="terrain" tilewidth="32" tileheight="32" spacing="1" margin="1">
   <image source="../../media/tmw_desert_spacing.png" width="265" height="199"/>
  </tileset>
- <layer name="Tile Layer 1" width="15" height="15">
+ <layer name="Tile Layer 1" width="15" height="40">
   <data encoding="base64" compression="zlib">
-   eJxjYGBgUCIDw8CoXvroxQbkkDCpgFi9XGTgUb2k6QUABFgP1w==
+   eJxjYGBgUCIDw8CoXvroxQbkkDCpgFi9XGTgUb2k60UHclgwsWBU76jeUb2jegnpHYrl5FDTCwCOVR4F
   </data>
  </layer>
- <objectgroup name="Object Layer 1" width="15" height="15">
-  <object name="Room 1" type="region" x="32" y="0" width="416" height="224"/>
-  <object name="Room 2" type="region" x="32" y="288" width="416" height="192"/>
-  <object x="96" y="96" width="32" height="32"/>
-  <object x="288" y="64" width="32" height="32"/>
-  <object x="352" y="160" width="32" height="32"/>
+ <objectgroup name="Object Layer 1" width="15" height="40">
+  <object name="Room 1" type="region" x="32" y="0" width="416" height="256"/>
+  <object name="Room 2" type="region" x="32" y="256" width="416" height="224"/>
+  <object name="Coin 1" type="coin" x="96" y="96" width="32" height="32"/>
+  <object name="Coin 2" type="coin" x="288" y="64" width="32" height="32"/>
+  <object name="Coin 3" type="coin" x="352" y="160" width="32" height="32"/>
+  <object name="Coin 4" type="coin" x="80" y="368" width="32" height="32"/>
+  <object name="Coin 5" type="coin" x="240" y="368" width="32" height="32"/>
+  <object name="Coin 6" type="coin" x="368" y="432" width="32" height="32"/>
+  <object name="Region 3" type="region" x="32" y="480" width="416" height="608"/>
+  <object name="Region 4" type="region" x="32" y="1088" width="416" height="192"/>
  </objectgroup>
 </map>

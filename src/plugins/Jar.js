@@ -4,7 +4,7 @@ import {Scene, SceneObject} from 'src/scene';
 import {ObjectScope} from 'src/scope';
 // TODO rename Renderer to Graphics
 import {Renderer} from 'src/render';
-import {Types} from 'src/worldscene';
+import {Types} from 'src/types';
 import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
 

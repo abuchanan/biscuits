@@ -2,7 +2,7 @@ import {Body} from 'src/world';
 import {BackgroundGrid} from 'src/background';
 import {ObjectScope} from 'src/scope';
 import {ObjectConfig} from 'src/config';
-import {Types} from 'src/worldscene';
+import {Types} from 'src/types';
 import {Loader} from 'src/utils';
 
 @ObjectScope

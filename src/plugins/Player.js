@@ -6,15 +6,11 @@ import {ObjectScope} from 'src/scope';
 import {Renderer} from 'src/render';
 import {loadSpriteSheetSync} from 'src/sprite';
 import PIXI from 'lib/pixi';
-import {Types} from 'src/worldscene';
+import {Types} from 'src/types';
 import {Loader} from 'src/utils';
 import {ObjectConfig} from 'src/config';
 import {Loadpoint} from 'src/loadpoints';
 import {Sounds} from 'src/sounds';
-
-export {
-  CoinPurse,
-};
 
 
 @ObjectScope
@@ -404,7 +400,7 @@ var PlayerDriver = ActionDriver({
 });
 
 
-Types['player'] = new Loader()
+var PlayerLoader = new Loader()
   .hasScope(ObjectScope)
   .provides(PlayerBody)
 
@@ -434,6 +430,13 @@ Types['player'] = new Loader()
     CoinPurse,
   ]);
 
+
+var Player = PlayerLoader.Injector;
+
+export {
+  CoinPurse,
+  Player
+};
 // TODO maybe di.js could attach its get() function to the function/class
 //      in order to improve the debugging experience? The call stack isn't
 //      very readable when there a bunch of get(), create(), etc... lines

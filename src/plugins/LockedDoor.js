@@ -1,5 +1,5 @@
 import {Provide, SuperConstructor} from 'di';
-import {Types} from 'src/worldscene';
+import {Types} from 'src/types';
 import {Loader} from 'src/utils';
 import {Body} from 'src/world';
 import {ObjectScope} from 'src/scope';
