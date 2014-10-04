@@ -9,7 +9,7 @@ import {BodyConfig, Body} from 'src/world';
 import {BackgroundGrid} from 'src/background';
 import {Loader} from 'src/utils';
 
-export {ActiveRegion};
+export {ActiveRegion, Region};
 
 // TODO how to handle hiding vs dimming?
 
@@ -181,6 +181,7 @@ be able to query objects and background efficiently
     if (!this._cachedRegions[key]) {
 
       var region = this._loader.load(region).get(Region);
+      region.load();
       this._cachedRegions[key] = true;
     }
   }
@@ -254,10 +255,28 @@ class Region {
   constructor(objectLoader: ObjectLoader, map: WorldMap, regionConfig: ObjectConfig,
               backgroundGrid: BackgroundGrid) {
 
+    this._objectLoader = objectLoader;
+    this._map = map;
+    this._regionConfig = regionConfig;
+    this._backgroundGrid = backgroundGrid;
+    this.active = true;
+
     console.log('cstr region');
+  }
+
+  load() {
+    if (!this.active) {
+      return;
+    }
+
+    var objectLoader = this._objectLoader;
+    var map = this._map;
+    var regionConfig = this._regionConfig;
+    var backgroundGrid = this._backgroundGrid;
 
     // TODO in the future this won't have access to map, since map will be loaded
     //      in pieces
+    //      or maybe Region will be given all the objects in that region?
     map.objectlayers.forEach(function(layer) {
       layer.forEach(function(objectConfig) {
         if (!objectConfig.hasType('region') && inRegion(objectConfig)) {

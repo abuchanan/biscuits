@@ -18,7 +18,7 @@
   <object name="Coin 5" type="coin" x="240" y="368" width="32" height="32"/>
   <object name="Coin 6" type="coin" x="368" y="432" width="32" height="32"/>
   <object name="Region 3" type="region" x="32" y="480" width="416" height="608"/>
-  <object name="Region 4" type="region" x="32" y="1088" width="416" height="192"/>
+  <object name="Region 4" type="region, room" x="32" y="1088" width="416" height="192"/>
   <object name="Coin 7" type="coin" x="160" y="1216" width="32" height="32"/>
  </objectgroup>
 </map>

@@ -139,7 +139,7 @@
                     {
 
                     },
-                 "type":"region",
+                 "type":"region, room",
                  "visible":true,
                  "width":416,
                  "x":32,
