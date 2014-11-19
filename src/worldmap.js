@@ -1,3 +1,0 @@
-export {WorldMap};
-
-class WorldMap {}

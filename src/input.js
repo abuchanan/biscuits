@@ -1,52 +1,86 @@
-import {Provide} from 'di';
-import Shortcut from 'lib/Shortcut';
-import {EventEmitter} from 'src/events';
-import {SceneScope} from 'src/scope';
-import {Scene} from 'src/scene';
+define([
+  'lib/Shortcut',
+  'lib/EventEmitter',
+  'utils'
 
-export {KeyboardInput, Input};
+], function(Shortcut, EventEmitter, utils) {
 
+    function Input(scene) {
 
-class Input {
-  constructor() {
-    this.Up = false;
-    this.Down = false;
-    this.Left = false;
-    this.Right = false;
-    this.Use = false;
-    this.Attack = false;
-  }
-}
+        var previous = {};
+        var current = {};
+        var events = new EventEmitter();
 
-class KeyboardInput {
+        scene.events.on('tick', function() {
+          for (var k in previous) {
+            if (!current[k]) {
+              events.trigger('stop ' + k);
+            }
+          }
 
-  constructor(input: Input, shortcutjs: Shortcut) {
+          for (var k in current) {
+            if (!previous[k]) {
+              events.trigger('start ' + k);
+            }
+          }
 
-    var keyDownOptions = {
-      propagate: false,
-    };
+          previous = utils.extend({}, current);
+        });
 
-    var keyUpOptions = {
-      type: 'keyup',
-    };
+        function start(name) {
+          current[name] = true;
+        }
 
-    function add(keyname, eventname) {
-      eventname = eventname || keyname;
+        function stop(name) {
+          if (previous[name]) {
+            delete current[name];
+          }
+        }
 
-      shortcutjs.add(keyname, function() {
-          input[eventname] = true;
-      }, keyDownOptions);
-
-      shortcutjs.add(keyname, function() {
-          input[eventname] = false;
-      }, keyUpOptions);
+        scene.input = {
+            start: start,
+            stop: stop,
+            events: events,
+        };
     }
 
-    add('Up');
-    add('Down');
-    add('Left');
-    add('Right');
-    add('E', 'Use');
-    add('F', 'Attack');
-  }
-}
+
+    function KeyboardInput(scene) {
+
+        var shortcutjs = new Shortcut();
+        var input = scene.input;
+
+        var keyDownOptions = {
+          propagate: false,
+        };
+
+        var keyUpOptions = {
+          type: 'keyup',
+        };
+
+        function add(keyname, eventname) {
+          eventname = eventname || keyname;
+
+          shortcutjs.add(keyname, function() {
+              input.start(eventname);
+          }, keyDownOptions);
+
+          shortcutjs.add(keyname, function() {
+              input.stop(eventname);
+          }, keyUpOptions);
+        }
+
+        add('Up');
+        add('Down');
+        add('Left');
+        add('Right');
+        add('E', 'Use');
+        add('F', 'Attack');
+    }
+
+    // Module exports
+    return {
+        Input: Input,
+        KeyboardInput: KeyboardInput,
+    };
+});

@@ -1,6 +1,0 @@
-var Types = {};
-
-export {
-  Types,
-};
-

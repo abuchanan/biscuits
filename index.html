@@ -3,47 +3,10 @@
   <head>
     <meta charset='utf-8'>
     <title>Biscuits</title>
-    <script src='lib/require.js'></script>
-    <script src='lib/traceur-runtime.js'></script>
   </head>
 
   <body>
     <div id="biscuits-container"></div>
-    <script>
-      var container = document.getElementById("biscuits-container");
-
-      require.config({
-        map: {
-          '*': {
-            'di': 'lib/di.js/index'
-          }
-        },
-
-        callback: function() {
-          require([
-              'src/biscuits',
-              'src/dev',
-              'src/plugins/FPSMeter',
-              'src/plugins/Chest',
-              'src/plugins/Coin',
-              'src/plugins/Jar',
-              'src/plugins/LockedDoor',
-              'src/plugins/Player',
-              'src/plugins/SwitchedDoor',
-              'src/plugins/key',
-              'src/plugins/Room',
-              'src/plugins/wall',
-            ],
-            function(biscuits, dev, fps) {
-              var app = new biscuits.Biscuits({container: container});
-              app.provides(dev.MockLoadpoints);
-              app.dependsOn(dev.mockLoadpointsData);
-              app.dependsOn(fps.FPSMeterPlugin);
-              app.start('default');
-            });
-        }
-      });
-
-    </script>
+    <script data-main='src/dev' src='src/lib/require.js'></script>
   </body>
 </html>

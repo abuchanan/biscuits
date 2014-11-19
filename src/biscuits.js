@@ -1,57 +1,59 @@
-import {Injector} from 'di';
-import {valueProvider} from 'src/utils';
-import {SceneManager} from 'src/scenemanager';
-import {KeyboardInput} from 'src/input';
-import {BiscuitsConfig} from 'src/config';
-import {extend} from 'src/utils';
+define(['lib/EventEmitter', 'lib/lodash'], function(EventEmitter, lodash) {
 
-export {Biscuits};
+    var currentSceneID = 1;
 
+    function Biscuits(loadpoints) {
 
-class Biscuits {
+        var currentScene = undefined;
+        var started = false;
 
-  constructor(config) {
-    this.config = config || {};
-    var provideBiscuitsConfig = valueProvider(BiscuitsConfig, this.config);
-    this._providers = [provideBiscuitsConfig];
-    // TODO Input type should be detected
-    this._deps = [KeyboardInput];
-    this._started = false;
-  }
+        function start(name) {
 
-  config(config) {
-    if (this._started) {
-      throw 'Already started';
+            var loadpoint = loadpoints[name];
+
+            if (!loadpoint) {
+              throw 'Unknown loadpoint: ' + name;
+            }
+
+            var config = loadpoint.config;
+            var plugins = loadpoint.plugins;
+
+            // TODO allow unload to be blocked
+            if (currentScene) {
+              currentScene.events.trigger('unload');
+            }
+
+            currentScene = {
+                ID: currentSceneID++,
+                config: config,
+                events: new EventEmitter(),
+                start: start,
+            };
+
+            for (var i = 0; i < plugins.length; i++) {
+                var plugin = plugins[i];
+                var ret = plugin(currentScene);
+                lodash.merge(currentScene, ret);
+            }
+
+            if (!started) {
+                requestAnimationFrame(tick);
+                started = true;
+            }
+        }
+
+        function tick() {
+          currentScene.events.trigger('tick', [Date.now()]);
+          requestAnimationFrame(tick);
+        }
+
+        // Biscuits public API
+        return {
+          start: start,
+        };
     }
-    extend(this.config, config);
-  }
 
-  provides(...providers) {
-    if (this._started) {
-      throw 'Already started';
-    }
-    this._providers.push.apply(this._providers, providers);
-  }
 
-  dependsOn(...deps) {
-    if (this._started) {
-      throw 'Already started';
-    }
-    this._deps.push.apply(this._deps, deps);
-  }
-
-  start(scene) {
-    if (this._started) {
-      throw 'Already started';
-    }
-
-    this._started = true;
-    var injector = new Injector(this._providers);
-
-    this._deps.forEach((dep) => {
-      injector.get(dep);
-    });
-
-    injector.get(SceneManager).load(scene);
-  }
-}
+    // Module exports
+    return Biscuits;
+});

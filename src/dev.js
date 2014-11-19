@@ -1,31 +1,74 @@
-import {Provide} from 'di';
-import {Loadpoints} from 'src/loadpoints';
-import {WorldSceneLoader} from 'src/worldscene';
+define([
+    'biscuits',
+    'input',
+    'Renderer',
+    'scenes/world/WorldMap',
+    'scenes/world/World',
+    'scenes/world/Background',
+    'scenes/world/player/PlayerBody',
+    'scenes/world/player/actions',
+    'scenes/world/player/PlayerRenderer',
+    'scenes/world/TrackPlayer',
+    'scenes/world/objects/Wall',
+    'scenes/world/objects/Door',
 
-export {
-  MockLoadpoints,
-  mockLoadpointsData
-};
+    'loadpoints',
+    'FPSMeter',
 
+], function(
+    Biscuits,
+    input,
+    Renderer,
+    WorldMap,
+    World,
+    Background,
+    PlayerBody,
+    PlayerActions,
+    PlayerRenderer,
+    TrackPlayer,
+    Wall,
+    Door,
 
-// TODO mock world for debugging only
-@Provide(Loadpoints)
-class MockLoadpoints {
+    loadpointsLoader,
+    FPSMeter
+) {
 
-  constructor() {
-    this.loadpoints = {};
-  }
+    var container = document.getElementById("biscuits-container");
 
-  get(ID) {
-    return this.loadpoints[ID];
-  }
+    var plugins = [
+      input.Input,
+      // TODO Input type should be detected
+      input.KeyboardInput,
 
-  addWorldScene(ID, mapPath, playerConfig) {
-    this.loadpoints[ID] = {mapID: mapPath, loader: WorldSceneLoader, playerConfig};
-  }
-}
+      function(scene) {
+        scene.config.container = container;
+      },
 
-function mockLoadpointsData(loadpoints: Loadpoints) {
-  // TODO important to note that player position is in pixels, not tiles
-  loadpoints.addWorldScene('default', 'maps/regions.json', {x: 224, y: 224});
-}
+      Renderer,
+
+      function(scene) {
+        scene.renderer.addLayers('background', 'objects', 'hud');
+      },
+
+      WorldMap,
+      World,
+
+      Background,
+
+      PlayerBody,
+      PlayerActions,
+      PlayerRenderer,
+
+      TrackPlayer('background', 'objects'),
+
+      Wall,
+      Door,
+
+      FPSMeter,
+    ];
+
+    var loadpoints = loadpointsLoader.load('maps/Level 1.json', plugins);
+    var app = Biscuits(loadpoints);
+
+    app.start('Loadpoint 2a');
+});
