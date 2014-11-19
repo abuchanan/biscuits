@@ -11,6 +11,7 @@ define([
     'scenes/world/TrackPlayer',
     'scenes/world/objects/Wall',
     'scenes/world/objects/Door',
+    'scenes/world/objects/DoorSwitch',
 
     'loadpoints',
     'FPSMeter',
@@ -28,6 +29,7 @@ define([
     TrackPlayer,
     Wall,
     Door,
+    DoorSwitch,
 
     loadpointsLoader,
     FPSMeter
@@ -47,7 +49,7 @@ define([
       Renderer,
 
       function(scene) {
-        scene.renderer.addLayers('background', 'objects', 'hud');
+        scene.renderer.addLayers('background', 'objects', 'player', 'hud');
       },
 
       WorldMap,
@@ -59,10 +61,11 @@ define([
       PlayerActions,
       PlayerRenderer,
 
-      TrackPlayer('background', 'objects'),
+      TrackPlayer('background', 'objects', 'player'),
 
       Wall,
       Door,
+      DoorSwitch,
 
       FPSMeter,
     ];

@@ -36,6 +36,8 @@ define(['lib/EventEmitter', 'lib/lodash'], function(EventEmitter, lodash) {
                 lodash.merge(currentScene, ret);
             }
 
+            currentScene.events.trigger('loaded');
+
             if (!started) {
                 requestAnimationFrame(tick);
                 started = true;

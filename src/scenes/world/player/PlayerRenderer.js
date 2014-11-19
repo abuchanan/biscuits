@@ -13,7 +13,7 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
     // TODO base animationSpeed on movement speed definitions
     clip.animationSpeed = 0.1;
 
-    var layer = scene.renderer.getLayer('objects');
+    var layer = scene.renderer.getLayer('player');
     layer.addChild(clip);
 
 

@@ -1,15 +1,11 @@
 define(['../Body'], function(Body) {
 
-    function handleCollision(body, obj, scene) {
-        body.events.on('player collision', function(playerBody) {
-          scene.start(obj.Destination);
-        });
-    }
 
-    function Door(scene) {
+    function DoorPlugin(scene) {
         var map = scene.map;
         var tileWidth = scene.map.mapData.tilewidth;
         var tileHeight = scene.map.mapData.tileheight;
+        var doors = {};
 
         for (var i = 0, ii = map.objectlayers.length; i < ii; i++) {
             var layer = map.objectlayers[i];
@@ -23,11 +19,74 @@ define(['../Body'], function(Body) {
                   var h = obj.h / tileHeight;
 
                   var body = Body(x, y, w, h, scene.world);
-                  handleCollision(body, obj, scene);
+                  var door = Door(body, obj, scene);
+                  DoorRenderer(door, body, scene);
+                  doors[obj.name] = door;
                 }
             }
         }
+
+        return {
+            doors: doors
+        };
     }
 
-    return Door;
+
+    function Door(body, obj, scene) {
+
+        body.events.on('player collision', function(playerBody) {
+          if (!isLocked()) {
+            scene.start(obj.Destination);
+          }
+        });
+
+        var locks = {};
+
+        function isLocked() {
+            return Object.keys(locks).length > 0;
+        }
+
+        function lock(key) {
+            locks[key] = true;
+            body.isBlock = true;
+        }
+
+        function unlock(key) {
+            delete locks[key];
+            console.log('unlock', locks);
+            if (!isLocked()) {
+                console.log('is unlocked');
+                body.isBlock = false;
+            }
+        }
+
+        return {
+            lock: lock,
+            unlock: unlock,
+            isLocked: isLocked,
+        };
+    }
+
+
+    function DoorRenderer(door, body, scene) {
+
+      var layer = scene.renderer.getLayer('objects');
+      var rect = body.getRectangle();
+      var map = scene.map;
+      var tileWidth = scene.map.mapData.tilewidth;
+      var tileHeight = scene.map.mapData.tileheight;
+
+      var g = scene.renderer.createGraphic();
+      g.beginFill(0xD10000);
+      g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
+                 rect.w * tileWidth, rect.h * tileHeight);
+      g.endFill();
+      layer.addChild(g);
+
+      scene.events.on('tick', function() {
+        g.visible = door.isLocked();
+      });
+    }
+
+    return DoorPlugin;
 });
