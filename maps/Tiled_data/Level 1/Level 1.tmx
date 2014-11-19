@@ -112,7 +112,7 @@
   <object name="Room 7" type="region" x="352" y="64" width="1312" height="160"/>
   <object name="Room 8" type="region" x="352" y="256" width="800" height="480"/>
  </objectgroup>
- <objectgroup name="Doors" visible="0">
+ <objectgroup name="Doors">
   <object name="Room 1 to 2" type="Door" x="1120" y="864" width="32" height="96">
    <properties>
     <property name="Destination" value="Loadpoint 2a"/>
@@ -189,29 +189,147 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup name="Loadpoints" visible="0">
-  <object name="Loadpoint 2a" type="Loadpoint" x="1248" y="896" width="32" height="32"/>
-  <object name="Loadpoint 1b" type="Loadpoint" x="1056" y="896" width="32" height="32"/>
-  <object name="Loadpoint 2b" type="Loadpoint" x="1408" y="832" width="32" height="32"/>
-  <object name="Loadpoint 3a" type="Loadpoint" x="1408" y="640" width="32" height="32"/>
-  <object name="Loadpoint 5a" type="Loadpoint" x="1920" y="832" width="32" height="32"/>
-  <object name="Loadpoint 4c" type="Loadpoint" x="1920" y="640" width="32" height="32"/>
-  <object name="Loadpoint 3b" type="Loadpoint" x="1568" y="480" width="32" height="32"/>
-  <object name="Loadpoint 8a" type="Loadpoint" x="608" y="320" width="32" height="32"/>
-  <object name="Loadpoint 7b" type="Loadpoint" x="608" y="128" width="32" height="32"/>
-  <object name="Loadpoint 7c" type="Loadpoint" x="864" y="128" width="32" height="32"/>
-  <object name="Loadpoint 7a" type="Loadpoint" x="1408" y="128" width="32" height="32"/>
-  <object name="Loadpoint 3c" type="Loadpoint" x="1408" y="320" width="32" height="32"/>
-  <object name="Loadpoint 4a" type="Loadpoint" x="1760" y="480" width="32" height="32"/>
-  <object name="Loadpoint 4b" type="Loadpoint" x="2080" y="480" width="32" height="32"/>
-  <object name="Loadpoint 6a" type="Loadpoint" x="2272" y="480" width="32" height="32"/>
-  <object name="Loadpoint 1a" type="Loadpoint" x="896" y="1472" width="32" height="32"/>
+ <objectgroup name="Loadpoints">
+  <object name="Loadpoint 2a" type="Loadpoint" x="1216" y="896" width="32" height="32">
+   <properties>
+    <property name="direction" value="right"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 1b" type="Loadpoint" x="1088" y="896" width="32" height="32">
+   <properties>
+    <property name="direction" value="left"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 2b" type="Loadpoint" x="1408" y="800" width="32" height="32">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 3a" type="Loadpoint" x="1408" y="672" width="32" height="32">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 5a" type="Loadpoint" x="1920" y="800" width="32" height="32">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 4c" type="Loadpoint" x="1920" y="672" width="32" height="32">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 3b" type="Loadpoint" x="1600" y="480" width="32" height="32">
+   <properties>
+    <property name="direction" value="left"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 8a" type="Loadpoint" x="608" y="288" width="32" height="32">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 7b" type="Loadpoint" x="608" y="160" width="32" height="32">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 7c" type="Loadpoint" x="864" y="160" width="32" height="32">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 7a" type="Loadpoint" x="1408" y="160" width="32" height="32">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 3c" type="Loadpoint" x="1408" y="288" width="32" height="32">
+   <properties>
+    <property name="direction" value="down"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 4a" type="Loadpoint" x="1728" y="480" width="32" height="32">
+   <properties>
+    <property name="direction" value="right"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 4b" type="Loadpoint" x="2112" y="480" width="32" height="32">
+   <properties>
+    <property name="direction" value="left"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 6a" type="Loadpoint" x="2240" y="480" width="32" height="32">
+   <properties>
+    <property name="direction" value="right"/>
+   </properties>
+  </object>
+  <object name="Loadpoint 1a" type="Loadpoint" x="896" y="1472" width="32" height="32">
+   <properties>
+    <property name="direction" value="up"/>
+   </properties>
+  </object>
  </objectgroup>
- <objectgroup name="Walls">
+ <objectgroup name="Walls" visible="0">
   <object type="Wall" x="672" y="768" width="32" height="800"/>
   <object type="Wall" x="672" y="768" width="480" height="32"/>
   <object type="Wall" x="1120" y="768" width="32" height="96"/>
   <object type="Wall" x="1120" y="960" width="32" height="608"/>
   <object type="Wall" x="672" y="1536" width="480" height="32"/>
+  <object type="Wall" x="1184" y="768" width="32" height="96"/>
+  <object type="Wall" x="1184" y="768" width="192" height="32"/>
+  <object type="Wall" x="1472" y="768" width="192" height="32"/>
+  <object type="Wall" x="1632" y="768" width="32" height="480"/>
+  <object type="Wall" x="1184" y="1216" width="480" height="32"/>
+  <object type="Wall" x="1184" y="960" width="32" height="288"/>
+  <object type="Wall" x="1184" y="704" width="192" height="32"/>
+  <object type="Wall" x="1472" y="704" width="192" height="32"/>
+  <object type="Wall" x="1632" y="544" width="32" height="192"/>
+  <object type="Wall" x="1184" y="256" width="32" height="480"/>
+  <object type="Wall" x="1184" y="256" width="192" height="32"/>
+  <object type="Wall" x="1472" y="256" width="192" height="32"/>
+  <object type="Wall" x="1632" y="256" width="32" height="192"/>
+  <object type="Wall" x="1696" y="256" width="480" height="32"/>
+  <object type="Wall" x="2144" y="256" width="32" height="192"/>
+  <object type="Wall" x="2144" y="544" width="32" height="192"/>
+  <object type="Wall" x="1984" y="704" width="192" height="32"/>
+  <object type="Wall" x="1696" y="704" width="192" height="32"/>
+  <object type="Wall" x="1696" y="544" width="32" height="192"/>
+  <object type="Wall" x="1696" y="256" width="32" height="192"/>
+  <object type="Wall" x="1760" y="768" width="128" height="32"/>
+  <object type="Wall" x="1984" y="768" width="128" height="32"/>
+  <object type="Wall" x="2080" y="768" width="32" height="160"/>
+  <object type="Wall" x="1984" y="896" width="128" height="32"/>
+  <object type="Wall" x="1760" y="896" width="128" height="32"/>
+  <object type="Wall" x="1760" y="768" width="32" height="160"/>
+  <object type="Wall" x="1856" y="1216" width="160" height="32"/>
+  <object type="Wall" x="1984" y="896" width="32" height="352"/>
+  <object type="Wall" x="1856" y="896" width="32" height="352"/>
+  <object type="Wall" x="2208" y="256" width="32" height="192"/>
+  <object type="Wall" x="2208" y="256" width="640" height="32"/>
+  <object type="Wall" x="2816" y="256" width="32" height="480"/>
+  <object type="Wall" x="2208" y="704" width="640" height="32"/>
+  <object type="Wall" x="2208" y="544" width="32" height="192"/>
+  <object type="Wall" x="672" y="192" width="704" height="32"/>
+  <object type="Wall" x="1472" y="192" width="192" height="32"/>
+  <object type="Wall" x="1632" y="64" width="32" height="160"/>
+  <object type="Wall" x="352" y="64" width="32" height="160"/>
+  <object type="Wall" x="352" y="192" width="224" height="32"/>
+  <object type="Wall" x="352" y="64" width="1312" height="32"/>
+  <object type="Wall" x="768" y="256" width="64" height="32"/>
+  <object type="Wall" x="928" y="256" width="224" height="32"/>
+  <object type="Wall" x="1120" y="256" width="32" height="480"/>
+  <object type="Wall" x="768" y="256" width="32" height="128"/>
+  <object type="Wall" x="768" y="352" width="288" height="32"/>
+  <object type="Wall" x="1024" y="352" width="32" height="288"/>
+  <object type="Wall" x="448" y="608" width="608" height="32"/>
+  <object type="Wall" x="448" y="352" width="32" height="288"/>
+  <object type="Wall" x="448" y="352" width="288" height="32"/>
+  <object type="Wall" x="672" y="256" width="64" height="32"/>
+  <object type="Wall" x="704" y="256" width="32" height="128"/>
+  <object type="Wall" x="352" y="256" width="224" height="32"/>
+  <object type="Wall" x="352" y="256" width="32" height="480"/>
+  <object type="Wall" x="352" y="704" width="800" height="32"/>
  </objectgroup>
 </map>

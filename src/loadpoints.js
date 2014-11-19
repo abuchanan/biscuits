@@ -21,7 +21,7 @@ define(['scenes/world/map/loaders/TiledJSON'], function(loader) {
           loadpoints[obj.name] = {
             config: {
               mapID: mapID,
-              initialPlayerPosition: {x: x, y: y},
+              initialPlayerPosition: {x: x, y: y, direction: obj.direction},
             },
             plugins: plugins,
           };

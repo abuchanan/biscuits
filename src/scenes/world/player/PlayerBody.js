@@ -61,6 +61,7 @@ define(['../Body', 'utils'], function(Body, utils) {
     var position = scene.config.initialPlayerPosition;
     var world = scene.world;
     var body = PlayerBody(position.x, position.y, world);
+    body.direction = position.direction;
 
     return {
       player: {

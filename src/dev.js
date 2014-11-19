@@ -70,5 +70,5 @@ define([
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', plugins);
     var app = Biscuits(loadpoints);
 
-    app.start('Loadpoint 2a');
+    app.start('Loadpoint 1a');
 });
