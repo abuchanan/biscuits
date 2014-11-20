@@ -82,7 +82,9 @@ define([
           console.log('attack!', hits);
 
           for (var i = 0, ii = hits.length; i < ii; i++) {
-              hits[i].events.trigger('hit', [body]);
+              if (hits[i] !== body) {
+                  hits[i].events.trigger('hit', [body]);
+              }
           }
 
           return action;
