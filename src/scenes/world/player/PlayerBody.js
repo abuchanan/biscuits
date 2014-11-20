@@ -49,7 +49,6 @@ define(['../Body', 'utils'], function(Body, utils) {
 
     utils.extend(body, {
       setPosition: setPosition,
-      direction: 'down',
     });
 
     return body;

@@ -339,4 +339,7 @@
    </properties>
   </object>
  </objectgroup>
+ <objectgroup name="Squirrels">
+  <object type="Squirrel" x="1024" y="1376" width="32" height="32"/>
+ </objectgroup>
 </map>

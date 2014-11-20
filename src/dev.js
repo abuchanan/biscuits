@@ -4,6 +4,9 @@ define([
     'Renderer',
     'scenes/world/WorldMap',
     'scenes/world/World',
+
+    'scenes/world/pathfinding/Pathfinding',
+
     'scenes/world/Background',
     'scenes/world/player/PlayerBody',
     'scenes/world/player/actions',
@@ -12,6 +15,7 @@ define([
     'scenes/world/objects/Wall',
     'scenes/world/objects/Door',
     'scenes/world/objects/DoorSwitch',
+    'scenes/world/objects/squirrel/Squirrel',
 
     'loadpoints',
     'FPSMeter',
@@ -22,6 +26,9 @@ define([
     Renderer,
     WorldMap,
     World,
+
+    Pathfinding,
+
     Background,
     PlayerBody,
     PlayerActions,
@@ -30,6 +37,7 @@ define([
     Wall,
     Door,
     DoorSwitch,
+    Squirrel,
 
     loadpointsLoader,
     FPSMeter
@@ -55,6 +63,8 @@ define([
       WorldMap,
       World,
 
+      Pathfinding,
+
       Background,
 
       PlayerBody,
@@ -66,6 +76,7 @@ define([
       Wall,
       Door,
       DoorSwitch,
+      Squirrel,
 
       FPSMeter,
     ];

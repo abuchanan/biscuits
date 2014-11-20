@@ -5,7 +5,6 @@ define(['lib/EventEmitter'], function(EventEmitter) {
 
   function Body(_x, _y, _w, _h, world) {
     var events = new EventEmitter();
-    var isBlock = false;
     // TODO hard-coded
     var x = _x;
     var y = _y;
@@ -45,7 +44,8 @@ define(['lib/EventEmitter'], function(EventEmitter) {
       getPosition: getPosition,
       setPosition: setPosition,
       getRectangle: getRectangle,
-      isBlock: isBlock,
+      isBlock: false,
+      direction: 'down',
       events: events,
       remove: remove,
       data: {},

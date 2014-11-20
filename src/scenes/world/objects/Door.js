@@ -53,9 +53,7 @@ define(['../Body'], function(Body) {
 
         function unlock(key) {
             delete locks[key];
-            console.log('unlock', locks);
             if (!isLocked()) {
-                console.log('is unlocked');
                 body.isBlock = false;
             }
         }

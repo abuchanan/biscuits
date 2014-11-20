@@ -1,7 +1,8 @@
-define(['./QuadTree'], function(QuadTree) {
+define(['./QuadTree', 'lib/EventEmitter'], function(QuadTree, EventEmitter) {
 
   function World(x, y, w, h) {
     var tree = new QuadTree(x, y, w, h);
+    var events = new EventEmitter();
     var objects = {};
 
     function query(x, y, w, h) {
@@ -9,18 +10,22 @@ define(['./QuadTree'], function(QuadTree) {
       return getObjects(IDs);
     }
 
-    // TODO? findPath() {}
-
     function add(body) {
       var bodyID = body.getID();
       objects[bodyID] = body;
       var rect = body.getRectangle();
       tree.add(rect.x, rect.y, rect.w, rect.h, bodyID);
+      events.trigger('add', [body]);
     }
 
     function remove(body) {
       tree.remove(body.getID());
+      events.trigger('remove', [body]);
     }
+
+    function getRectangle() {
+      return {x: x, y: y, w: w, h: h};
+    };
 
     /*
       Internal helper for turning a list of IDs
@@ -42,6 +47,8 @@ define(['./QuadTree'], function(QuadTree) {
       query: query,
       add: add,
       remove: remove,
+      events: events,
+      getRectangle: getRectangle,
     };
   }
 
@@ -50,10 +57,9 @@ define(['./QuadTree'], function(QuadTree) {
   return function(scene) {
 
       var map = scene.map.mapData;
-      scene.world = World(0, 0,
-          map.width * map.tilewidth,
-          map.height * map.tileheight
-      );
+      // TODO this is getting the whole map, not just the current region
+      console.log('foo', map.width, map.height);
+      scene.world = World(0, 0, map.width, map.height);
   };
 });
 

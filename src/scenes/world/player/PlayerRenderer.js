@@ -24,6 +24,7 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
         //      into discrete pieces. i.e. make action/movement rendering
         //      pluggable
         if (action && action.isMovement) {
+
             var textureName = action.name;
             clip.textures = textures[textureName];
             clip.play();
