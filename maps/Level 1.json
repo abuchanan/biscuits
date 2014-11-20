@@ -1475,6 +1475,62 @@
                  "width":32,
                  "x":1024,
                  "y":1376
+                }, 
+                {
+                 "height":32,
+                 "name":"",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"Squirrel",
+                 "visible":true,
+                 "width":32,
+                 "x":1280,
+                 "y":1152
+                }, 
+                {
+                 "height":32,
+                 "name":"",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"Squirrel",
+                 "visible":true,
+                 "width":32,
+                 "x":1536,
+                 "y":1152
+                }, 
+                {
+                 "height":32,
+                 "name":"",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"Squirrel",
+                 "visible":true,
+                 "width":32,
+                 "x":1280,
+                 "y":832
+                }, 
+                {
+                 "height":32,
+                 "name":"",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"Squirrel",
+                 "visible":true,
+                 "width":32,
+                 "x":1536,
+                 "y":832
                 }],
          "opacity":1,
          "type":"objectgroup",

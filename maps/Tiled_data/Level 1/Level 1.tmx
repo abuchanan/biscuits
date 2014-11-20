@@ -341,5 +341,9 @@
  </objectgroup>
  <objectgroup name="Squirrels">
   <object type="Squirrel" x="1024" y="1376" width="32" height="32"/>
+  <object type="Squirrel" x="1280" y="1152" width="32" height="32"/>
+  <object type="Squirrel" x="1536" y="1152" width="32" height="32"/>
+  <object type="Squirrel" x="1280" y="832" width="32" height="32"/>
+  <object type="Squirrel" x="1536" y="832" width="32" height="32"/>
  </objectgroup>
 </map>
