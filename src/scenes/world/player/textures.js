@@ -8,57 +8,57 @@ define(['sprites'], function(sprites) {
 
   // TODO define this stuff in JSON. build a tool to help build these texture packs.
   return {
-    'stop-up': [
-      parts['up-0'],
+    'stop-north': [
+      parts['north-0'],
     ],
-    'stop-down': [
-      parts['down-0'],
+    'stop-south': [
+      parts['south-0'],
     ],
-    'stop-left': [
-      parts['left-0'],
+    'stop-west': [
+      parts['west-0'],
     ],
-    'stop-right': [
-      parts['right-0'],
+    'stop-east': [
+      parts['east-0'],
     ],
-    'walk-up': [
-      parts['up-0'],
-      parts['up-1'],
-      parts['up-2'],
-      parts['up-3'],
-      parts['up-4'],
+    'walk-north': [
+      parts['north-0'],
+      parts['north-1'],
+      parts['north-2'],
+      parts['north-3'],
+      parts['north-4'],
     ],
-    'walk-down': [
-      parts['down-0'],
-      parts['down-1'],
-      parts['down-2'],
-      parts['down-3'],
-      parts['down-4'],
+    'walk-south': [
+      parts['south-0'],
+      parts['south-1'],
+      parts['south-2'],
+      parts['south-3'],
+      parts['south-4'],
     ],
-    'walk-right': [
-      parts['right-0'],
-      parts['right-1'],
-      parts['right-2'],
-      parts['right-1'],
-      parts['right-3'],
+    'walk-east': [
+      parts['east-0'],
+      parts['east-1'],
+      parts['east-2'],
+      parts['east-1'],
+      parts['east-3'],
     ],
-    'walk-left': [
-      parts['left-0'],
-      parts['left-1'],
-      parts['left-2'],
-      parts['left-1'],
-      parts['left-3'],
+    'walk-west': [
+      parts['west-0'],
+      parts['west-1'],
+      parts['west-2'],
+      parts['west-1'],
+      parts['west-3'],
     ],
-    'sword-up': [
-      parts['sword-up-0'],
+    'sword-north': [
+      parts['sword-north-0'],
     ],
-    'sword-down': [
-      parts['sword-down-0'],
+    'sword-south': [
+      parts['sword-south-0'],
     ],
-    'sword-left': [
-      parts['sword-left-0'],
+    'sword-west': [
+      parts['sword-west-0'],
     ],
-    'sword-right': [
-      parts['sword-right-0'],
+    'sword-east': [
+      parts['sword-east-0'],
     ],
   };
 

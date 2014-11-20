@@ -15,13 +15,13 @@ define(['sprites'], function(sprites) {
     }
 
     return {
-      'idle-up': getSequence('idle-up', 8),
-      'idle-down': getSequence('idle-down', 8),
-      'idle-left': getSequence('idle-left', 8),
-      'idle-right': getSequence('idle-right', 8),
-      'walk-up': getSequence('move-up', 3),
-      'walk-down': getSequence('move-down', 3),
-      'walk-left': getSequence('move-left', 3),
-      'walk-right': getSequence('move-right', 3),
+      'idle-north': getSequence('idle-north', 8),
+      'idle-south': getSequence('idle-south', 8),
+      'idle-west': getSequence('idle-west', 8),
+      'idle-east': getSequence('idle-east', 8),
+      'walk-north': getSequence('move-north', 3),
+      'walk-south': getSequence('move-south', 3),
+      'walk-west': getSequence('move-west', 3),
+      'walk-east': getSequence('move-east', 3),
     };
 });

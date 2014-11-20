@@ -3,7 +3,7 @@ define(['lib/pixi', './textures'], function(PIXI, textures) {
 
     function SquirrelRenderer(scene, body, actionManager) {
 
-        var clip = new PIXI.MovieClip(textures['idle-left']);
+        var clip = new PIXI.MovieClip(textures['idle-west']);
 
         var tileWidth = scene.map.mapData.tilewidth;
         var tileHeight = scene.map.mapData.tileheight;

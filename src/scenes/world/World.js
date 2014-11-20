@@ -5,8 +5,8 @@ define(['./QuadTree', 'lib/EventEmitter'], function(QuadTree, EventEmitter) {
     var events = new EventEmitter();
     var objects = {};
 
-    function query(x, y, w, h) {
-      var IDs = tree.query(x, y, w, h);
+    function query(bb) {
+      var IDs = tree.query(bb.x, bb.y, bb.w, bb.h);
       return getObjects(IDs);
     }
 

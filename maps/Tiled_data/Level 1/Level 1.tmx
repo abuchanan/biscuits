@@ -192,82 +192,82 @@
  <objectgroup name="Loadpoints">
   <object name="Loadpoint 2a" type="Loadpoint" x="1216" y="896" width="32" height="32">
    <properties>
-    <property name="direction" value="right"/>
+    <property name="direction" value="east"/>
    </properties>
   </object>
   <object name="Loadpoint 1b" type="Loadpoint" x="1088" y="896" width="32" height="32">
    <properties>
-    <property name="direction" value="left"/>
+    <property name="direction" value="west"/>
    </properties>
   </object>
   <object name="Loadpoint 2b" type="Loadpoint" x="1408" y="800" width="32" height="32">
    <properties>
-    <property name="direction" value="down"/>
+    <property name="direction" value="south"/>
    </properties>
   </object>
   <object name="Loadpoint 3a" type="Loadpoint" x="1408" y="672" width="32" height="32">
    <properties>
-    <property name="direction" value="up"/>
+    <property name="direction" value="north"/>
    </properties>
   </object>
   <object name="Loadpoint 5a" type="Loadpoint" x="1920" y="800" width="32" height="32">
    <properties>
-    <property name="direction" value="down"/>
+    <property name="direction" value="south"/>
    </properties>
   </object>
   <object name="Loadpoint 4c" type="Loadpoint" x="1920" y="672" width="32" height="32">
    <properties>
-    <property name="direction" value="up"/>
+    <property name="direction" value="north"/>
    </properties>
   </object>
   <object name="Loadpoint 3b" type="Loadpoint" x="1600" y="480" width="32" height="32">
    <properties>
-    <property name="direction" value="left"/>
+    <property name="direction" value="west"/>
    </properties>
   </object>
   <object name="Loadpoint 8a" type="Loadpoint" x="608" y="288" width="32" height="32">
    <properties>
-    <property name="direction" value="down"/>
+    <property name="direction" value="south"/>
    </properties>
   </object>
   <object name="Loadpoint 7b" type="Loadpoint" x="608" y="160" width="32" height="32">
    <properties>
-    <property name="direction" value="up"/>
+    <property name="direction" value="north"/>
    </properties>
   </object>
   <object name="Loadpoint 7c" type="Loadpoint" x="864" y="160" width="32" height="32">
    <properties>
-    <property name="direction" value="up"/>
+    <property name="direction" value="north"/>
    </properties>
   </object>
   <object name="Loadpoint 7a" type="Loadpoint" x="1408" y="160" width="32" height="32">
    <properties>
-    <property name="direction" value="up"/>
+    <property name="direction" value="north"/>
    </properties>
   </object>
   <object name="Loadpoint 3c" type="Loadpoint" x="1408" y="288" width="32" height="32">
    <properties>
-    <property name="direction" value="down"/>
+    <property name="direction" value="south"/>
    </properties>
   </object>
   <object name="Loadpoint 4a" type="Loadpoint" x="1728" y="480" width="32" height="32">
    <properties>
-    <property name="direction" value="right"/>
+    <property name="direction" value="east"/>
    </properties>
   </object>
   <object name="Loadpoint 4b" type="Loadpoint" x="2112" y="480" width="32" height="32">
    <properties>
-    <property name="direction" value="left"/>
+    <property name="direction" value="west"/>
    </properties>
   </object>
   <object name="Loadpoint 6a" type="Loadpoint" x="2240" y="480" width="32" height="32">
    <properties>
-    <property name="direction" value="right"/>
+    <property name="direction" value="east"/>
    </properties>
   </object>
   <object name="Loadpoint 1a" type="Loadpoint" x="896" y="1472" width="32" height="32">
    <properties>
-    <property name="direction" value="up"/>
+    <property name="direction" value="north"/>
    </properties>
   </object>
  </objectgroup>

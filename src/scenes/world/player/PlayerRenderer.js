@@ -2,7 +2,7 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
 
   function PlayerRenderer(scene) {
 
-    var clip = new PIXI.MovieClip(textures['stop-down']);
+    var clip = new PIXI.MovieClip(textures['stop-south']);
 
     var tileWidth = scene.map.mapData.tilewidth;
     var tileHeight = scene.map.mapData.tileheight;

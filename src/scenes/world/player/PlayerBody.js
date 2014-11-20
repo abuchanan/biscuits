@@ -22,7 +22,9 @@ define(['../Body', 'utils'], function(Body, utils) {
     function isBlocked(x, y) {
         // TODO extract to world.containsBlock()?
         var rect = body.getRectangle();
-        var bodies = world.query(x, y, rect.w, rect.h);
+        rect.x = x;
+        rect.y = y;
+        var bodies = world.query(rect);
         var blocks = [];
 
         // Check if the next tile is blocked.
@@ -37,7 +39,7 @@ define(['../Body', 'utils'], function(Body, utils) {
 
     function triggerCollisions() {
         var rect = body.getRectangle();
-        var bodies = world.query(rect.x, rect.y, rect.w, rect.h);
+        var bodies = world.query(rect);
 
         for (var i = 0, ii = bodies.length; i < ii; i++) {
           if (bodies[i].getID() !== body.getID()) {
@@ -49,6 +51,7 @@ define(['../Body', 'utils'], function(Body, utils) {
 
     utils.extend(body, {
       setPosition: setPosition,
+      isPlayer: true,
     });
 
     return body;

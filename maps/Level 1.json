@@ -367,7 +367,7 @@
                  "name":"Loadpoint 2a",
                  "properties":
                     {
-                     "direction":"right"
+                     "direction":"east"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -381,7 +381,7 @@
                  "name":"Loadpoint 1b",
                  "properties":
                     {
-                     "direction":"left"
+                     "direction":"west"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -395,7 +395,7 @@
                  "name":"Loadpoint 2b",
                  "properties":
                     {
-                     "direction":"down"
+                     "direction":"south"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -409,7 +409,7 @@
                  "name":"Loadpoint 3a",
                  "properties":
                     {
-                     "direction":"up"
+                     "direction":"north"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -423,7 +423,7 @@
                  "name":"Loadpoint 5a",
                  "properties":
                     {
-                     "direction":"down"
+                     "direction":"south"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -437,7 +437,7 @@
                  "name":"Loadpoint 4c",
                  "properties":
                     {
-                     "direction":"up"
+                     "direction":"north"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -451,7 +451,7 @@
                  "name":"Loadpoint 3b",
                  "properties":
                     {
-                     "direction":"left"
+                     "direction":"west"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -465,7 +465,7 @@
                  "name":"Loadpoint 8a",
                  "properties":
                     {
-                     "direction":"down"
+                     "direction":"south"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -479,7 +479,7 @@
                  "name":"Loadpoint 7b",
                  "properties":
                     {
-                     "direction":"up"
+                     "direction":"north"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -493,7 +493,7 @@
                  "name":"Loadpoint 7c",
                  "properties":
                     {
-                     "direction":"up"
+                     "direction":"north"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -507,7 +507,7 @@
                  "name":"Loadpoint 7a",
                  "properties":
                     {
-                     "direction":"up"
+                     "direction":"north"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -521,7 +521,7 @@
                  "name":"Loadpoint 3c",
                  "properties":
                     {
-                     "direction":"down"
+                     "direction":"south"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -535,7 +535,7 @@
                  "name":"Loadpoint 4a",
                  "properties":
                     {
-                     "direction":"right"
+                     "direction":"east"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -549,7 +549,7 @@
                  "name":"Loadpoint 4b",
                  "properties":
                     {
-                     "direction":"left"
+                     "direction":"west"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -563,7 +563,7 @@
                  "name":"Loadpoint 6a",
                  "properties":
                     {
-                     "direction":"right"
+                     "direction":"east"
                     },
                  "rotation":0,
                  "type":"Loadpoint",
@@ -577,7 +577,7 @@
                  "name":"Loadpoint 1a",
                  "properties":
                     {
-                     "direction":"up"
+                     "direction":"north"
                     },
                  "rotation":0,
                  "type":"Loadpoint",

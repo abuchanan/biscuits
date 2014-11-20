@@ -18,13 +18,13 @@ define(function() {
                     var dy = next.y - pos.y;
 
                     if (dy == -1) {
-                      actions.moveManager.start(actions.walk.up);
+                      actions.moveManager.start(actions.walk.north);
                     } else if (dy == 1) {
-                      actions.moveManager.start(actions.walk.down);
+                      actions.moveManager.start(actions.walk.south);
                     } else if (dx == -1) {
-                      actions.moveManager.start(actions.walk.left);
+                      actions.moveManager.start(actions.walk.west);
                     } else if (dx == 1) {
-                      actions.moveManager.start(actions.walk.right);
+                      actions.moveManager.start(actions.walk.east);
                     }
                 }
             }

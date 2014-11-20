@@ -24,30 +24,30 @@ define([
 
       var actions = {
           walk: {
-              up: Movement({
-                  name: 'walk-up',
-                  direction: 'up',
+              north: Movement({
+                  name: 'walk-north',
+                  direction: 'north',
                   deltaY: -1,
                   duration: 250,
               }),
 
-              down: Movement({
-                  name: 'walk-down',
-                  direction: 'down',
+              south: Movement({
+                  name: 'walk-south',
+                  direction: 'south',
                   deltaY: 1,
                   duration: 250,
               }),
 
-              right: Movement({
-                  name: 'walk-right',
-                  direction: 'right',
+              east: Movement({
+                  name: 'walk-east',
+                  direction: 'east',
                   deltaX: 1,
                   duration: 250,
               }),
 
-              left: Movement({
-                  name: 'walk-left',
-                  direction: 'left',
+              west: Movement({
+                  name: 'walk-west',
+                  direction: 'west',
                   deltaX: -1,
                   duration: 250,
               }),

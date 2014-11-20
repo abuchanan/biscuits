@@ -18,52 +18,52 @@ define([
 
       var actions = {
           walk: {
-              up: Movement({
-                  name: 'walk-up',
-                  direction: 'up',
+              north: Movement({
+                  name: 'walk-north',
+                  direction: 'north',
                   deltaY: -1,
                   duration: 250,
                   loop: true,
               }),
 
-              down: Movement({
-                  name: 'walk-down',
-                  direction: 'down',
+              south: Movement({
+                  name: 'walk-south',
+                  direction: 'south',
                   deltaY: 1,
                   duration: 250,
                   loop: true,
               }),
 
-              right: Movement({
-                  name: 'walk-right',
-                  direction: 'right',
+              east: Movement({
+                  name: 'walk-east',
+                  direction: 'east',
                   deltaX: 1,
                   duration: 250,
                   loop: true,
               }),
 
-              left: Movement({
-                  name: 'walk-left',
-                  direction: 'left',
+              west: Movement({
+                  name: 'walk-west',
+                  direction: 'west',
                   deltaX: -1,
                   duration: 250,
                   loop: true,
               }),
           },
-          attack: Attack(body),
+          attack: Attack(scene.world, body),
       };
 
-      bindInput('Up', actions.walk.up);
-      bindInput('Down', actions.walk.down);
-      bindInput('Left', actions.walk.left);
-      bindInput('Right', actions.walk.right);
+      bindInput('Up', actions.walk.north);
+      bindInput('Down', actions.walk.south);
+      bindInput('Left', actions.walk.west);
+      bindInput('Right', actions.walk.east);
       bindInput('Attack', actions.attack);
 
       return actionManager;
   };
 
 
-  function Attack(body, config) {
+  function Attack(world, body, config) {
 
       var defaults = {
           name: 'attack',
@@ -75,7 +75,9 @@ define([
 
       return function() {
           var action = makeAction();
-          var hits = body.queryFront();
+          var bb = body.getRectangle();
+          bb.extend('forward', 1);
+          var hits = world.query(bb);
 
           console.log('attack!', hits);
 
