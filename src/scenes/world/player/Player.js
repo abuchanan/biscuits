@@ -16,12 +16,13 @@ define([
       var renderable = PlayerRenderer(scene);
       var actionManager = PlayerActions(body, scene.input, scene);
 
-      PlayerLife(body);
+      var life = PlayerLife(scene, body);
 
       scene.player = {
         body: body,
         renderable: renderable,
         actionManager: actionManager,
+        life: life,
       };
     }
 

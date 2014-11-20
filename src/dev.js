@@ -19,6 +19,7 @@ define([
 
     'loadpoints',
     'FPSMeter',
+    'Dead',
 
 ], function(
     Biscuits,
@@ -40,7 +41,8 @@ define([
     Squirrel,
 
     loadpointsLoader,
-    FPSMeter
+    FPSMeter,
+    Dead
 ) {
 
     var container = document.getElementById("biscuits-container");
@@ -80,6 +82,24 @@ define([
     ];
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', plugins);
+
+    loadpoints['dead'] = {
+      config: {},
+      plugins: [
+
+        input.Input,
+        // TODO Input type should be detected
+        input.KeyboardInput,
+
+        function(scene) {
+          scene.config.container = container;
+        },
+
+        Renderer,
+        Dead
+      ],
+    };
+
     var app = Biscuits(loadpoints);
 
     app.start('Loadpoint 1a');
