@@ -27,7 +27,7 @@ define(function() {
   function BoundingBox(x, y, w, h, boxDirection) {
 
     function tryAlias(d) {
-      return directionAliases[boxDirection + '-' + d] || d;
+      return directionAliases[d + '-' + boxDirection] || d;
     }
 
     function move(moveDirection, distance) {
@@ -61,7 +61,8 @@ define(function() {
 
       switch (extendDirection) {
         case 'north':
-          bb.h -= distance;
+          bb.y -= distance;
+          bb.h += distance;
           break;
 
         case 'south':
@@ -69,7 +70,8 @@ define(function() {
           break;
 
         case 'west':
-          bb.w -= distance;
+          bb.x -= distance;
+          bb.w += distance;
           break;
 
         case 'east':
