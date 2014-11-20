@@ -31,7 +31,7 @@ define([
 
     function Squirrel(scene, x, y, w, h) {
 
-        var body = Body(x, y, w, h, scene.world);
+        var body = Body(x, y, w, h, false, scene.world);
         var actions = SquirrelActions(scene, body);
         var renderer = SquirrelRenderer(scene, body, actions.moveManager);
         var driver = SquirrelDriver(scene, body, actions);

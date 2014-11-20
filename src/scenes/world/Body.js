@@ -3,7 +3,7 @@ define(['lib/EventEmitter', './BoundingBox'], function(EventEmitter, BoundingBox
   var currentBodyID = 1;
 
 
-  function Body(_x, _y, _w, _h, world) {
+  function Body(_x, _y, _w, _h, isBlock, world) {
     var events = new EventEmitter();
     var x = _x;
     var y = _y;
@@ -44,7 +44,7 @@ define(['lib/EventEmitter', './BoundingBox'], function(EventEmitter, BoundingBox
       getPosition: getPosition,
       setPosition: setPosition,
       getRectangle: getRectangle,
-      isBlock: false,
+      isBlock: function() { return isBlock; },
       direction: 'south',
       events: events,
       remove: remove,

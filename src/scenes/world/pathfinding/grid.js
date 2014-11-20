@@ -19,15 +19,14 @@ define(function() {
             }
         }
 
-        // TODO body.isBlock can change, which doesn't update here
         world.events.on('add', function(body) {
-            if (body.isBlock) {
+            if (body.isBlock()) {
                 updateGrid(body.getRectangle(), 1);
             }
         });
 
         world.events.on('remove', function(body) {
-            if (body.isBlock) {
+            if (body.isBlock()) {
                 updateGrid(body.getRectangle(), -1);
             }
         });

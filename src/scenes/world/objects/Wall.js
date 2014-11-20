@@ -14,8 +14,7 @@ define(['../Body'], function(Body) {
                   var y = obj.y / tileHeight;
                   var w = obj.w / tileWidth;
                   var h = obj.h / tileHeight;
-                  var body = Body(x, y, w, h, scene.world);
-                  body.isBlock = true;
+                  var body = Body(x, y, w, h, true, scene.world);
                 }
             }
         }

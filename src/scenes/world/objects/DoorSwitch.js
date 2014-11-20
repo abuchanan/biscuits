@@ -31,7 +31,7 @@ define(['../Body'], function(Body) {
                     var y = obj.y / tileHeight;
                     var w = obj.w / tileWidth;
                     var h = obj.h / tileHeight;
-                    var body = Body(x, y, w, h, scene.world);
+                    var body = Body(x, y, w, h, false, scene.world);
                     var renderer = DoorSwitchRenderer(scene, body);
                     configureLock(obj, body, renderer);
                 }

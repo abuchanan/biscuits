@@ -18,7 +18,7 @@ define(['../Body'], function(Body) {
                   var w = obj.w / tileWidth;
                   var h = obj.h / tileHeight;
 
-                  var body = Body(x, y, w, h, scene.world);
+                  var body = Body(x, y, w, h, true, scene.world);
                   var door = Door(body, obj, scene);
                   DoorRenderer(door, body, scene);
                   doors[obj.name] = door;
@@ -46,14 +46,10 @@ define(['../Body'], function(Body) {
 
         function lock(key) {
             locks[key] = true;
-            body.isBlock = true;
         }
 
         function unlock(key) {
             delete locks[key];
-            if (!isLocked()) {
-                body.isBlock = false;
-            }
         }
 
         return {

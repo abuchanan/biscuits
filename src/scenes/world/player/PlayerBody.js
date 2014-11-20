@@ -1,7 +1,7 @@
 define(['../Body', 'utils'], function(Body, utils) {
 
   function PlayerBody(x, y, world) {
-    var body = Body(x, y, 1, 1, world);
+    var body = Body(x, y, 1, 1, false, world);
     var originalSetPosition = body.setPosition;
 
     function setPosition(x, y) {
@@ -29,7 +29,7 @@ define(['../Body', 'utils'], function(Body, utils) {
 
         // Check if the next tile is blocked.
         for (var i = 0, ii = bodies.length; i < ii; i++) {
-          if (bodies[i].getID() !== body.getID() && bodies[i].isBlock) {
+          if (bodies[i].getID() !== body.getID() && bodies[i].isBlock()) {
             blocks.push(bodies[i]);
           }
         }
