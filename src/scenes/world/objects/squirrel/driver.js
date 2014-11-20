@@ -1,10 +1,12 @@
-define(function() {
+define(['lib/EventEmitter'], function(EventEmitter) {
 
-    function SquirrelDriver(scene, body, actions) {
+    function SquirrelPathDriver(scene, body, actions) {
+
         var path;
+        var events = new EventEmitter();
 
-        function onLoad() {
-            path = scene.findPath({x: 32, y: 43}, {x: 23, y: 27});
+        function setDestination(dest) {
+            path = scene.findPath(body.getRectangle(), dest);
         }
 
         function update() {
@@ -12,6 +14,8 @@ define(function() {
                 var action = actions.moveManager.getCurrentAction();
 
                 if (!action) {
+                    // TODO should pathfinder just return an array of deltas?
+                    //      instead of an array of positions?
                     var pos = body.getPosition();
                     var next = path.shift();
                     var dx = next.x - pos.x;
@@ -27,17 +31,54 @@ define(function() {
                       actions.moveManager.start(actions.walk.east);
                     }
                 }
+            } else {
+                events.trigger('done');
             }
         }
 
         // Need a better way to listen for events that doesn't leak
         // memory when you forget to remove the handlers
-        scene.events.on('loaded', onLoad);
         scene.events.on('tick', update);
 
         function destroy() {
-            scene.events.off('loaded', onLoad);
             scene.events.off('tick', update);
+        }
+
+        return {
+            setDestination: setDestination,
+            events: events,
+            destroy: destroy,
+        };
+    }
+
+
+     // TODO sporadic animation. a squirrel isn't a fluid animation loop.
+    function SquirrelSporadicDriver(scene, body, actions) {
+
+        var driver = SquirrelPathDriver(scene, body, actions);
+
+        function randomDestination() {
+            var radius = 5;
+            var bb = body.getRectangle();
+
+            return {
+                x: bb.x + Math.floor(Math.random() * radius * 2) - radius,
+                y: bb.y + Math.floor(Math.random() * radius * 2) - radius,
+            };
+        }
+
+        driver.events.on('done', function() {
+            if (Math.random() < 0.25) {
+              var dest = randomDestination();
+              driver.setDestination(dest);
+            } else {
+              actions.moveManager.start(actions.stay);
+            }
+            
+        });
+
+        function destroy() {
+            driver.destroy();
         }
 
         return {
@@ -45,13 +86,11 @@ define(function() {
         };
     }
 
-    return SquirrelDriver;
+
+    return SquirrelSporadicDriver;
 });
-// TODO sporadic animation. a squirrel isn't a fluid animation loop.
 
 
-/*
-function SquirrelDriver(scene: Scene, actions: SquirrelActions) {
 
     // TODO I think that simplicity in destroying an object is really interesting,
     //      particularly when it comes to callback functions like this. Currently,
@@ -78,29 +117,3 @@ function SquirrelDriver(scene: Scene, actions: SquirrelActions) {
     //
     //      Could also consider using something like WeakMap to track event listeners?
     //      Won't have reasonable browser support for a long time though.
-    var noop = function() {};
-    var choices = [
-      actions.walkUp,
-      actions.walkDown,
-      actions.walkLeft,
-      actions.walkRight,
-    ];
-
-    scene.events.on('tick', function() {
-      var state = actions.manager.getState();
-
-      if (state.action == 'stop') {
-        if (Math.random() > 0.95) {
-          var i = Math.floor(Math.random() * choices.length);
-          var move = choices[i];
-          actions.manager.start(move);
-        } else {
-          actions.manager.stopAll();
-        }
-      } else {
-        actions.manager.stopAll();
-      }
-    });
-}
-
-*/

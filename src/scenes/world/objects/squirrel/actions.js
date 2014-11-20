@@ -53,6 +53,8 @@ define([
               }),
           },
 
+          stay: Action({name: 'stop-south', duration: 2000}),
+
           hitPlayer: HitPlayer(scene.player),
 
           hitManager: hitManager,
