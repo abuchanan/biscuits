@@ -1,23 +1,14 @@
-import PIXI from 'lib/pixi';
-import {SceneScope} from 'src/scope';
-import {Renderer} from 'src/render';
+define(['lib/pixi'], function(PIXI) {
+  
+    function HUDPlugin(scene) {
+        var layer = scene.renderer.getLayer('hud');
+        var healthText = new PIXI.Text('Health: ' + 0, {fill: 'white'});
+        layer.addChild(healthText);
 
-export {HUD};
+        scene.events.on('tick', function() {
+            healthText.setText('Health: ' + scene.player.life.get(), {fill: 'white'});
+        });
+    }
 
-@SceneScope
-function HUD(renderer: Renderer) {
-  var layer = renderer.getLayer('hud');
-
-  var coinText = new PIXI.Text('Coins: 0');
-  var keyText = new PIXI.Text('Keys: 0');
-  // TODO hard-coded
-  keyText.position.y = 32;
-
-  layer.addChild(coinText);
-  layer.addChild(keyText);
-
-  return {
-    setCoins: (val) => { coinText.setText('Coins: ' + val); },
-    setKeys: (val) => { keyText.setText('Keys: ' + val); },
-  };
-}
+    return HUDPlugin;
+});

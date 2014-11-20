@@ -20,6 +20,7 @@ define([
     'loadpoints',
     'FPSMeter',
     'Dead',
+    'HUD',
 
 ], function(
     Biscuits,
@@ -42,7 +43,8 @@ define([
 
     loadpointsLoader,
     FPSMeter,
-    Dead
+    Dead,
+    HUD
 ) {
 
     var container = document.getElementById("biscuits-container");
@@ -79,6 +81,7 @@ define([
       Squirrel,
 
       FPSMeter,
+      HUD,
     ];
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', plugins);
