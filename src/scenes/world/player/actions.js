@@ -1,9 +1,11 @@
 define([
   'actions/InputBinder',
   'actions/ActionManager',
+  'actions/Action',
   'actions/Movement',
+  'utils',
 
-], function(InputBinder, ActionManager, BaseMovement) {
+], function(InputBinder, ActionManager, Action, BaseMovement, utils) {
 
   return function(scene) {
 
@@ -44,19 +46,42 @@ define([
                   duration: 250,
               }),
           },
+          attack: Attack(scene.player.body),
       };
 
       bindInput('Up', actions.walk.up);
       bindInput('Down', actions.walk.down);
       bindInput('Left', actions.walk.left);
       bindInput('Right', actions.walk.right);
+      bindInput('Attack', actions.attack);
 
-      return {
-          player: {
-              actionManager: actionManager,
-          },
-      };
+      scene.player.actionManager = actionManager;
   };
+
+
+  function Attack(body, config) {
+
+      var defaults = {
+          name: 'attack',
+          duration: 200,
+      };
+      config = utils.extend({}, defaults, config || {});
+
+      var makeAction = Action(config);
+
+      return function() {
+          var action = makeAction();
+          var hits = body.queryFront();
+
+          console.log('attack!', hits);
+
+          for (var i = 0, ii = hits.length; i < ii; i++) {
+              hits[i].events.trigger('hit', [body]);
+          }
+
+          return action;
+      };
+  }
 
 });
 
@@ -88,31 +113,4 @@ class Use extends Action {
 }
 
 
-class Attack extends Action {
-
-  constructor(superConstructor: SuperConstructor, body: Body, sounds: Sounds) {
-    superConstructor();
-    this.body = body;
-    this.sounds = sounds;
-
-    this.configure({
-      name: 'attack',
-      duration: 200,
-    });
-  }
-
-  start() {
-    super.start();
-    console.log('attack!');
-
-    this.sounds.swingSword.play();
-
-    // TODO optimize?
-    // TODO can only use one object?
-    var body = this.body;
-    body.queryFront().forEach(function(hit) {
-      hit.events.trigger('hit', [body]);
-    });
-  }
-}
 */

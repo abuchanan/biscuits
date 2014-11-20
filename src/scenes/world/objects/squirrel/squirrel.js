@@ -21,14 +21,38 @@ define([
                   var y = obj.y / tileHeight;
                   var w = obj.w / tileWidth;
                   var h = obj.h / tileHeight;
-                  var body = Body(x, y, w, h, scene.world);
-                  var actions = SquirrelActions(scene, body);
-                  SquirrelRenderer(scene, body, actions.manager);
-
-                  SquirrelDriver(scene, body, actions);
+                  Squirrel(scene, x, y, w, h);
 
                 }
             }
+        }
+    }
+
+
+    function Squirrel(scene, x, y, w, h) {
+
+        var body = Body(x, y, w, h, scene.world);
+        var actions = SquirrelActions(scene, body);
+        var renderer = SquirrelRenderer(scene, body, actions.manager);
+        var driver = SquirrelDriver(scene, body, actions);
+
+        var life = 100;
+
+        body.events.on('hit', function() {
+          life -= 10;
+
+          if (life <= 0) {
+              destroy();
+              console.log('dead');
+          } else {
+              console.log('squirrel hit!', life);
+          }
+        });
+
+        function destroy() {
+            body.remove();
+            renderer.destroy();
+            driver.destroy();
         }
     }
 

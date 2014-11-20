@@ -67,6 +67,11 @@ define([
 
       Background,
 
+      // TODO clean this up
+      function(scene) {
+        scene.player = {};
+      },
+
       PlayerBody,
       PlayerActions,
       PlayerRenderer,

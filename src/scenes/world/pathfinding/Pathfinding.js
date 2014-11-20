@@ -3,10 +3,7 @@ define(['./Grid', './BinaryHeap'], function(Grid, BinaryHeap) {
 
     function PathfindingPlugin(scene) {
         var grid = Grid(scene.world);
-
-        return {
-            findPath: findPath.bind(null, grid),
-        };
+        scene.findPath = findPath.bind(null, grid);
     }
 
 

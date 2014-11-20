@@ -87,6 +87,7 @@ define(function() {
         var y2 = y1 + h;
 
         _data[ID] = function(qx1, qy1, qw, qh) {
+          //console.log(qx1, x1, qx2 > x1, qy1, qw, qh);
           var qx2 = qx1 + qw;
           var qy2 = qy1 + qh;
           return qx2 > x1 && qx1 < x2 && qy2 > y1 && qy1 < y2;

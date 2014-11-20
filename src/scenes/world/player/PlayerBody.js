@@ -61,12 +61,7 @@ define(['../Body', 'utils'], function(Body, utils) {
     var world = scene.world;
     var body = PlayerBody(position.x, position.y, world);
     body.direction = position.direction;
-
-    return {
-      player: {
-        body: body,
-      },
-    }
+    scene.player.body = body;
   };
 
 });

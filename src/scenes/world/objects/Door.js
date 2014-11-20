@@ -26,9 +26,7 @@ define(['../Body'], function(Body) {
             }
         }
 
-        return {
-            doors: doors
-        };
+        scene.doors = doors;
     }
 
 

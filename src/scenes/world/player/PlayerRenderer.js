@@ -55,11 +55,7 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
         } 
     });
 
-    return {
-        player: {
-            renderable: clip,
-        }
-    }
+    scene.player.renderable = clip;
   }
 
 

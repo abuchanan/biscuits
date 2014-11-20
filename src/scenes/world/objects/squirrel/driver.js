@@ -3,11 +3,11 @@ define(function() {
     function SquirrelDriver(scene, body, actions) {
         var path;
 
-        scene.events.on('loaded', function() {
+        function onLoad() {
             path = scene.findPath({x: 32, y: 43}, {x: 23, y: 27});
-        });
+        }
 
-        scene.events.on('tick', function() {
+        function update() {
             if (path && path.length > 0) {
                 var action = actions.manager.getCurrentAction();
 
@@ -32,7 +32,23 @@ define(function() {
             } else {
                 actions.manager.stopAll();
             }
-        });
+        }
+
+        // Need a better way to listen for events that doesn't leak
+        // memory when you forget to remove the handlers
+        //
+        // Maybe weakmap eventemitter would do?
+        scene.events.on('loaded', onLoad);
+        scene.events.on('tick', update);
+
+        function destroy() {
+            scene.events.off('loaded', onLoad);
+            scene.events.off('tick', update);
+        }
+
+        return {
+            destroy: destroy,
+        };
     }
 
     return SquirrelDriver;

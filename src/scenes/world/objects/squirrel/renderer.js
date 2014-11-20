@@ -19,8 +19,7 @@ define(['lib/pixi', './textures'], function(PIXI, textures) {
         var layer = scene.renderer.getLayer('objects');
         layer.addChild(clip);
 
-        // TODO need deregistration function
-        scene.events.on('tick', function() {
+        function render() {
             var action = actionManager.getCurrentAction();
 
             // TODO exactly same code as player renderer. DRY
@@ -48,8 +47,16 @@ define(['lib/pixi', './textures'], function(PIXI, textures) {
               clip.textures = textures[textureName];
               clip.play();
             }
+        }
 
-        });
+        scene.events.on('tick', render);
+
+        return {
+          destroy: function() {
+             layer.removeChild(clip);
+             scene.events.off('tick', render);
+          }
+        };
     }
 
 

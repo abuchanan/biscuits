@@ -1,4 +1,4 @@
-define(['lib/EventEmitter', 'lib/lodash'], function(EventEmitter, lodash) {
+define(['lib/EventEmitter'], function(EventEmitter) {
 
     var currentSceneID = 1;
 
@@ -33,7 +33,6 @@ define(['lib/EventEmitter', 'lib/lodash'], function(EventEmitter, lodash) {
             for (var i = 0; i < plugins.length; i++) {
                 var plugin = plugins[i];
                 var ret = plugin(currentScene);
-                lodash.merge(currentScene, ret);
             }
 
             currentScene.events.trigger('loaded');
