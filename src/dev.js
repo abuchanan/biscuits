@@ -8,9 +8,9 @@ define([
     'scenes/world/pathfinding/Pathfinding',
 
     'scenes/world/Background',
-    'scenes/world/player/PlayerBody',
-    'scenes/world/player/actions',
-    'scenes/world/player/PlayerRenderer',
+
+    'scenes/world/player/Player',
+
     'scenes/world/TrackPlayer',
     'scenes/world/objects/Wall',
     'scenes/world/objects/Door',
@@ -30,9 +30,9 @@ define([
     Pathfinding,
 
     Background,
-    PlayerBody,
-    PlayerActions,
-    PlayerRenderer,
+
+    Player, 
+
     TrackPlayer,
     Wall,
     Door,
@@ -67,14 +67,7 @@ define([
 
       Background,
 
-      // TODO clean this up
-      function(scene) {
-        scene.player = {};
-      },
-
-      PlayerBody,
-      PlayerActions,
-      PlayerRenderer,
+      Player,
 
       TrackPlayer('background', 'objects', 'player'),
 

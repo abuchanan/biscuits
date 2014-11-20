@@ -33,7 +33,7 @@ define([
 
         var body = Body(x, y, w, h, scene.world);
         var actions = SquirrelActions(scene, body);
-        var renderer = SquirrelRenderer(scene, body, actions.manager);
+        var renderer = SquirrelRenderer(scene, body, actions.moveManager);
         var driver = SquirrelDriver(scene, body, actions);
 
         var life = 100;
@@ -49,10 +49,35 @@ define([
           }
         });
 
+
+
+        // TODO happens when player moves and collides with object,
+        //      but should probably happen the other way around too;
+        //      object moves and collides with player
+        body.events.on('player collision', function() {
+          actions.hitManager.start(actions.hitPlayer);
+        });
+
+        function tick() {
+            // TODO need a more simple way of responding to collisions
+            var hits = body.queryFront();
+            for (var i = 0, ii = hits.length; i < ii; i++) {
+                if (hits[i] === scene.player.body) {
+                    actions.hitManager.start(actions.hitPlayer);
+                }
+            }
+        }
+
+        scene.events.on('tick', tick);
+
+
+
         function destroy() {
             body.remove();
             renderer.destroy();
             driver.destroy();
+            actions.destroy();
+            scene.events.off('tick', tick);
         }
     }
 

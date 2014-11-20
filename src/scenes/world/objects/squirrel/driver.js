@@ -9,7 +9,7 @@ define(function() {
 
         function update() {
             if (path && path.length > 0) {
-                var action = actions.manager.getCurrentAction();
+                var action = actions.moveManager.getCurrentAction();
 
                 if (!action) {
                     var pos = body.getPosition();
@@ -18,26 +18,20 @@ define(function() {
                     var dy = next.y - pos.y;
 
                     if (dy == -1) {
-                      actions.manager.start(actions.walk.up);
+                      actions.moveManager.start(actions.walk.up);
                     } else if (dy == 1) {
-                      actions.manager.start(actions.walk.down);
+                      actions.moveManager.start(actions.walk.down);
                     } else if (dx == -1) {
-                      actions.manager.start(actions.walk.left);
+                      actions.moveManager.start(actions.walk.left);
                     } else if (dx == 1) {
-                      actions.manager.start(actions.walk.right);
+                      actions.moveManager.start(actions.walk.right);
                     }
-                } else {
-                    actions.manager.stopAll();
                 }
-            } else {
-                actions.manager.stopAll();
             }
         }
 
         // Need a better way to listen for events that doesn't leak
         // memory when you forget to remove the handlers
-        //
-        // Maybe weakmap eventemitter would do?
         scene.events.on('loaded', onLoad);
         scene.events.on('tick', update);
 

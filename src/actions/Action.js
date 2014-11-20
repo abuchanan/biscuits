@@ -30,6 +30,7 @@ define(['utils'], function(utils) {
               percentComplete: 0,
               done: false,
               tick: tick,
+              loop: config.loop,
             };
 
             return action;

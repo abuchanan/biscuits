@@ -19,6 +19,9 @@ define(['utils'], function(utils) {
 
           if (nextAction) {
             currentAction = nextAction();
+            if (!currentAction.loop) {
+                nextAction = false;
+             }
           } else {
             currentAction = false;
           }

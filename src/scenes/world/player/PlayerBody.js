@@ -55,13 +55,6 @@ define(['../Body', 'utils'], function(Body, utils) {
   }
 
   // Module exports
-  return function(scene) {
-
-    var position = scene.config.initialPlayerPosition;
-    var world = scene.world;
-    var body = PlayerBody(position.x, position.y, world);
-    body.direction = position.direction;
-    scene.player.body = body;
-  };
+  return PlayerBody;
 
 });

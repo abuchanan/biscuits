@@ -7,12 +7,12 @@ define([
 
 ], function(InputBinder, ActionManager, Action, BaseMovement, utils) {
 
-  return function(scene) {
+  return function(body, input, scene) {
 
-      var Movement = BaseMovement.bind(null, scene.player.body);
+      var Movement = BaseMovement.bind(null, body);
 
       var actionManager = ActionManager();
-      var bindInput = InputBinder(scene.input, actionManager);
+      var bindInput = InputBinder(input, actionManager);
 
       scene.events.on('tick', actionManager.tick);
 
@@ -23,6 +23,7 @@ define([
                   direction: 'up',
                   deltaY: -1,
                   duration: 250,
+                  loop: true,
               }),
 
               down: Movement({
@@ -30,6 +31,7 @@ define([
                   direction: 'down',
                   deltaY: 1,
                   duration: 250,
+                  loop: true,
               }),
 
               right: Movement({
@@ -37,6 +39,7 @@ define([
                   direction: 'right',
                   deltaX: 1,
                   duration: 250,
+                  loop: true,
               }),
 
               left: Movement({
@@ -44,9 +47,10 @@ define([
                   direction: 'left',
                   deltaX: -1,
                   duration: 250,
+                  loop: true,
               }),
           },
-          attack: Attack(scene.player.body),
+          attack: Attack(body),
       };
 
       bindInput('Up', actions.walk.up);
@@ -55,7 +59,7 @@ define([
       bindInput('Right', actions.walk.right);
       bindInput('Attack', actions.attack);
 
-      scene.player.actionManager = actionManager;
+      return actionManager;
   };
 
 

@@ -9,10 +9,11 @@ define(['./Action', 'utils'], function(Action, utils) {
           deltaY: 0,
         };
         config = utils.extend({}, defaults, config || {});
+        var makeAction = Action(config);
 
         return function() {
             var previousPosition = body.getPosition();
-            var action = Action(config)();
+            var action = makeAction();
             var originalTick = action.tick;
 
             body.direction = config.direction;
