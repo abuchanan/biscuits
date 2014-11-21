@@ -1,15 +1,15 @@
 define(['lib/fpsmeter'], function(FPSMeter) {
 
-    var meter = new FPSMeter.FPSMeter({
-      top: 'auto',
-      left: 'auto',
-      bottom: '5px',
-      right: '5px',
-    });
+    function startMeter(s) {
 
-    function startMeter(scene) {
+      var meter = new FPSMeter.FPSMeter({
+        top: 'auto',
+        left: 'auto',
+        bottom: '5px',
+        right: '5px',
+      });
 
-      scene.events.on('tick', function(time) {
+      s.on('tick', function(time) {
         meter.tick();
       });
     }

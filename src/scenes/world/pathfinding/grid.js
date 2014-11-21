@@ -19,13 +19,13 @@ define(function() {
             }
         }
 
-        world.events.on('add', function(body) {
+        world.on('add', function(body) {
             if (body.isBlock()) {
                 updateGrid(body.getRectangle(), 1);
             }
         });
 
-        world.events.on('remove', function(body) {
+        world.on('remove', function(body) {
             if (body.isBlock()) {
                 updateGrid(body.getRectangle(), -1);
             }

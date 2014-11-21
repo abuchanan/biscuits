@@ -1,12 +1,12 @@
 define(['lib/pixi', './textures'], function(PIXI, textures) {
 
 
-    function SquirrelRenderer(scene, body, actionManager) {
+    function SquirrelRenderer(s, actionManager) {
 
         var clip = new PIXI.MovieClip(textures['idle-west']);
 
-        var tileWidth = scene.map.mapData.tilewidth;
-        var tileHeight = scene.map.mapData.tileheight;
+        var tileWidth = s.map.mapData.tilewidth;
+        var tileHeight = s.map.mapData.tileheight;
 
         clip.width = tileWidth;
         clip.height = tileHeight;
@@ -16,10 +16,10 @@ define(['lib/pixi', './textures'], function(PIXI, textures) {
         clip.animationSpeed = 0.07;
         clip.play();
 
-        var layer = scene.renderer.getLayer('objects');
+        var layer = s.renderer.getLayer('objects');
         layer.addChild(clip);
 
-        function render() {
+        s.on('tick', function() {
             var action = actionManager.getCurrentAction();
 
             // TODO exactly same code as player renderer. DRY
@@ -37,26 +37,25 @@ define(['lib/pixi', './textures'], function(PIXI, textures) {
 
 
             } else {
-              var pos = body.getPosition();
+              var pos = s.body.getPosition();
 
               // TODO have some other layer that automatically scales positions
               clip.x = pos.x * tileWidth;
               clip.y = pos.y * tileHeight;
 
-              var textureName = 'idle-' + body.direction;
+              var textureName = 'idle-' + s.body.direction;
               clip.textures = textures[textureName];
               clip.play();
             }
-        }
+        });
 
-        scene.events.on('tick', render);
-
-        return {
-          destroy: function() {
+        // TODO it would be nice if "s.renderer" was nicely wrapped
+        //      so it could destroy itself. that way each object wouldn't
+        //      have to worry about it
+        s.on('destroy', function() {
+            console.log('remove');
              layer.removeChild(clip);
-             scene.events.off('tick', render);
-          }
-        };
+        });
     }
 
 

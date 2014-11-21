@@ -2,12 +2,23 @@
 //      shouldn't have to load and parse every map upfront
 define(['scenes/world/map/loaders/TiledJSON'], function(loader) {
 
-  function load(mapID, plugins) {
+  function load(mapID, init) {
     var map = loader.loadMapSync(mapID);
     var tileWidth = map.mapData.tilewidth;
     var tileHeight = map.mapData.tileheight;
 
     var loadpoints = {};
+
+    function makeLoadpoint(x, y, mapID, obj) {
+        return function(s) {
+          s.config = {
+            mapID: mapID,
+            initialPlayerPosition: {x: x, y: y, direction: obj.direction},
+          };
+
+          init(s);
+        };
+    }
 
     for (var i = 0, ii = map.objectlayers.length; i < ii; i++) {
       var layer = map.objectlayers[i];
@@ -18,13 +29,7 @@ define(['scenes/world/map/loaders/TiledJSON'], function(loader) {
           var x = obj.x / tileWidth;
           var y = obj.y / tileHeight;
 
-          loadpoints[obj.name] = {
-            config: {
-              mapID: mapID,
-              initialPlayerPosition: {x: x, y: y, direction: obj.direction},
-            },
-            plugins: plugins,
-          };
+          loadpoints[obj.name] = makeLoadpoint(x, y, mapID, obj);
         }
       }
     }

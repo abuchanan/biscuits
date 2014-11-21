@@ -6,29 +6,22 @@ define([
 
 ], function(PlayerBody, PlayerRenderer, PlayerActions, PlayerLife) {
 
-    function PlayerPlugin(scene) {
+    function Player(s) {
 
-      var position = scene.config.initialPlayerPosition;
-      var world = scene.world;
-      var body = PlayerBody(position.x, position.y, world);
-      body.direction = position.direction;
+      var position = s.config.initialPlayerPosition;
 
-      var renderable = PlayerRenderer(scene);
-      var actionManager = PlayerActions(body, scene.input, scene);
+      s.body = s.create(PlayerBody, position.x, position.y);
+      s.body.direction = position.direction;
 
-      var life = PlayerLife(scene, body);
-
-      scene.player = {
-        body: body,
-        renderable: renderable,
-        actionManager: actionManager,
-        life: life,
-      };
+      s.playerRenderer = s.create(PlayerRenderer);
+      s.actions = s.create(PlayerActions, s.body);
+      s.life = s.create(PlayerLife, s.body);
     }
 
-    return PlayerPlugin;
-
+    return Player;
 });
+
+
 // TODO when keyup event happens during a different window
 //      e.g. keydown, cmd+tab away, let go of key, then cmd+tab back
 //      window focus/blur events?
@@ -37,7 +30,6 @@ define([
     // TODO mechanism for telling scene that it needs to wait on a promise
     //      when loading
     //      scene.loadDependsOn(loadPlayerTextures());
-    // TODO PlayerCombat(keybindings, worldObj);
     // TODO how to allow player to move and swing sword at same time?
     //      how to coordinate separate action manager with the renderer?
 

@@ -1,8 +1,8 @@
 define(['./map/loaders/TiledJSONRegions'], function(loadTiledJSONRegions) {
 
     // Module exports
-    return function(scene) {
-      scene.map = loadTiledJSONRegions.load(scene.config.mapID,
-                                            scene.config.initialPlayerPosition);
+    return function(s) {
+      s.map = loadTiledJSONRegions.load(s.config.mapID,
+                                        s.config.initialPlayerPosition);
     };
 });

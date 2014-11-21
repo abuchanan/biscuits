@@ -1,27 +1,25 @@
 define(['lib/EventEmitter'], function(EventEmitter) {
 
-    function PlayerLife(scene, body) {
+    function PlayerLife(s) {
 
         var life = 100;
         var events = new EventEmitter();
 
-        body.events.on('hit', function() {
+        s.body.on('hit', function() {
             // TODO variable hit amounts
             life -= 10;
 
             if (life <= 0) {
                 console.log('player dead');
-                scene.start('dead');
+                s.start('dead');
             } else {
                 console.log('player hit!', life);
             }
         });
 
-        return {
-            get: function() {
-                return life;
-            },
-        }
+        s.get = function() {
+          return life;
+        };
     }
 
 

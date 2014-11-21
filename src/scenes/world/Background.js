@@ -1,7 +1,6 @@
 define(['./TileBatchRenderable'], function(TileBatchRenderable) {
 
-    function Background(scene) {
-        var map = scene.map;
+    function Background(s, map) {
         var grid = [];
         var renderable = new TileBatchRenderable(grid.forEach.bind(grid));
 
@@ -12,7 +11,7 @@ define(['./TileBatchRenderable'], function(TileBatchRenderable) {
           }
         }
 
-        var layer = scene.renderer.getLayer('background');
+        var layer = s.renderer.getLayer('background');
         layer.addChild(renderable);
     }
 

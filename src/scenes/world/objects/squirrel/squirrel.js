@@ -6,10 +6,11 @@ define([
 
 ], function(SquirrelRenderer, SquirrelActions, SquirrelDriver, Body) {
 
-    function SquirrelPlugin(scene) {
-        var map = scene.map;
-        var tileWidth = scene.map.mapData.tilewidth;
-        var tileHeight = scene.map.mapData.tileheight;
+
+    function SquirrelPlugin(s) {
+        var map = s.map;
+        var tileWidth = s.map.mapData.tilewidth;
+        var tileHeight = s.map.mapData.tileheight;
 
         for (var i = 0, ii = map.objectlayers.length; i < ii; i++) {
             var layer = map.objectlayers[i];
@@ -17,38 +18,38 @@ define([
                 var obj = layer[j];
 
                 if (obj.hasType('Squirrel')) {
-                  var x = obj.x / tileWidth;
-                  var y = obj.y / tileHeight;
-                  var w = obj.w / tileWidth;
-                  var h = obj.h / tileHeight;
-                  Squirrel(scene, x, y, w, h);
+                    var x = obj.x / tileWidth;
+                    var y = obj.y / tileHeight;
+                    var w = obj.w / tileWidth;
+                    var h = obj.h / tileHeight;
 
+                    s.create(Squirrel, x, y, w, h);
                 }
             }
         }
     }
 
 
-    function Squirrel(scene, x, y, w, h) {
+    function Squirrel(s, x, y, w, h) {
 
-        var body = Body(x, y, w, h, false, scene.world);
-        var actions = SquirrelActions(scene, body);
-        var renderer = SquirrelRenderer(scene, body, actions.moveManager);
-        var driver = SquirrelDriver(scene, body, actions);
+        s.body = s.create(Body, x, y, w, h, false);
 
-        var life = 100;
+        s.actions = s.create(SquirrelActions);
+        s.create(SquirrelRenderer, s.actions.moveManager);
+        var driver = s.create(SquirrelDriver, s.actions);
 
-        body.events.on('hit', function() {
+        var life = 20;
+
+        s.body.on('hit', function() {
           life -= 10;
 
           if (life <= 0) {
-              destroy();
               console.log('dead');
+              s.destroy();
           } else {
               console.log('squirrel hit!', life);
           }
         });
-
 
 
         // TODO happens when player moves and collides with object,
@@ -59,36 +60,24 @@ define([
          // actions.hitManager.start(actions.hitPlayer);
         //});
 
-        function tick() {
+        s.on('tick', function() {
             // TODO need a more simple way of responding to collisions
-            var bb = body.getRectangle();
-            var hits = scene.world.query(bb);
+            var bb = s.body.getRectangle();
+            var hits = s.world.query(bb);
             var hitPlayer = false;
 
             for (var i = 0, ii = hits.length; i < ii; i++) {
-                if (hits[i] === scene.player.body) {
+                if (hits[i] === s.player.body) {
                     hitPlayer = true;
                 }
             }
 
             if (hitPlayer) {
-              actions.hitManager.start(actions.hitPlayer);
+                s.actions.hitManager.start(s.actions.hitPlayer);
             } else {
-              actions.hitManager.stopAll();
+                s.actions.hitManager.stopAll();
             }
-        }
-
-        scene.events.on('tick', tick);
-
-
-
-        function destroy() {
-            body.remove();
-            renderer.destroy();
-            driver.destroy();
-            actions.destroy();
-            scene.events.off('tick', tick);
-        }
+        });
     }
 
     return SquirrelPlugin;
@@ -97,17 +86,3 @@ define([
 
 
 // TODO gosh it would be nice not to have to prefix everything with "Squirrel"
-
-    // TODO squirrels can be destroyed which is an interesting case where an object
-    //      need to destroy itself.
-    //
-    //      I'm pretty sure this is an important case for why every object needs
-    //      its own injector, otherwise, how would you destroy all the dependencies of
-    //      that object?
-    /* TODO
-      destroy: function() {
-        body.remove();
-        destroyRenderer();
-        pathfinder.stop();
-      },
-    */

@@ -1,17 +1,17 @@
 define(function() {
 
-    function InputBinder(input, manager) {
+    function InputBinder(s, manager) {
 
-      return function(name, action) {
+      s.bind = function(name, action) {
 
-        input.events.on('start ' + name, function() {
-          manager.start(action);
-        });
+          s.on('start ' + name, function() {
+              manager.start(action);
+          });
 
-        input.events.on('stop ' + name, function() {
-          manager.stop(action);
-        });
-      }
+          s.on('stop ' + name, function() {
+              manager.stop(action);
+          });
+      };
     }
 
     return InputBinder;

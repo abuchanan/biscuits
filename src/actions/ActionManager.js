@@ -1,13 +1,11 @@
-define(['utils'], function(utils) {
+define(function() {
 
-
-    // TODO does an object need multiple managers?
-    function ActionManager() {
+    function ActionManager(s) {
 
         var currentAction = false;
         var nextAction = false;
 
-        function tick() {
+        s.on('tick', function() {
 
           if (currentAction) {
             currentAction.tick();
@@ -25,36 +23,30 @@ define(['utils'], function(utils) {
           } else {
             currentAction = false;
           }
-        }
+        });
 
-        // ActionManager API
-        return {
-          getCurrentAction: function() {
+        s.getCurrentAction = function() {
             if (currentAction) {
-              return currentAction;
+                return currentAction;
             }
-          },
+        };
 
-          start: function(action) {
-            if (!action) {
-              return;
+        s.start = function(action) {
+            if (action) {
+                nextAction = action;
             }
-            nextAction = action;
-          },
+        };
 
-          stop: function(action) {
+        s.stop = function(action) {
             // Only stop if we're currently running the action that was
             // requested to be stopped.
             if (nextAction && nextAction === action) {
-              nextAction = false;
+                nextAction = false;
             }
-          },
+        };
 
-          stopAll: function() {
+        s.stopAll = function() {
             nextAction = false;
-          },
-
-          tick: tick,
         };
     }
 

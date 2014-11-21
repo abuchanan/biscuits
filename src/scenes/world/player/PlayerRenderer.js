@@ -1,11 +1,12 @@
 define(['./textures', 'lib/pixi'], function(textures, PIXI) {
 
-  function PlayerRenderer(scene) {
+  function PlayerRenderer(s) {
 
     var clip = new PIXI.MovieClip(textures['stop-south']);
+    s.renderable = clip;
 
-    var tileWidth = scene.map.mapData.tilewidth;
-    var tileHeight = scene.map.mapData.tileheight;
+    var tileWidth = s.map.mapData.tilewidth;
+    var tileHeight = s.map.mapData.tileheight;
 
     // TODO scale player sprite images in actual image file
     clip.width = tileWidth;
@@ -13,12 +14,12 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
     // TODO base animationSpeed on movement speed definitions
     clip.animationSpeed = 0.1;
 
-    var layer = scene.renderer.getLayer('player');
+    var layer = s.renderer.getLayer('player');
     layer.addChild(clip);
 
 
-    scene.events.on('tick', function() {
-        var action = scene.player.actionManager.getCurrentAction();
+    s.on('tick', function() {
+        var action = s.actions.manager.getCurrentAction();
 
         // TODO need a way to split up the rendering of various movements
         //      into discrete pieces. i.e. make action/movement rendering
@@ -43,13 +44,13 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
         //
         //      Something to ask: how would concurrent actions/states be handled?
         } else {
-            var pos = scene.player.body.getPosition();
+            var pos = s.body.getPosition();
 
             // TODO have some other layer that automatically scales positions
             clip.x = pos.x * tileWidth;
             clip.y = pos.y * tileHeight;
 
-            var textureName = 'stop-' + scene.player.body.direction;
+            var textureName = 'stop-' + s.body.direction;
             clip.textures = textures[textureName];
             clip.gotoAndStop(0);
         } 

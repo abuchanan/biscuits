@@ -1,59 +1,51 @@
-define(['lib/EventEmitter', './BoundingBox'], function(EventEmitter, BoundingBox) {
+define(['./BoundingBox'], function(BoundingBox) {
 
   var currentBodyID = 1;
 
 
-  function Body(_x, _y, _w, _h, isBlock, world) {
-    var events = new EventEmitter();
-    var x = _x;
-    var y = _y;
-    var w = _w;
-    var h = _h;
-    var ID = currentBodyID++;
+  function Body(s, _x, _y, _w, _h, isBlock) {
+      var x = _x;
+      var y = _y;
+      var w = _w;
+      var h = _h;
+      var ID = currentBodyID++;
 
 
-    function getID() {
-      return ID;
-    }
+      s.getID = function() {
+        return ID;
+      };
 
-    function getPosition() {
-      return {x: x, y: y};
-    }
+      s.getPosition = function() {
+        return {x: x, y: y};
+      };
 
-    function setPosition(_x, _y) {
-      x = _x;
-      y = _y;
+      s.setPosition = function(_x, _y) {
+        x = _x;
+        y = _y;
 
-      // TODO inefficient. not sure how to improve using quadtrees though.
-      world.remove(body);
-      world.add(body);
-    }
+        // TODO inefficient. not sure how to improve using quadtrees though.
+        s.world.remove(s);
+        s.world.add(s);
+      };
 
-    function getRectangle() {
-      return BoundingBox(x, y, w, h, body.direction);
-    }
+      s.getRectangle = function() {
+        return BoundingBox(x, y, w, h, s.direction);
+      };
 
-    function remove() {
-      world.remove(body);
-    }
+      s.remove = function() {
+        world.remove(s);
+      };
 
+      s.isBlock = function() {
+        return isBlock;
+      };
 
-    // Body API
-    var body = {
-      getID: getID,
-      getPosition: getPosition,
-      setPosition: setPosition,
-      getRectangle: getRectangle,
-      isBlock: function() { return isBlock; },
-      direction: 'south',
-      events: events,
-      remove: remove,
-      data: {},
-    };
+      s.direction = 'south';
+      s.world.add(s);
 
-    world.add(body);
-
-    return body;
+      s.on('destroy', function() {
+        s.world.remove(s);
+      });
   }
 
   // Module exports

@@ -24,7 +24,7 @@ define([
 
 ], function(
     Biscuits,
-    input,
+    KeyboardInput,
     Renderer,
     WorldMap,
     World,
@@ -49,58 +49,49 @@ define([
 
     var container = document.getElementById("biscuits-container");
 
-    var plugins = [
-      input.Input,
+
+    var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {
+
       // TODO Input type should be detected
-      input.KeyboardInput,
+      s.mixin(KeyboardInput);
 
-      function(scene) {
-        scene.config.container = container;
-      },
+      s.objects = {};
 
-      Renderer,
+      // TODO this feels a little out of place. why doesn't it use s.create()?
+      s.mixin(WorldMap);
 
-      function(scene) {
-        scene.renderer.addLayers('background', 'objects', 'player', 'hud');
-      },
+      // TODO this is getting the whole map, not just the current region
+      s.world = s.create(World, 0, 0, s.map.mapData.width, s.map.mapData.height);
+      s.world.mixin(Pathfinding);
 
-      WorldMap,
-      World,
+      s.renderer = s.create(Renderer, container);
+      s.renderer.addLayers('background', 'objects', 'player', 'hud');
 
-      Pathfinding,
+      // TODO sometimes I'm not sure whether to pass something in, 
+      //      or get it from the scope
+      s.mixin(Background, s.map);
 
-      Background,
+      s.player = s.create(Player);
+      s.create(TrackPlayer, s.player.playerRenderer.renderable,
+               ['background', 'objects', 'player']);
 
-      Player,
+      s.create(Wall);
+      s.create(Door);
+      s.create(DoorSwitch);
+      s.create(Squirrel);
 
-      TrackPlayer('background', 'objects', 'player'),
+      s.create(HUD);
+      s.create(FPSMeter);
 
-      Wall,
-      Door,
-      DoorSwitch,
-      Squirrel,
+    });
 
-      FPSMeter,
-      HUD,
-    ];
+    loadpoints['dead'] = function(s) {
 
-    var loadpoints = loadpointsLoader.load('maps/Level 1.json', plugins);
+      // TODO Input type should be detected
+      s.mixin(KeyboardInput);
+      s.renderer = s.create(Renderer, container);
 
-    loadpoints['dead'] = {
-      config: {},
-      plugins: [
-
-        input.Input,
-        // TODO Input type should be detected
-        input.KeyboardInput,
-
-        function(scene) {
-          scene.config.container = container;
-        },
-
-        Renderer,
-        Dead
-      ],
+      s.mixin(Dead);
     };
 
     var app = Biscuits(loadpoints);

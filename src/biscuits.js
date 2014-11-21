@@ -1,4 +1,4 @@
-define(['lib/EventEmitter'], function(EventEmitter) {
+define(['scope'], function(Scope) {
 
     var currentSceneID = 1;
 
@@ -16,26 +16,19 @@ define(['lib/EventEmitter'], function(EventEmitter) {
             }
 
             var config = loadpoint.config;
-            var plugins = loadpoint.plugins;
 
             // TODO allow unload to be blocked
             if (currentScene) {
-              currentScene.events.trigger('unload');
+              currentScene.trigger('destroy');
             }
 
-            currentScene = {
-                ID: currentSceneID++,
-                config: config,
-                events: new EventEmitter(),
-                start: start,
-            };
+            currentScene = Scope();
+            // TODO use event instead?
+            currentScene.start = start;
 
-            for (var i = 0; i < plugins.length; i++) {
-                var plugin = plugins[i];
-                var ret = plugin(currentScene);
-            }
+            loadpoint(currentScene);
 
-            currentScene.events.trigger('loaded');
+            currentScene.trigger('loaded');
 
             if (!started) {
                 requestAnimationFrame(tick);
@@ -44,7 +37,8 @@ define(['lib/EventEmitter'], function(EventEmitter) {
         }
 
         function tick() {
-          currentScene.events.trigger('tick', [Date.now()]);
+          currentScene.trigger('tick');
+          currentScene.clean();
           requestAnimationFrame(tick);
         }
 

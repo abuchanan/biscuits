@@ -1,9 +1,9 @@
 define(['./Grid', './BinaryHeap'], function(Grid, BinaryHeap) {
 
 
-    function PathfindingPlugin(scene) {
-        var grid = Grid(scene.world);
-        scene.findPath = findPath.bind(null, grid);
+    function PathfindingPlugin(s) {
+        var grid = Grid(s);
+        s.findPath = findPath.bind(null, grid);
     }
 
 

@@ -7,59 +7,55 @@ define([
 
 ], function(InputBinder, ActionManager, Action, BaseMovement, utils) {
 
-  return function(body, input, scene) {
+  return function(s, body) {
 
       var Movement = BaseMovement.bind(null, body);
 
-      var actionManager = ActionManager();
-      var bindInput = InputBinder(input, actionManager);
+      var actionManager = s.create(ActionManager);
+      var binder = s.create(InputBinder, actionManager);
 
-      scene.events.on('tick', actionManager.tick);
+      s.walk = {
+          north: Movement({
+              name: 'walk-north',
+              direction: 'north',
+              deltaY: -1,
+              duration: 250,
+              loop: true,
+          }),
 
-      var actions = {
-          walk: {
-              north: Movement({
-                  name: 'walk-north',
-                  direction: 'north',
-                  deltaY: -1,
-                  duration: 250,
-                  loop: true,
-              }),
+          south: Movement({
+              name: 'walk-south',
+              direction: 'south',
+              deltaY: 1,
+              duration: 250,
+              loop: true,
+          }),
 
-              south: Movement({
-                  name: 'walk-south',
-                  direction: 'south',
-                  deltaY: 1,
-                  duration: 250,
-                  loop: true,
-              }),
+          east: Movement({
+              name: 'walk-east',
+              direction: 'east',
+              deltaX: 1,
+              duration: 250,
+              loop: true,
+          }),
 
-              east: Movement({
-                  name: 'walk-east',
-                  direction: 'east',
-                  deltaX: 1,
-                  duration: 250,
-                  loop: true,
-              }),
-
-              west: Movement({
-                  name: 'walk-west',
-                  direction: 'west',
-                  deltaX: -1,
-                  duration: 250,
-                  loop: true,
-              }),
-          },
-          attack: Attack(scene.world, body),
+          west: Movement({
+              name: 'walk-west',
+              direction: 'west',
+              deltaX: -1,
+              duration: 250,
+              loop: true,
+          }),
       };
+          
+      s.attack = Attack(s.world, body),
+      s.manager = actionManager;
 
-      bindInput('Up', actions.walk.north);
-      bindInput('Down', actions.walk.south);
-      bindInput('Left', actions.walk.west);
-      bindInput('Right', actions.walk.east);
-      bindInput('Attack', actions.attack);
-
-      return actionManager;
+      binder.bind('Up', s.walk.north);
+      binder.bind('Down', s.walk.south);
+      binder.bind('Left', s.walk.west);
+      binder.bind('Right', s.walk.east);
+      binder.bind('Attack', s.attack);
   };
 
 
@@ -83,7 +79,7 @@ define([
 
           for (var i = 0, ii = hits.length; i < ii; i++) {
               if (hits[i] !== body) {
-                  hits[i].events.trigger('hit', [body]);
+                  hits[i].trigger('hit', [body]);
               }
           }
 
@@ -93,8 +89,8 @@ define([
 
 });
 
-/*
 
+/*
 
 class Use extends Action {
 
@@ -119,6 +115,5 @@ class Use extends Action {
     });
   }
 }
-
 
 */

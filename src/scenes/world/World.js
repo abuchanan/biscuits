@@ -1,29 +1,29 @@
-define(['./QuadTree', 'lib/EventEmitter'], function(QuadTree, EventEmitter) {
+define(['./QuadTree'], function(QuadTree) {
 
-  function World(x, y, w, h) {
+  function World(s, x, y, w, h) {
+
     var tree = new QuadTree(x, y, w, h);
-    var events = new EventEmitter();
     var objects = {};
 
-    function query(bb) {
+    s.query = function(bb) {
       var IDs = tree.query(bb.x, bb.y, bb.w, bb.h);
       return getObjects(IDs);
-    }
+    };
 
-    function add(body) {
+    s.add = function(body) {
       var bodyID = body.getID();
       objects[bodyID] = body;
       var rect = body.getRectangle();
       tree.add(rect.x, rect.y, rect.w, rect.h, bodyID);
-      events.trigger('add', [body]);
-    }
+      s.trigger('add', [body]);
+    };
 
-    function remove(body) {
+    s.remove = function(body) {
       tree.remove(body.getID());
-      events.trigger('remove', [body]);
-    }
+      s.trigger('remove', [body]);
+    };
 
-    function getRectangle() {
+    s.getRectangle = function() {
       return {x: x, y: y, w: w, h: h};
     };
 
@@ -40,27 +40,9 @@ define(['./QuadTree', 'lib/EventEmitter'], function(QuadTree, EventEmitter) {
       }
       return result;
     }
-
-
-    // World API
-    return {
-      query: query,
-      add: add,
-      remove: remove,
-      events: events,
-      getRectangle: getRectangle,
-    };
   }
 
-
-  // Module exports
-  return function(scene) {
-
-      var map = scene.map.mapData;
-      // TODO this is getting the whole map, not just the current region
-      console.log('foo', map.width, map.height);
-      scene.world = World(0, 0, map.width, map.height);
-  };
+  return World;
 });
 
 

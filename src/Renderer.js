@@ -1,7 +1,7 @@
 define(['lib/pixi'], function(PIXI) {
 
 
-    function Renderer(scene) {
+    function Renderer(s, container) {
 
         var layers = {};
         var renderer = PIXI.autoDetectRenderer();
@@ -11,13 +11,13 @@ define(['lib/pixi'], function(PIXI) {
         stage.width = renderer.width;
         stage.height = renderer.height;
 
-        scene.config.container.appendChild(renderer.view);
+        container.appendChild(renderer.view);
 
-        function createGraphic() {
+        s.createGraphic = function() {
           return new PIXI.Graphics();
-        }
+        };
 
-        function getLayer(name) {
+        s.getLayer = function(name) {
             var layer = layers[name];
 
             if (!layer) {
@@ -26,29 +26,21 @@ define(['lib/pixi'], function(PIXI) {
             }
 
             return layer;
-        }
+        };
 
-        function addLayers() {
+        s.addLayers = function() {
             for (var i = 0; i < arguments.length; i++) {
-                getLayer(arguments[i]);
+                s.getLayer(arguments[i]);
             }
         }
 
-        scene.events.on('tick', function() {
-          renderer.render(stage);
+        s.on('tick', function() {
+            renderer.render(stage);
         });
 
-        scene.events.on('unload', function() {
-          scene.config.container.removeChild(renderer.view);
+        s.on('destroy', function() {
+            container.removeChild(renderer.view);
         });
-
-
-        // Renderer API
-        scene.renderer = {
-            createGraphic: createGraphic,
-            getLayer: getLayer,
-            addLayers: addLayers,
-        };
     }
 
     // Module exports

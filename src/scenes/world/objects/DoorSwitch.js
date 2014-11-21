@@ -1,27 +1,11 @@
 define(['../Body'], function(Body) {
 
-    function DoorSwitchPlugin(scene) {
-        var map = scene.map;
-        var tileWidth = scene.map.mapData.tilewidth;
-        var tileHeight = scene.map.mapData.tileheight;
+    function DoorSwitchPlugin(s) {
+        var tileWidth = s.map.mapData.tilewidth;
+        var tileHeight = s.map.mapData.tileheight;
 
-        function configureLock(obj, body, renderer) {
-          var door;
-
-          body.events.on('player collision', function() {
-            door.unlock(obj.name);
-            renderer.renderOn();
-          });
-
-          scene.events.on('loaded', function() {
-            // TODO sounds.movingBlock.play();
-            door = scene.doors[obj.target];
-            door.lock(obj.name);
-          });
-        }
-
-        for (var i = 0, ii = map.objectlayers.length; i < ii; i++) {
-            var layer = map.objectlayers[i];
+        for (var i = 0, ii = s.map.objectlayers.length; i < ii; i++) {
+            var layer = s.map.objectlayers[i];
             for (var j = 0, jj = layer.length; j < jj; j++) {
                 var obj = layer[j];
 
@@ -31,45 +15,63 @@ define(['../Body'], function(Body) {
                     var y = obj.y / tileHeight;
                     var w = obj.w / tileWidth;
                     var h = obj.h / tileHeight;
-                    var body = Body(x, y, w, h, false, scene.world);
-                    var renderer = DoorSwitchRenderer(scene, body);
-                    configureLock(obj, body, renderer);
+
+                    s.create(DoorSwitch, obj, x, y, w, h);
                 }
             }
         }
     }
 
 
-    function DoorSwitchRenderer(scene, body) {
+    function DoorSwitch(s, obj, x, y, w, h) {
+        s.body = s.create(Body, x, y, w, h, false);
+        var renderer = s.create(DoorSwitchRenderer);
 
-      var layer = scene.renderer.getLayer('objects');
-      var rect = body.getRectangle();
-      var map = scene.map;
-      var tileWidth = scene.map.mapData.tilewidth;
-      var tileHeight = scene.map.mapData.tileheight;
+        var door;
 
-      var g = scene.renderer.createGraphic();
+        s.body.on('player collision', function() {
+          door.unlock(obj.name);
+          renderer.renderOn();
+        });
+
+        s.on('loaded', function() {
+          // TODO sounds.movingBlock.play();
+          door = s.objects[obj.target];
+          door.lock(obj.name);
+        });
+    }
+
+
+    function DoorSwitchRenderer(s) {
+
+      var layer = s.renderer.getLayer('objects');
+      var rect = s.body.getRectangle();
+
+      var tileWidth = s.map.mapData.tilewidth;
+      var tileHeight = s.map.mapData.tileheight;
+
+      var g = s.renderer.createGraphic();
       g.beginFill(0xDDDDDD);
       g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
                  rect.w * tileWidth, rect.h * tileHeight);
       g.endFill();
+
       layer.addChild(g);
 
-      return {
-        renderOn: function() {
+      s.renderOn = function() {
           g.clear();
           g.beginFill(0x333333);
           g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
                      rect.w * tileWidth, rect.h * tileHeight);
           g.endFill();
-        },
-        renderOff: function() {
+      };
+
+      s.renderOff = function() {
           g.clear();
           g.beginFill(0xDDDDDD);
           g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
                      rect.w * tileWidth, rect.h * tileHeight);
           g.endFill();
-        }
       };
     }
 
