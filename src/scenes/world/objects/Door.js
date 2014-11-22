@@ -1,31 +1,9 @@
 define(['../Body'], function(Body) {
 
 
-    function DoorPlugin(s) {
-        var tileWidth = s.map.mapData.tilewidth;
-        var tileHeight = s.map.mapData.tileheight;
+    function Door(s, obj) {
 
-        for (var i = 0, ii = s.map.objectlayers.length; i < ii; i++) {
-            var layer = s.map.objectlayers[i];
-            for (var j = 0, jj = layer.length; j < jj; j++) {
-                var obj = layer[j];
-
-                if (obj.hasType('Door')) {
-                  var x = obj.x / tileWidth;
-                  var y = obj.y / tileHeight;
-                  var w = obj.w / tileWidth;
-                  var h = obj.h / tileHeight;
-
-                  s.objects[obj.name] = s.create(Door, obj, x, y, w, h);
-                }
-            }
-        }
-    }
-
-
-    function Door(s, obj, x, y, w, h) {
-
-        s.body = s.create(Body, x, y, w, h, true);
+        s.body = s.create(Body, obj.x, obj.y, obj.w, obj.h, true);
                   
         var renderer = s.create(DoorRenderer);
 
@@ -80,5 +58,5 @@ define(['../Body'], function(Body) {
       };
     }
 
-    return DoorPlugin;
+    return Door;
 });

@@ -17,6 +17,8 @@ define([
     'scenes/world/objects/DoorSwitch',
     'scenes/world/objects/squirrel/Squirrel',
 
+    'scenes/world/ObjectLoader',
+
     'loadpoints',
     'FPSMeter',
     'Dead',
@@ -41,6 +43,7 @@ define([
     DoorSwitch,
     Squirrel,
 
+    ObjectLoader,
     loadpointsLoader,
     FPSMeter,
     Dead,
@@ -49,6 +52,13 @@ define([
 
     var container = document.getElementById("biscuits-container");
 
+
+    var objectTypeMap = {
+        'Squirrel': Squirrel,
+        'DoorSwitch': DoorSwitch,
+        'Door': Door,
+        'Wall': Wall,
+    };
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {
 
@@ -75,14 +85,11 @@ define([
       s.create(TrackPlayer, s.player.playerRenderer.renderable,
                ['background', 'objects', 'player']);
 
-      s.create(Wall);
-      s.create(Door);
-      s.create(DoorSwitch);
-      s.create(Squirrel);
+      s.loader = s.create(ObjectLoader, objectTypeMap);
+      s.loader.loadMap(s.map);
 
       s.create(HUD);
       s.create(FPSMeter);
-
     });
 
     loadpoints['dead'] = function(s) {

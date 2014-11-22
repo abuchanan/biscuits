@@ -7,32 +7,9 @@ define([
 ], function(SquirrelRenderer, SquirrelActions, SquirrelDriver, Body) {
 
 
-    function SquirrelPlugin(s) {
-        var map = s.map;
-        var tileWidth = s.map.mapData.tilewidth;
-        var tileHeight = s.map.mapData.tileheight;
+    function Squirrel(s, obj) {
 
-        for (var i = 0, ii = map.objectlayers.length; i < ii; i++) {
-            var layer = map.objectlayers[i];
-            for (var j = 0, jj = layer.length; j < jj; j++) {
-                var obj = layer[j];
-
-                if (obj.hasType('Squirrel')) {
-                    var x = obj.x / tileWidth;
-                    var y = obj.y / tileHeight;
-                    var w = obj.w / tileWidth;
-                    var h = obj.h / tileHeight;
-
-                    s.create(Squirrel, x, y, w, h);
-                }
-            }
-        }
-    }
-
-
-    function Squirrel(s, x, y, w, h) {
-
-        s.body = s.create(Body, x, y, w, h, false);
+        s.body = s.create(Body, obj.x, obj.y, obj.w, obj.h, false);
 
         s.actions = s.create(SquirrelActions);
         s.create(SquirrelRenderer, s.actions.moveManager);
@@ -80,7 +57,7 @@ define([
         });
     }
 
-    return SquirrelPlugin;
+    return Squirrel;
 });
 
 
