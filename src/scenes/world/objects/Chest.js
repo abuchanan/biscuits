@@ -1,89 +1,45 @@
-// TODO if this name is missing from the module, no import error is thrown.
-//      it's just "undefined" which totally sucks.
-import {Provide, SuperConstructor} from 'di';
-import {ObjectScope} from 'src/scope';
-import {Body} from 'src/world';
-import {Renderer} from 'src/render';
-import {CoinPurse} from 'src/plugins/Player';
-import {Types} from 'src/types';
-import {Loader} from 'src/utils';
-import {ObjectConfig} from 'src/config';
+define(['../Body'], function(Body) {
 
+    function Chest(s, obj) {
+        s.body = s.create(Body, obj.x, obj.y, obj.w, obj.h, true);
+        s.isOpen = false;
 
-@ObjectScope
-@Provide(Body)
-class ChestBody extends Body {
+        var chestRenderer = s.create(ChestRenderer);
 
-  constructor(superConstructor: SuperConstructor) {
-    superConstructor();
-    this.isBlock = true;
-  }
-}
-// TODO contain things other than coins
-
-class ChestConfig {
-  constructor(value = 1) {
-    this.value = value;
-    this.isOpen = false;
-  }
-}
-
-
-@ObjectScope
-function ChestRenderer(renderer: Renderer, body: Body) {
-  var layer = renderer.getLayer('objects');
-  var rect = body.getRectangle();
-
-  // TODO handle isOpen == true on initialization
-
-  var g = renderer.createGraphic();
-  g.beginFill(0x00FFFF);
-  g.drawRect(rect.x, rect.y, rect.w, rect.h);
-  g.endFill();
-  layer.addChild(g);
-
-  return {
-    renderOpened: function() {
-      g.clear();
-      g.beginFill(0x0000FF);
-      g.drawRect(rect.x, rect.y, rect.w, rect.h);
-      g.endFill();
+        s.body.on('use', function(player) {
+          if (!s.isOpen) {
+            s.isOpen = true;
+            chestRenderer.renderOpened();
+            s.trigger('chest opened', [player]);
+          }
+        });
     }
-  };
-}
 
 
-@ObjectScope
-function ChestUseable(body: Body, config: ChestConfig,
-                      chestRenderer: ChestRenderer) {
+    function ChestRenderer(s) {
+        var layer = s.renderer.getLayer('objects');
+        var rect = s.body.getRectangle();
 
-  body.events.on('use', function(usedBy) {
-    if (!config.isOpen) {
-      config.isOpen = true;
-      // TODO this pattern is interesting. what happens when the object doesn't
-      //      have a coin purse? Error thrown? Returns undefined
-      var coinPurse = usedBy.obj.get(CoinPurse);
-      coinPurse.deposit(config.value);
-      chestRenderer.renderOpened();
+        // TODO handle isOpen == true on initialization
+
+        var tileWidth = s.map.mapData.tilewidth;
+        var tileHeight = s.map.mapData.tileheight;
+
+        var g = s.renderer.createGraphic();
+        g.beginFill(0x00FFFF);
+        g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
+                   rect.w * tileWidth, rect.h * tileHeight);
+        g.endFill();
+        layer.addChild(g);
+
+        s.renderOpened = function() {
+            g.clear();
+            g.beginFill(0x0000FF);
+            g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
+                       rect.w * tileWidth, rect.h * tileHeight);
+            g.endFill();
+        };
     }
-  });
-}
 
-
-@ObjectScope
-@Provide(ChestConfig)
-function provideChestConfig(config: ObjectConfig) {
-  return {value: parseInt(config.chestValue)};
-}
-
-
-Types['chest'] = new Loader()
-  .provides([
-    provideChestConfig,
-    ChestBody,
-  ])
-  .runs([
-    Body,
-    ChestRenderer,
-    ChestUseable,
-  ]);
+    return Chest;
+});

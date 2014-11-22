@@ -51,7 +51,8 @@ define([
           }),
       };
           
-      s.attack = Attack(s.world, body),
+      s.attack = Attack(s.world, body);
+      s.use = Use(s.world, body);
       s.manager = actionManager;
 
       binder.bind('Up', s.walk.north);
@@ -59,6 +60,7 @@ define([
       binder.bind('Left', s.walk.west);
       binder.bind('Right', s.walk.east);
       binder.bind('Attack', s.attack);
+      binder.bind('Use', s.use);
   };
 
 
@@ -90,33 +92,34 @@ define([
       };
   }
 
+
+  function Use(world, body, config) {
+
+      var defaults = {
+          name: 'use',
+          duration: 1000,
+      };
+      config = utils.extend({}, defaults, config || {});
+
+      var makeAction = Action(config);
+
+      return function() {
+          var action = makeAction();
+          var bb = body.getRectangle();
+          bb.extend('forward', 1);
+          var hits = world.query(bb);
+
+          console.log('use!', hits);
+
+          // TODO can only use one object?
+          for (var i = 0, ii = hits.length; i < ii; i++) {
+              if (hits[i] !== body) {
+                  hits[i].trigger('use', [body]);
+              }
+          }
+
+          return action;
+      };
+  }
+
 });
-
-
-/*
-
-class Use extends Action {
-
-  constructor(superConstructor: SuperConstructor, body: Body) {
-    superConstructor();
-    this.body = body;
-
-    this.configure({
-      name: 'use',
-      duration: 1000,
-    });
-  }
-
-  start() {
-    super.start();
-
-    // TODO optimize?
-    // TODO can only use one object?
-    var body = this.body;
-    body.queryFront().forEach(function(hit) {
-      hit.events.trigger('use', [body]);
-    });
-  }
-}
-
-*/

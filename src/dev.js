@@ -13,6 +13,8 @@ define([
 
     'scenes/world/TrackPlayer',
     'scenes/world/objects/Wall',
+    'scenes/world/objects/Coin',
+    'scenes/world/objects/CoinChest',
     'scenes/world/objects/Door',
     'scenes/world/objects/DoorSwitch',
     'scenes/world/objects/squirrel/Squirrel',
@@ -20,6 +22,7 @@ define([
 
     'scenes/world/ObjectLoader',
 
+    'Bank',
     'loadpoints',
     'FPSMeter',
     'Dead',
@@ -40,12 +43,15 @@ define([
 
     TrackPlayer,
     Wall,
+    Coin,
+    CoinChest,
     Door,
     DoorSwitch,
     Squirrel,
     SquirrelLock,
 
     ObjectLoader,
+    Bank,
     loadpointsLoader,
     FPSMeter,
     Dead,
@@ -61,6 +67,8 @@ define([
         'Door': Door,
         'Wall': Wall,
         'SquirrelLock': SquirrelLock,
+        'Coin': Coin,
+        'CoinChest': CoinChest,
     };
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {
@@ -85,6 +93,8 @@ define([
       s.mixin(Background, s.map);
 
       s.player = s.create(Player);
+      s.player.coins = s.player.create(Bank);
+
       s.create(TrackPlayer, s.player.playerRenderer.renderable,
                ['background', 'objects', 'player']);
 

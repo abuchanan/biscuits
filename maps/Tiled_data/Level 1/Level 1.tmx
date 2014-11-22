@@ -362,4 +362,16 @@
    </properties>
   </object>
  </objectgroup>
+ <objectgroup name="Coins">
+  <object type="Coin" x="736" y="1280" width="32" height="32"/>
+  <object type="Coin" x="736" y="1216" width="32" height="32"/>
+  <object type="Coin" x="736" y="1152" width="32" height="32"/>
+ </objectgroup>
+ <objectgroup name="Chests">
+  <object type="CoinChest" x="1056" y="1152" width="32" height="32">
+   <properties>
+    <property name="coinValue" value="10"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>
