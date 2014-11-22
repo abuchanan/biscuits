@@ -166,6 +166,7 @@
   <object name="Room 4 to 6" type="Door" x="2144" y="448" width="32" height="96">
    <properties>
     <property name="Destination" value="Loadpoint 6a"/>
+    <property name="locks" value="generic"/>
    </properties>
   </object>
   <object name="Room 6 to 4" type="Door" x="2208" y="448" width="32" height="96">
@@ -373,5 +374,8 @@
     <property name="coinValue" value="10"/>
    </properties>
   </object>
+ </objectgroup>
+ <objectgroup name="Keys">
+  <object type="Key" x="1760" y="320" width="32" height="32"/>
  </objectgroup>
 </map>

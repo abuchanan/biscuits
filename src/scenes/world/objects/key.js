@@ -1,74 +1,36 @@
-import {Provide} from 'di';
-import {Body} from 'src/world';
-import {ObjectScope} from 'src/scope';
-import {Renderer} from 'src/render';
-import {Types} from 'src/types';
-import {Loader} from 'src/utils';
-import {ObjectConfig} from 'src/config';
+define(['../Body'], function(Body) {
 
+    function Key(s, obj) {
+      s.body = s.create(Body, obj.x, obj.y, obj.w, obj.h, false);
 
-class KeyConfig {}
+      s.mixin(KeyRenderer);
 
-
-@ObjectScope
-function KeyRenderer(renderer: Renderer, body: Body) {
-  var layer = renderer.getLayer('objects');
-  var rect = body.getRectangle();
-
-  var g = renderer.createGraphic();
-  g.beginFill(0xFFB300);
-  g.drawRect(rect.x, rect.y, rect.w, rect.h);
-  g.endFill();
-  layer.addChild(g);
-
-  return {
-    clear: function() {
-      layer.removeChild(g);
+      s.body.on('player collision', function(playerBody) {
+        // TODO move away from using global player object, so that a future
+        //      move to multiplayer would be easier
+        s.player.keys.deposit(1);
+        s.destroy();
+      });
     }
-  }
-}
 
+    function KeyRenderer(s) {
+        var layer = s.renderer.getLayer('objects');
+        var rect = s.body.getRectangle();
 
-@ObjectScope
-class KeyPurse {
+        var tileWidth = s.map.mapData.tilewidth;
+        var tileHeight = s.map.mapData.tileheight;
 
-  constructor() {
-    this._balance = 0;
-  }
+        var g = s.renderer.createGraphic();
+        g.beginFill(0xFFB300);
+        g.drawRect(rect.x * tileWidth, rect.y * tileHeight,
+                   rect.w * tileWidth, rect.h * tileHeight);
+        g.endFill();
+        layer.addChild(g);
 
-  // TODO needs type checking, should be integer
-  //      best if it happens at compile time?
-  deposit(amount) {
-    this._balance += amount;
-  }
+        s.on('destroy', function() {
+          layer.removeChild(g);
+        });
+    }
 
-  withdraw(amount) {
-    this._balance -= amount;
-  }
-
-  balance() {
-    return this._balance;
-  }
-}
-
-
-@ObjectScope
-function KeyCollision(config: KeyConfig, body: Body,
-                      renderer: KeyRenderer) {
-
-  // TODO should be getting the player object, not the body
-  body.events.on('player collision', function(playerBody) {
-    body.remove();
-
-    var purse = playerBody.obj.get(KeyPurse);
-    purse.deposit(1);
-
-    // TODO test for this
-    renderer.clear();
-  });
-}
-
-Types['key'] = new Loader()
-  .runs(Body, KeyRenderer, KeyCollision);
-
-// TODO test that renderables are removed from renderer when scene is unloaded
+    return Key;
+});

@@ -5,15 +5,26 @@ define(['../Body'], function(Body) {
 
         s.body = s.create(Body, obj.x, obj.y, obj.w, obj.h, true);
                   
+        var locks = {};
         var renderer = s.create(DoorRenderer);
 
         s.body.on('player collision', function(playerBody) {
+          // TODO this is a weird case. Feels very hard-coded to both
+          //      a global player and a "generic" key/lock name
+          //
+          //      maybe want a plugin to be able to observe collisions
+          //      between to foreign objects (player and door)
+          if (s.isLocked() && locks['generic']) {
+              if (s.player.keys.balance() > 0) {
+                  s.player.keys.withdraw(1);
+                  s.unlock('generic');
+              }
+          }
+
           if (!s.isLocked()) {
             s.start(obj.Destination);
           }
         });
-
-        var locks = {};
 
         s.isLocked = function() {
             return Object.keys(locks).length > 0;
@@ -30,6 +41,13 @@ define(['../Body'], function(Body) {
                 renderer.renderOpen();
             }
         };
+
+        if (obj.locks) {
+            var l = obj.locks.split(/[, ]+/);
+            for (var i = 0; i < l.length; i++) {
+                s.lock(l[i]);
+            }
+        }
     }
 
 

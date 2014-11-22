@@ -15,6 +15,7 @@ define([
     'scenes/world/objects/Wall',
     'scenes/world/objects/Coin',
     'scenes/world/objects/CoinChest',
+    'scenes/world/objects/Key',
     'scenes/world/objects/Door',
     'scenes/world/objects/DoorSwitch',
     'scenes/world/objects/squirrel/Squirrel',
@@ -45,6 +46,7 @@ define([
     Wall,
     Coin,
     CoinChest,
+    Key,
     Door,
     DoorSwitch,
     Squirrel,
@@ -69,6 +71,7 @@ define([
         'SquirrelLock': SquirrelLock,
         'Coin': Coin,
         'CoinChest': CoinChest,
+        'Key': Key,
     };
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {
@@ -94,6 +97,7 @@ define([
 
       s.player = s.create(Player);
       s.player.coins = s.player.create(Bank);
+      s.player.keys = s.player.create(Bank);
 
       s.create(TrackPlayer, s.player.playerRenderer.renderable,
                ['background', 'objects', 'player']);
@@ -116,5 +120,6 @@ define([
 
     var app = Biscuits(loadpoints);
 
-    app.start('Loadpoint 1a');
+    //app.start('Loadpoint 1a');
+    app.start('Loadpoint 4a');
 });
