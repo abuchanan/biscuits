@@ -1464,7 +1464,7 @@
          "objects":[
                 {
                  "height":32,
-                 "name":"",
+                 "name":"Squirrel 1",
                  "properties":
                     {
 
@@ -1478,13 +1478,13 @@
                 }, 
                 {
                  "height":32,
-                 "name":"",
+                 "name":"Squirrel 2",
                  "properties":
                     {
-
+                     "lockTarget":"Room 2 to 3"
                     },
                  "rotation":0,
-                 "type":"Squirrel",
+                 "type":"SquirrelLock",
                  "visible":true,
                  "width":32,
                  "x":1280,
@@ -1492,13 +1492,13 @@
                 }, 
                 {
                  "height":32,
-                 "name":"",
+                 "name":"Squirrel 3",
                  "properties":
                     {
-
+                     "lockTarget":"Room 2 to 3"
                     },
                  "rotation":0,
-                 "type":"Squirrel",
+                 "type":"SquirrelLock",
                  "visible":true,
                  "width":32,
                  "x":1536,
@@ -1506,13 +1506,13 @@
                 }, 
                 {
                  "height":32,
-                 "name":"",
+                 "name":"Squirrel 4",
                  "properties":
                     {
-
+                     "lockTarget":"Room 2 to 3"
                     },
                  "rotation":0,
-                 "type":"Squirrel",
+                 "type":"SquirrelLock",
                  "visible":true,
                  "width":32,
                  "x":1280,
@@ -1520,13 +1520,13 @@
                 }, 
                 {
                  "height":32,
-                 "name":"",
+                 "name":"Squirrel 5",
                  "properties":
                     {
-
+                     "lockTarget":"Room 2 to 3"
                     },
                  "rotation":0,
-                 "type":"Squirrel",
+                 "type":"SquirrelLock",
                  "visible":true,
                  "width":32,
                  "x":1536,

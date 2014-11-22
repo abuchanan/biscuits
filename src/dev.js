@@ -16,6 +16,7 @@ define([
     'scenes/world/objects/Door',
     'scenes/world/objects/DoorSwitch',
     'scenes/world/objects/squirrel/Squirrel',
+    'scenes/world/objects/squirrel/SquirrelLock',
 
     'scenes/world/ObjectLoader',
 
@@ -42,6 +43,7 @@ define([
     Door,
     DoorSwitch,
     Squirrel,
+    SquirrelLock,
 
     ObjectLoader,
     loadpointsLoader,
@@ -58,6 +60,7 @@ define([
         'DoorSwitch': DoorSwitch,
         'Door': Door,
         'Wall': Wall,
+        'SquirrelLock': SquirrelLock,
     };
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {

@@ -21,8 +21,11 @@ define(function() {
                         var type = obj.types[k];
                         var func = typeMap[type];
                         if (func) {
-                            console.log(func.name);
+                            // TODO for multiple types, this is broken
                             var objScope = s.create(func, obj);
+                            // TODO might want to assign programmatically unique
+                            //      IDs to each object. They might not get unique
+                            //      names during map editing
                             s.objects[obj.name] = objScope;
                         }
                     }

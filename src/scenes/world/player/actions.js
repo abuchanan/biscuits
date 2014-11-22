@@ -14,6 +14,9 @@ define([
       var actionManager = s.create(ActionManager);
       var binder = s.create(InputBinder, actionManager);
 
+
+    // TODO movement. Sometimes you want to change direction without moving
+    //      to the next square. Can't do this with current setup.
       s.walk = {
           north: Movement({
               name: 'walk-north',

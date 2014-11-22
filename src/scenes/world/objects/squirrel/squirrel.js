@@ -21,7 +21,7 @@ define([
           life -= 10;
 
           if (life <= 0) {
-              console.log('dead');
+              s.trigger('dead');
               s.destroy();
           } else {
               console.log('squirrel hit!', life);

@@ -340,10 +340,26 @@
   </object>
  </objectgroup>
  <objectgroup name="Squirrels">
-  <object type="Squirrel" x="1024" y="1376" width="32" height="32"/>
-  <object type="Squirrel" x="1280" y="1152" width="32" height="32"/>
-  <object type="Squirrel" x="1536" y="1152" width="32" height="32"/>
-  <object type="Squirrel" x="1280" y="832" width="32" height="32"/>
-  <object type="Squirrel" x="1536" y="832" width="32" height="32"/>
+  <object name="Squirrel 1" type="Squirrel" x="1024" y="1376" width="32" height="32"/>
+  <object name="Squirrel 2" type="SquirrelLock" x="1280" y="1152" width="32" height="32">
+   <properties>
+    <property name="lockTarget" value="Room 2 to 3"/>
+   </properties>
+  </object>
+  <object name="Squirrel 3" type="SquirrelLock" x="1536" y="1152" width="32" height="32">
+   <properties>
+    <property name="lockTarget" value="Room 2 to 3"/>
+   </properties>
+  </object>
+  <object name="Squirrel 4" type="SquirrelLock" x="1280" y="832" width="32" height="32">
+   <properties>
+    <property name="lockTarget" value="Room 2 to 3"/>
+   </properties>
+  </object>
+  <object name="Squirrel 5" type="SquirrelLock" x="1536" y="832" width="32" height="32">
+   <properties>
+    <property name="lockTarget" value="Room 2 to 3"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
