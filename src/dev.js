@@ -13,6 +13,7 @@ define([
 
     'scenes/world/TrackPlayer',
     'scenes/world/objects/Wall',
+    'scenes/world/objects/Jar',
     'scenes/world/objects/Coin',
     'scenes/world/objects/CoinChest',
     'scenes/world/objects/Key',
@@ -44,6 +45,7 @@ define([
 
     TrackPlayer,
     Wall,
+    Jar,
     Coin,
     CoinChest,
     Key,
@@ -72,6 +74,7 @@ define([
         'Coin': Coin,
         'CoinChest': CoinChest,
         'Key': Key,
+        'Jar': Jar,
     };
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {
@@ -120,6 +123,6 @@ define([
 
     var app = Biscuits(loadpoints);
 
-    //app.start('Loadpoint 1a');
-    app.start('Loadpoint 4a');
+    app.start('Loadpoint 1a');
+    //app.start('Loadpoint 4a');
 });

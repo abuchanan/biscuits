@@ -378,4 +378,9 @@
  <objectgroup name="Keys">
   <object type="Key" x="1760" y="320" width="32" height="32"/>
  </objectgroup>
+ <objectgroup name="Jars">
+  <object type="Jar" x="736" y="1088" width="32" height="32"/>
+  <object type="Jar" x="736" y="1024" width="32" height="32"/>
+  <object type="Jar" x="736" y="960" width="32" height="32"/>
+ </objectgroup>
 </map>
