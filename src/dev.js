@@ -24,10 +24,11 @@ define([
 
     'scenes/world/ObjectLoader',
 
+
     'Bank',
     'loadpoints',
     'FPSMeter',
-    'Dead',
+    'scenes/Dead',
     'HUD',
 
 ], function(
