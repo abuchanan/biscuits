@@ -24,13 +24,19 @@ define(['./textures', 'lib/pixi'], function(textures, PIXI) {
         // TODO need a way to split up the rendering of various movements
         //      into discrete pieces. i.e. make action/movement rendering
         //      pluggable
-        if (action && action.isMovement) {
+        if (action) {
 
-            var textureName = action.name;
+            if (action.isMovement) {
+                var textureName = action.name;
+                var pos = action.interpolatePosition();
+
+            } else {
+                var textureName = action.name + '-' + s.body.direction;
+                var pos = s.body.getPosition();
+            }
+
             clip.textures = textures[textureName];
             clip.play();
-
-            var pos = action.interpolatePosition();
 
             // TODO have some other layer that automatically scales positions
             clip.x = Math.floor(pos.x * tileWidth);

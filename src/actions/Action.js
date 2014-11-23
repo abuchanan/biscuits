@@ -31,6 +31,8 @@ define(['utils'], function(utils) {
               done: false,
               tick: tick,
               loop: config.loop,
+              config: config,
+              name: config.name,
             };
 
             return action;

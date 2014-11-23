@@ -48,7 +48,6 @@ define(['./Action', 'utils'], function(Action, utils) {
 
             // Action API
             return utils.extend(action, {
-                name: config.name,
                 isMovement: true,
                 tick: tick,
                 interpolatePosition: interpolatePosition,

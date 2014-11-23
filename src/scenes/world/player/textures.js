@@ -48,16 +48,16 @@ define(['sprites'], function(sprites) {
       parts['west-1'],
       parts['west-3'],
     ],
-    'sword-north': [
+    'attack-north': [
       parts['sword-north-0'],
     ],
-    'sword-south': [
+    'attack-south': [
       parts['sword-south-0'],
     ],
-    'sword-west': [
+    'attack-west': [
       parts['sword-west-0'],
     ],
-    'sword-east': [
+    'attack-east': [
       parts['sword-east-0'],
     ],
   };
