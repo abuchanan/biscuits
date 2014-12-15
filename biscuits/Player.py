@@ -11,6 +11,7 @@ from kivy.properties import NumericProperty, ReferenceListProperty, \
 from kivy.uix.image import Image
 from kivy.uix.widget import Widget
 
+from World import Body, Direction
 from geometry import Rectangle as BoundingBox
 
 
@@ -50,8 +51,7 @@ class Player:
 
     def __init__(self, world):
         # TODO initial position and direction from map
-        self.bb = BoundingBox(10, 10, 1, 1)
-        self.direction = 'south'
+        self.body = Body(10, 10, 1, 1)
         self.world = world
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
@@ -61,13 +61,13 @@ class Player:
         world.add(self)
 
     def move(self, dx, dy):
-        n = BoundingBox(self.bb.x + dx, self.bb.y + dy,
-                        self.bb.w, self.bb.h)
+        n = BoundingBox(self.body.x + dx, self.body.y + dy,
+                        self.body.w, self.body.h)
 
         if self.world.hits_block(n):
             return
 
-        self.bb = n
+        self.body.set_dimensions(n)
 
     def update(self, dt):
         self.actions.update(dt)
@@ -170,54 +170,54 @@ class PlayerActions:
 
         if self.current is self.idle or isinstance(self.current, Walk):
             if self._input.up.keydown:
-                self.current = Walk(self.player, 'north')
+                self.current = Walk(self.player, Direction.north)
 
             elif self._input.down.keydown:
-                self.current = Walk(self.player, 'south')
+                self.current = Walk(self.player, Direction.south)
 
             elif self._input.left.keydown:
-                self.current = Walk(self.player, 'west')
+                self.current = Walk(self.player, Direction.west)
 
             elif self._input.right.keydown:
-                self.current = Walk(self.player, 'east')
+                self.current = Walk(self.player, Direction.east)
 
         if isinstance(self.current, Walk):
             d = self.current.direction
 
-            if d == 'north' and self._input.up.keyup:
+            if d == Direction.north and self._input.up.keyup:
                 self.current = self.idle
 
-            elif d == 'south' and self._input.down.keyup:
+            elif d == Direction.south and self._input.down.keyup:
                 self.current = self.idle
 
-            elif d == 'west' and self._input.left.keyup:
+            elif d == Direction.west and self._input.left.keyup:
                 self.current = self.idle
 
-            elif d == 'east' and self._input.right.keyup:
+            elif d == Direction.east and self._input.right.keyup:
                 self.current = self.idle
                 
 
 class Walk:
 
-    def __init__(self, player, direction='north'):
+    def __init__(self, player, direction=Direction.north):
         self.player = player
         self.direction = direction
 
     def update(self, dt):
         # TODO sprite animation
-        self.player.direction = self.direction
-        self.player.widget.background = 'media/player/' + self.direction + '-0.png'
+        self.player.body.direction = self.direction
+        self.player.widget.background = 'media/player/' + self.direction.name + '-0.png'
 
         dx = 0
         dy = 0
 
-        if self.direction == 'north':
+        if self.direction == Direction.north:
             dy = 1
-        elif self.direction == 'south':
+        elif self.direction == Direction.south:
             dy = -1
-        elif self.direction == 'east':
+        elif self.direction == Direction.east:
             dx = 1
-        elif self.direction == 'west':
+        elif self.direction == Direction.west:
             dx = -1
 
         speed = .75

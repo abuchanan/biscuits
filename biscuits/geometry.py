@@ -49,6 +49,12 @@ class Rectangle:
         return (right > other_left and left < other_right and
                 top > other_bottom and bottom < other_top)
 
+    def set_dimensions(self, other):
+        self.x = other.x
+        self.y = other.y
+        self.w = other.w
+        self.h = other.h
+
     @property
     def bounds(self):
         return self.x, self.y, self.x + self.w, self.y + self.h

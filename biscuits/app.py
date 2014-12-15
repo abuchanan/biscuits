@@ -15,17 +15,16 @@ from kivy.properties import NumericProperty
 from TileGrid import TileGrid
 from TiledMap import TiledMap
 from Player import Player
-from World import World, Block
-from geometry import Rectangle as BoundingBox
+from World import World, Body
 
 
 maps_path = Path(__file__).parent / '..' / 'maps' / 'Tiled_data'
 
 
-class Wall(Block):
+class Wall:
 
     def __init__(self, x, y, w, h):
-        self.bb = BoundingBox(x, y, w, h)
+        self.body = Body(x, y, w, h, is_block=True)
 
     def update(self, dt):
         pass
@@ -53,15 +52,15 @@ class BasicItem:
 
     def __init__(self, name, x, y, w, h, value, world):
         self.name = name
-        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
-        self.bb = BoundingBox(x, y, w, h)
         # TODO resolve this tile width/height crap
+        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
+        self.body = Body(x, y, w, h)
         self.world = world
         self.value = value
         world.add(self)
 
     def update(self, dt):
-        for hit in self.world.query(self.bb):
+        for hit in self.world.query(self.body):
             if isinstance(hit, Player):
                 getattr(hit, self.name).balance += self.value
                 self.widget.remove()
@@ -227,8 +226,8 @@ class BiscuitsGame(RelativeLayout):
         # TODO could (should) use grid layout details instead of map tile details
         #      that would account for any extra information defined in the grid
         #      (e.g. padding, scaling, etc)
-        x = math.floor((self.player.bb.x + 0.5) * self.map.tilewidth)
-        y = math.floor((self.player.bb.y + 0.5) * self.map.tileheight)
+        x = math.floor((self.player.body.x + 0.5) * self.map.tilewidth)
+        y = math.floor((self.player.body.y + 0.5) * self.map.tileheight)
 
         # TODO getting low FPS during movement, seems to be happening here
         #      I guess it's not surprising since all those sprites are moving
