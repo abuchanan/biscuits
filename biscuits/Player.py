@@ -72,7 +72,7 @@ class Player:
         # TODO initial position and direction from map
         self.body = PlayerBody(world, 10, 10, 1, 1)
         self.world = world
-        self.actions = PlayerActions(self)
+        self.actions = PlayerActions(self, world)
         self.widget = PlayerWidget()
         self.coins = Bank()
         self.keys = Bank()
@@ -84,6 +84,14 @@ class Player:
 
 
 class Keybindings:
+
+    _map = {
+        'up': 'up',
+        'down': 'down',
+        'left': 'left',
+        'right': 'right',
+        'e': 'use',
+    }
 
     def __init__(self, _input):
         self._input = _input
@@ -97,11 +105,11 @@ class Keybindings:
         self._keyboard = None
 
     def _on_key_up(self, keyboard, keycode):
-        k = keycode[1]
+        k = self._map.get(keycode[1], keycode[1])
         self._input.deactivate(k)
 
     def _on_key_down(self, keyboard, keycode, text, modifiers):
-        k = keycode[1]
+        k = self._map.get(keycode[1], keycode[1])
         self._input.activate(k)
 
 
@@ -166,46 +174,87 @@ class Input:
 
 class PlayerActions:
 
-    def __init__(self, player):
+    def __init__(self, player, world):
         self.player = player
+        self.world = world
         self._input = Input()
         Keybindings(self._input)
         self.idle = Idle()
         self.current = self.idle
 
-    def update(self, dt):
+    def transition(self):
 
+        # For brevity
+        cur = self.current
+        inp = self._input
+
+        if isinstance(cur, Use) and cur.done:
+            print('use done')
+            return self.idle
+
+        elif cur is self.idle or isinstance(cur, Walk):
+
+            if inp.use.keydown:
+                print('use!')
+                return Use(self.player, self.world)
+
+            elif inp.up.keydown:
+                return Walk(self.player, Direction.north)
+
+            elif inp.down.keydown:
+                return Walk(self.player, Direction.south)
+
+            elif inp.left.keydown:
+                return Walk(self.player, Direction.west)
+
+            elif inp.right.keydown:
+                return Walk(self.player, Direction.east)
+
+            elif isinstance(cur, Walk):
+                d = cur.direction
+
+                if d == Direction.north and inp.up.keyup:
+                    return self.idle
+
+                elif d == Direction.south and inp.down.keyup:
+                    return self.idle
+
+                elif d == Direction.west and inp.left.keyup:
+                    return self.idle
+
+                elif d == Direction.east and inp.right.keyup:
+                    return self.idle
+
+
+    def update(self, dt):
         self._input.update(dt)
+        _next = self.transition()
+        if _next:
+            self.current = _next
         self.current.update(dt)
 
-        if self.current is self.idle or isinstance(self.current, Walk):
-            if self._input.up.keydown:
-                self.current = Walk(self.player, Direction.north)
 
-            elif self._input.down.keydown:
-                self.current = Walk(self.player, Direction.south)
+class Use:
+    def __init__(self, player, world):
+        self.player = player
+        self.world = world
+        self.elapsed_time = 0
+        self.done = False
+        self.started = False
 
-            elif self._input.left.keydown:
-                self.current = Walk(self.player, Direction.west)
+    def update(self, dt):
+        self.elapsed_time += dt
 
-            elif self._input.right.keydown:
-                self.current = Walk(self.player, Direction.east)
+        if not self.started:
+            b = self.player.body
+            q = b.copy()
+            q.grow(b.direction.forward)
+            self.world.dispatch(q, 'use', self.player)
+            self.started = True
 
-        if isinstance(self.current, Walk):
-            d = self.current.direction
+        if self.elapsed_time >= 1:
+            self.done = True
 
-            if d == Direction.north and self._input.up.keyup:
-                self.current = self.idle
-
-            elif d == Direction.south and self._input.down.keyup:
-                self.current = self.idle
-
-            elif d == Direction.west and self._input.left.keyup:
-                self.current = self.idle
-
-            elif d == Direction.east and self._input.right.keyup:
-                self.current = self.idle
-                
 
 class Walk:
 

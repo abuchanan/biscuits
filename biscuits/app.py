@@ -81,6 +81,25 @@ class Key(BasicItem):
         self.widget.color.rgb = (1, 1, 0)
 
 
+class Chest:
+
+    def __init__(self, x, y, w, h, world):
+        # TODO resolve this tile width/height crap
+        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
+        self.widget.color.rgb = (0, 0, 1)
+        self.body = Body(x, y, w, h, is_block=True)
+        world.add(self)
+        self.is_open = False
+
+    def on_use(self, player):
+        if not self.is_open:
+            self.is_open = True
+            self.widget.color.rgb = (0, 0, 0)
+
+    def update(self, dt):
+        pass
+
+
 def load_object_groups(map, world, container):
     for group_i in map.visible_object_groups:
         for obj in map.layers[group_i]:
@@ -107,6 +126,10 @@ def load_object_groups(map, world, container):
             elif obj.type == 'Key':
                 key = Key(x, y, w, h, 1, world)
                 container.add_widget(key.widget)
+
+            elif obj.type == 'Chest':
+                chest = Chest(x, y, w, h, world)
+                container.add_widget(chest.widget)
 
 
 class HUDWidget(BoxLayout):

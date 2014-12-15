@@ -15,8 +15,6 @@ class Rectangle:
 
     The rectangle stores left, top, right, and bottom values.
 
-    Coordinates are based on window coordinates (to match Kivy).
-
         y increases
         ^
         |
@@ -59,18 +57,6 @@ class Rectangle:
     def bounds(self):
         return self.x, self.y, self.x + self.w, self.y + self.h
 
-    
-    def grow(self, n):
-        """Return a rectangle with extended borders.
-
-        Create a new rectangle that is wider and taller than the
-        immediate one. All sides are extended by "n" points.
-        """
-        return Rectangle(self.x - n, self.y - n, self.w + n, self.h + n)
-
-    def shrink(self, n):
-        return self.grow(-n)
-    
     def __repr__(self):
         return "{}({}, {}, {}, {})".format(self.__class__.__name__,
                                            self.x, self.y, self.w, self.h)

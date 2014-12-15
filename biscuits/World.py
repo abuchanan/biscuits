@@ -1,3 +1,4 @@
+from copy import copy
 from enum import Enum
 
 from geometry import Rectangle as BoundingBox
@@ -43,6 +44,29 @@ class Body(BoundingBox):
         self.x += direction.dx * distance
         self.y += direction.dy * distance
 
+    def grow(self, direction=None, distance=1):
+        if direction:
+            dx = direction.dx * distance
+            dy = direction.dy * distance
+
+            if dx > 0:
+                self.w += dx
+            elif dx < 0:
+                self.x -= dx
+
+            if dy > 0:
+                self.h += dy
+            elif dy < 0:
+                self.y -= dy
+        else:
+            self.x -= distance
+            self.y -= distance
+            self.w += distance
+            self.h += distance
+
+    def copy(self):
+        return copy(self)
+
 
 class World:
 
@@ -73,3 +97,9 @@ class World:
                 return True
 
         return False
+
+    def dispatch(self, q, event_name, *args, **kwargs):
+        for hit in self.query(q):
+            method = getattr(hit, 'on_' + event_name, None)
+            if method:
+                method(*args, **kwargs)
