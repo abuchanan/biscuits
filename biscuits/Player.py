@@ -47,11 +47,30 @@ class Bank:
         self._balance = max(val, 0)
 
 
+class PlayerBody(Body):
+
+    def __init__(self, world, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.world = world
+
+    def move(self, direction, distance=1):
+        dx = direction.dx * distance
+        dy = direction.dy * distance
+
+        n = BoundingBox(self.x + dx, self.y + dy,
+                        self.w, self.h)
+
+        if self.world.hits_block(n):
+            return
+
+        self.set_from_rectangle(n)
+
+
 class Player:
 
     def __init__(self, world):
         # TODO initial position and direction from map
-        self.body = Body(10, 10, 1, 1)
+        self.body = PlayerBody(world, 10, 10, 1, 1)
         self.world = world
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
@@ -59,15 +78,6 @@ class Player:
         self.keys = Bank()
         self.health = Bank(100)
         world.add(self)
-
-    def move(self, dx, dy):
-        n = BoundingBox(self.body.x + dx, self.body.y + dy,
-                        self.body.w, self.body.h)
-
-        if self.world.hits_block(n):
-            return
-
-        self.body.set_dimensions(n)
 
     def update(self, dt):
         self.actions.update(dt)
@@ -208,18 +218,6 @@ class Walk:
         self.player.body.direction = self.direction
         self.player.widget.background = 'media/player/' + self.direction.name + '-0.png'
 
-        dx = 0
-        dy = 0
-
-        if self.direction == Direction.north:
-            dy = 1
-        elif self.direction == Direction.south:
-            dy = -1
-        elif self.direction == Direction.east:
-            dx = 1
-        elif self.direction == Direction.west:
-            dx = -1
-
         speed = .75
         progress = dt / speed
-        self.player.move(dx * progress, dy * progress)
+        self.player.body.move(self.direction, progress)

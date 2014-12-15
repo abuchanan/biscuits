@@ -49,7 +49,7 @@ class Rectangle:
         return (right > other_left and left < other_right and
                 top > other_bottom and bottom < other_top)
 
-    def set_dimensions(self, other):
+    def set_from_rectangle(self, other):
         self.x = other.x
         self.y = other.y
         self.w = other.w

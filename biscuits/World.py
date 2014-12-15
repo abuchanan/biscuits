@@ -5,10 +5,15 @@ from geometry import Rectangle as BoundingBox
 
 class Direction(Enum):
 
-    north = 0
-    east = 1
-    south = 2
-    west = 3
+    north = (0, 0, 1)
+    east  = (1, 1, 0)
+    south = (2, 0, -1)
+    west  = (3, -1, 0)
+
+    def __init__(self, index, dx, dy):
+        self.index = index
+        self.dx = dx
+        self.dy = dy
 
     @property
     def forward(self):
@@ -16,15 +21,15 @@ class Direction(Enum):
 
     @property
     def backward(self):
-        return Direction((self.value + 2) % 4)
+        return Direction((self.index + 2) % 4)
 
     @property
     def left(self):
-        return Direction((self.value + 3) % 4)
+        return Direction((self.index + 3) % 4)
 
     @property
     def right(self):
-        return Direction((self.value + 1) % 4)
+        return Direction((self.index + 1) % 4)
 
 
 class Body(BoundingBox):
@@ -35,7 +40,8 @@ class Body(BoundingBox):
         self.direction = direction
 
     def move(self, direction, distance=1):
-        pass
+        self.x += direction.dx * distance
+        self.y += direction.dy * distance
 
 
 class World:
