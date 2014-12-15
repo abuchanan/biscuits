@@ -1,0 +1,17 @@
+python 3.4
+
+pyvenv-3.4 venv
+
+activate
+
+pip install cython
+
+brew install mercurial
+
+brew install sdl sdl_image sdl_mixer sdl_ttf smpeg portmidi 
+
+pip install hg+http://bitbucket.org/pygame/pygame
+
+brew install gstreamer
+
+pip install git+https://github.com/kivy/kivy.git@master

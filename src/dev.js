@@ -1,87 +1,5 @@
-define([
-    'biscuits',
-    'input',
-    'Renderer',
-    'scenes/world/WorldMap',
-    'scenes/world/World',
-
-    'scenes/world/pathfinding/Pathfinding',
-
-    'scenes/world/Background',
-
-    'scenes/world/player/Player',
-
-    'scenes/world/TrackPlayer',
-    'scenes/world/objects/Wall',
-    'scenes/world/objects/Jar',
-    'scenes/world/objects/Coin',
-    'scenes/world/objects/CoinChest',
-    'scenes/world/objects/Key',
-    'scenes/world/objects/Door',
-    'scenes/world/objects/DoorSwitch',
-    'scenes/world/objects/squirrel/Squirrel',
-    'scenes/world/objects/squirrel/SquirrelLock',
-
-    'scenes/world/ObjectLoader',
-
-
-    'Bank',
-    'loadpoints',
-    'FPSMeter',
-    'scenes/Dead',
-    'HUD',
-
-], function(
-    Biscuits,
-    KeyboardInput,
-    Renderer,
-    WorldMap,
-    World,
-
-    Pathfinding,
-
-    Background,
-
-    Player, 
-
-    TrackPlayer,
-    Wall,
-    Jar,
-    Coin,
-    CoinChest,
-    Key,
-    Door,
-    DoorSwitch,
-    Squirrel,
-    SquirrelLock,
-
-    ObjectLoader,
-    Bank,
-    loadpointsLoader,
-    FPSMeter,
-    Dead,
-    HUD
-) {
-
-    var container = document.getElementById("biscuits-container");
-
-
-    var objectTypeMap = {
-        'Squirrel': Squirrel,
-        'DoorSwitch': DoorSwitch,
-        'Door': Door,
-        'Wall': Wall,
-        'SquirrelLock': SquirrelLock,
-        'Coin': Coin,
-        'CoinChest': CoinChest,
-        'Key': Key,
-        'Jar': Jar,
-    };
 
     var loadpoints = loadpointsLoader.load('maps/Level 1.json', function(s) {
-
-      // TODO Input type should be detected
-      s.mixin(KeyboardInput);
 
       s.objects = {};
 
@@ -92,19 +10,8 @@ define([
       s.world = s.create(World, 0, 0, s.map.mapData.width, s.map.mapData.height);
       s.world.mixin(Pathfinding);
 
-      s.renderer = s.create(Renderer, container);
-      s.renderer.addLayers('background', 'objects', 'player', 'hud');
-
-      // TODO sometimes I'm not sure whether to pass something in, 
-      //      or get it from the scope
-      s.mixin(Background, s.map);
-
-      s.player = s.create(Player);
       s.player.coins = s.player.create(Bank);
       s.player.keys = s.player.create(Bank);
-
-      s.create(TrackPlayer, s.player.playerRenderer.renderable,
-               ['background', 'objects', 'player']);
 
       s.loader = s.create(ObjectLoader, objectTypeMap);
       s.loader.loadMap(s.map);
@@ -116,7 +23,9 @@ define([
     loadpoints['dead'] = function(s) {
 
       // TODO Input type should be detected
-      s.mixin(KeyboardInput);
+      s.input = s.create(Input);
+      s.input.mixin(KeyboardInput);
+
       s.renderer = s.create(Renderer, container);
 
       s.mixin(Dead);
@@ -124,6 +33,5 @@ define([
 
     var app = Biscuits(loadpoints);
 
-    app.start('Loadpoint 1a');
-    //app.start('Loadpoint 4a');
+    app.loadScene('Loadpoint 1a');
 });
