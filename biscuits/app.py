@@ -4,38 +4,169 @@ from pathlib import Path
 from kivy.app import App
 from kivy.base import EventLoop
 from kivy.clock import Clock
+from kivy.graphics import *
 from kivy.uix.widget import Widget
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.label import Label
+from kivy.properties import NumericProperty
 
 from TileGrid import TileGrid
 from TiledMap import TiledMap
 from Player import Player
-from World import World
+from World import World, Block
 from geometry import Rectangle as BoundingBox
 
 
 maps_path = Path(__file__).parent / '..' / 'maps' / 'Tiled_data'
 
 
-class Wall:
+class Wall(Block):
+
     def __init__(self, x, y, w, h):
         self.bb = BoundingBox(x, y, w, h)
-        self.is_block = True
+
+    def update(self, dt):
+        pass
 
 
-def load_object_groups(map, world):
+class BasicItemWidget(Widget):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.size_hint = (None, None)
+
+        with self.canvas:
+            PushState('color')
+            self.color = Color(1, 0, 0)
+            self.rect = Rectangle(pos=self.pos, size=self.size)
+            PopState('color')
+
+    def remove(self):
+        if self.parent:
+            self.parent.remove_widget(self)
+
+
+class BasicItem:
+
+    def __init__(self, name, x, y, w, h, value, world):
+        self.name = name
+        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
+        self.bb = BoundingBox(x, y, w, h)
+        # TODO resolve this tile width/height crap
+        self.world = world
+        self.value = value
+        world.add(self)
+
+    def update(self, dt):
+        for hit in self.world.query(self.bb):
+            if isinstance(hit, Player):
+                getattr(hit, self.name).balance += self.value
+                self.widget.remove()
+                self.world.remove(self)
+                break
+
+
+class Coin(BasicItem):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__('coins', *args, **kwargs)
+
+
+class Key(BasicItem):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__('keys', *args, **kwargs)
+        self.widget.color.rgb = (1, 1, 0)
+
+
+def load_object_groups(map, world, container):
     for group_i in map.visible_object_groups:
         for obj in map.layers[group_i]:
+
+            w = obj.width / map.tilewidth
+            h = obj.height / map.tileheight
+
+            x = obj.x / map.tilewidth
+            y = map.height - (obj.y / map.tileheight) - h
+
             if obj.type == 'Wall':
-                w = obj.width / map.tilewidth
-                h = obj.height / map.tileheight
-
-                x = obj.x / map.tilewidth
-                y = map.height - (obj.y / map.tileheight) - h
-
                 wall = Wall(x, y, w, h)
                 world.add(wall)
+
+            elif obj.type == 'Coin':
+                try:
+                    value = int(obj.coinValue)
+                except AttributeError:
+                    value = 1
+                coin = Coin(x, y, w, h, value, world)
+                # TODO move to Coin constructor?
+                container.add_widget(coin.widget)
+
+            elif obj.type == 'Key':
+                key = Key(x, y, w, h, 1, world)
+                container.add_widget(key.widget)
+
+
+class HUDWidget(BoxLayout):
+
+    coins = NumericProperty(0)
+    keys = NumericProperty(0)
+    health = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        with self.canvas.before:
+            PushState('color')
+            Color(0, 0, 0, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+            PopState('color')
+
+        self.health_label = Label(text='Health: ' + str(self.health))
+        self.bind(health=self.redraw)
+        self.add_widget(self.health_label)
+
+        self.coins_label = Label(text='Coins: ' + str(self.coins))
+        self.bind(coins=self.redraw)
+        self.add_widget(self.coins_label)
+
+        self.keys_label = Label(text='Keys: ' + str(self.keys))
+        self.bind(keys=self.redraw)
+        self.add_widget(self.keys_label)
+
+        self.bind(pos=self.redraw, size=self.redraw)
+
+    def redraw(self, *args):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+        self.coins_label.text = 'Coins: ' + str(self.coins)
+        self.health_label.text = 'Health: ' + str(self.health)
+        self.keys_label.text = 'Keys: ' + str(self.keys)
+
+
+class DebugPanel(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        with self.canvas.before:
+            PushState('color')
+            Color(0, 0, 0, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+            PopState('color')
+
+        self.label = Label(text='FPS: ')
+        self.add_widget(self.label)
+        self.bind(pos=self.update, size=self.update)
+        Clock.schedule_interval(self.update, .1)
+
+    def update(self, *args):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+        self.label.text = 'FPS: ' + str(int(Clock.get_fps()))
 
 
 class BiscuitsGame(RelativeLayout):
@@ -52,9 +183,14 @@ class BiscuitsGame(RelativeLayout):
         # TODO handle multiple tile layers
         tile_layer = next(map.visible_tile_layers)
         grid = TileGrid(tile_layer, map.tileheight, map.tilewidth)
+        self.add_widget(grid)
 
         world = World()
-        load_object_groups(map, world)
+        self.world = world
+        objects_layer = RelativeLayout()
+        self.objects_layer = objects_layer
+        self.add_widget(objects_layer)
+        load_object_groups(map, world, objects_layer)
 
         player = Player(world)
         player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
@@ -66,13 +202,24 @@ class BiscuitsGame(RelativeLayout):
         self.grid = grid
         self.player = player
 
-        self.add_widget(grid)
         self.add_widget(player.widget)
+
+        self.hud = HUDWidget(size_hint=(1, .05), pos_hint={'top': 1})
+        self.add_widget(self.hud)
+
+        debug = DebugPanel(size_hint=(1, .05))
+        self.add_widget(debug)
 
         Clock.schedule_interval(self.update, 1 / 60)
 
     def update(self, dt):
+        for obj in self.world:
+            obj.update(dt)
+        
         self.player.update(dt)
+        self.hud.coins = self.player.coins.balance
+        self.hud.health = self.player.health.balance
+        self.hud.keys = self.player.keys.balance
         self.track_player()
 
     # TODO abstract to reusable component
@@ -83,8 +230,14 @@ class BiscuitsGame(RelativeLayout):
         x = math.floor((self.player.bb.x + 0.5) * self.map.tilewidth)
         y = math.floor((self.player.bb.y + 0.5) * self.map.tileheight)
 
+        # TODO getting low FPS during movement, seems to be happening here
+        #      I guess it's not surprising since all those sprites are moving
+        #      Grid layout probably isn't the best option
         self.grid.x = self.center_x - x
         self.grid.y = self.center_y - y
+
+        self.objects_layer.x = self.center_x - x
+        self.objects_layer.y = self.center_y - y
 
 
 class BiscuitsApp(App):

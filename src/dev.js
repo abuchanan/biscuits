@@ -9,15 +9,6 @@
       // TODO this is getting the whole map, not just the current region
       s.world = s.create(World, 0, 0, s.map.mapData.width, s.map.mapData.height);
       s.world.mixin(Pathfinding);
-
-      s.player.coins = s.player.create(Bank);
-      s.player.keys = s.player.create(Bank);
-
-      s.loader = s.create(ObjectLoader, objectTypeMap);
-      s.loader.loadMap(s.map);
-
-      s.create(HUD);
-      s.create(FPSMeter);
     });
 
     loadpoints['dead'] = function(s) {

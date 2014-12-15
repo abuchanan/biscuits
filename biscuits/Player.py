@@ -33,13 +33,32 @@ class PlayerWidget(Widget):
         self.rect.source = self.background
 
 
+class Bank:
+    def __init__(self, initial=0):
+        self._balance = initial
+
+    @property
+    def balance(self):
+        return self._balance
+
+    @balance.setter
+    def balance(self, val):
+        self._balance = max(val, 0)
+
+
 class Player:
 
     def __init__(self, world):
+        # TODO initial position and direction from map
         self.bb = BoundingBox(10, 10, 1, 1)
+        self.direction = 'south'
         self.world = world
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
+        self.coins = Bank()
+        self.keys = Bank()
+        self.health = Bank(100)
+        world.add(self)
 
     def move(self, dx, dy):
         n = BoundingBox(self.bb.x + dx, self.bb.y + dy,
@@ -186,6 +205,7 @@ class Walk:
 
     def update(self, dt):
         # TODO sprite animation
+        self.player.direction = self.direction
         self.player.widget.background = 'media/player/' + self.direction + '-0.png'
 
         dx = 0
@@ -200,4 +220,6 @@ class Walk:
         elif self.direction == 'west':
             dx = -1
 
-        self.player.move(dx * .5, dy * .5)
+        speed = .75
+        progress = dt / speed
+        self.player.move(dx * progress, dy * progress)

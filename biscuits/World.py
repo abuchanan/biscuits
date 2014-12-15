@@ -1,3 +1,5 @@
+class Block: pass
+
 class World:
 
     def __init__(self):
@@ -5,6 +7,12 @@ class World:
 
     def add(self, obj):
         self._objects.append(obj)
+
+    def remove(self, obj):
+        self._objects.remove(obj)
+
+    def __iter__(self):
+        return iter(self._objects)
 
     def query(self, rect):
         hits = []
@@ -17,7 +25,7 @@ class World:
 
     def hits_block(self, rect):
         for hit in self.query(rect):
-            if hit.is_block:
+            if isinstance(hit, Block):
                 return True
 
         return False
