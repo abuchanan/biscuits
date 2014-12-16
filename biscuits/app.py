@@ -12,7 +12,7 @@ from kivy.uix.image import Image
 import biscuits.objects
 from biscuits.debug import DebugWidget
 from biscuits.hud import HUDWidget
-from biscuits.Player import Player
+from biscuits.player import Player
 from biscuits.World import World, Direction
 from biscuits.map_loaders.tiled import TiledMap
 
