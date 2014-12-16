@@ -25,18 +25,17 @@ maps_path = Path(__file__).parent / '..' / 'maps' / 'Tiled_data'
 # TODO don't subclass layout, provide as "game.widget"
 class BiscuitsGame(RelativeLayout):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
+    def load_scene(self, ID):
         map_path = (maps_path / 'Level 1' / 'Level 1.tmx').resolve()
         map = TiledMap(map_path)
 
         self.tilewidth = map.tilewidth
         self.tileheight = map.tileheight
 
-        loadpoint = map.loadpoints['Loadpoint 1a']
+        loadpoint = map.loadpoints[ID]
         region = loadpoint.region
 
+        self.clear_widgets()
         self.world = World()
 
         self.objects_layer = RelativeLayout()
@@ -56,7 +55,6 @@ class BiscuitsGame(RelativeLayout):
         for config in region.objects:
             self.load_object(config)
 
-        print(loadpoint.config.__dict__)
         start_x = int(loadpoint.config.x)
         start_y = int(loadpoint.config.y)
         start_direction = Direction[loadpoint.config.direction]
@@ -74,8 +72,6 @@ class BiscuitsGame(RelativeLayout):
 
         debug = DebugWidget(size_hint=(1, .05))
         self.add_widget(debug)
-
-        Clock.schedule_interval(self.update, 1 / 60)
 
     def update(self, dt):
         for obj in self.world:
@@ -114,6 +110,7 @@ class BiscuitsGame(RelativeLayout):
             obj = cls.from_config(config)
 
             obj.signals.destroy.connect(self.cleanup)
+            obj.signals.load_scene.connect(self.load_scene)
             self.world.add(obj)
 
             try:
@@ -128,6 +125,7 @@ class BiscuitsApp(App):
         EventLoop.ensure_window()
 
         game = BiscuitsGame()
+        game.load_scene('Loadpoint 1a')
         Clock.schedule_interval(game.update, 1.0 / 60.0)
 
         return game

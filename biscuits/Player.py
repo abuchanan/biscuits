@@ -12,21 +12,23 @@ from biscuits.objects.base import Base
 
 class PlayerWidget(Widget):
 
-    background = StringProperty('media/player/south-0.png')
+    direction = StringProperty('south')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         with self.canvas:
-            self.rect = Rectangle(source=self.background, pos=self.pos)
+            source = 'media/player/' + self.direction + '-0.png'
+            self.rect = Rectangle(source=source, pos=self.pos)
 
         # TODO defining this stuff in kv language might be cleaner
-        self.bind(pos=self.redraw, size=self.redraw, background=self.redraw)
+        self.bind(pos=self.redraw, size=self.redraw, direction=self.redraw)
 
     def redraw(self, *args):
         self.rect.size = self.size
         self.rect.pos = self.pos
-        self.rect.source = self.background
+        source = 'media/player/' + self.direction + '-0.png'
+        self.rect.source = source
 
 
 class Bank:
@@ -78,6 +80,7 @@ class Player(Base):
         self.world = world
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
+        self.widget.direction = direction.name
         self.coins = Bank()
         self.keys = Bank()
         self.health = Bank(100)
@@ -300,8 +303,8 @@ class Walk:
     def update(self, dt):
         # TODO sprite animation
         self.player.body.direction = self.direction
-        self.player.widget.background = 'media/player/' + self.direction.name + '-0.png'
+        self.player.widget.direction = self.direction.name
 
-        speed = .75
+        speed = .6
         progress = dt / speed
         self.player.body.move(self.direction, progress)
