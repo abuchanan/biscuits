@@ -33,7 +33,7 @@
   <object name="squirrel" type="squirrel" x="960" y="1088" width="32" height="32"/>
   <object name="squirrel" type="squirrel" x="1120" y="1024" width="32" height="32"/>
   <object name="key" type="Key" x="416" y="1088" width="32" height="32"/>
-  <object name="squirrel" type="squirrel" x="544" y="928" width="32" height="32"/>
+  <object name="jar" type="Jar" x="544" y="928" width="32" height="32"/>
   <object name="squirrel" type="squirrel" x="96" y="928" width="32" height="32"/>
   <object name="squirrel" type="squirrel" x="128" y="736" width="32" height="32"/>
   <object name="coin1" type="Coin" x="832" y="1184" width="32" height="32"/>

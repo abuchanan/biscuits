@@ -114,6 +114,22 @@ class CoinChest(Chest):
         player.coins.balance += self.value
 
 
+class Jar:
+
+    def __init__(self, x, y, w, h, world):
+        # TODO resolve this tile width/height crap
+        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
+        self.widget.color.rgb = (.5, .25, 0)
+        self.body = Body(x, y, w, h, is_block=True)
+        world.add(self)
+
+    def on_attack(self, player):
+        print('attacked!')
+
+    def update(self, dt):
+        pass
+
+
 def load_object_groups(map, world, container):
     for group_i in map.visible_object_groups:
         for obj in map.layers[group_i]:
@@ -153,6 +169,10 @@ def load_object_groups(map, world, container):
 
                 chest = CoinChest(x, y, w, h, world, value)
                 container.add_widget(chest.widget)
+
+            elif obj.type == 'Jar':
+                jar = Jar(x, y, w, h, world)
+                container.add_widget(jar.widget)
 
 
 class HUDWidget(BoxLayout):

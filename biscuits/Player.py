@@ -72,7 +72,7 @@ class Player:
         # TODO initial position and direction from map
         self.body = PlayerBody(world, 10, 10, 1, 1)
         self.world = world
-        self.actions = PlayerActions(self, world)
+        self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
         self.coins = Bank()
         self.keys = Bank()
@@ -81,6 +81,11 @@ class Player:
 
     def update(self, dt):
         self.actions.update(dt)
+
+    def dispatch_forward(self, event, *args, **kwargs):
+        q = self.body.copy()
+        q.grow(self.body.direction.forward)
+        self.world.dispatch(q, event, self, *args, **kwargs)
 
 
 class Keybindings:
@@ -91,6 +96,7 @@ class Keybindings:
         'left': 'left',
         'right': 'right',
         'e': 'use',
+        'f': 'attack',
     }
 
     def __init__(self, _input):
@@ -174,9 +180,8 @@ class Input:
 
 class PlayerActions:
 
-    def __init__(self, player, world):
+    def __init__(self, player):
         self.player = player
-        self.world = world
         self._input = Input()
         Keybindings(self._input)
         self.idle = Idle()
@@ -189,14 +194,18 @@ class PlayerActions:
         inp = self._input
 
         if isinstance(cur, Use) and cur.done:
-            print('use done')
+            return self.idle
+
+        elif isinstance(cur, Attack) and cur.done:
             return self.idle
 
         elif cur is self.idle or isinstance(cur, Walk):
 
             if inp.use.keydown:
-                print('use!')
-                return Use(self.player, self.world)
+                return Use(self.player)
+
+            elif inp.attack.keydown:
+                return Attack(self.player)
 
             elif inp.up.keydown:
                 return Walk(self.player, Direction.north)
@@ -234,26 +243,46 @@ class PlayerActions:
         self.current.update(dt)
 
 
-class Use:
-    def __init__(self, player, world):
-        self.player = player
-        self.world = world
+class TimedAction:
+
+    def __init__(self, duration=1):
+        self.duration = duration
         self.elapsed_time = 0
         self.done = False
         self.started = False
+
+    def on_start(self):
+        pass
 
     def update(self, dt):
         self.elapsed_time += dt
 
         if not self.started:
-            b = self.player.body
-            q = b.copy()
-            q.grow(b.direction.forward)
-            self.world.dispatch(q, 'use', self.player)
+            self.on_start()
             self.started = True
 
-        if self.elapsed_time >= 1:
+        if self.elapsed_time >= self.duration:
             self.done = True
+
+
+class Attack(TimedAction):
+
+    def __init__(self, player):
+        super().__init__()
+        self.player = player
+
+    def on_start(self):
+        self.player.dispatch_forward('attack')
+
+
+class Use(TimedAction):
+
+    def __init__(self, player):
+        super().__init__()
+        self.player = player
+
+    def on_start(self):
+        self.player.dispatch_forward('use')
 
 
 class Walk:
