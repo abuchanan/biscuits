@@ -35,6 +35,9 @@ class Rectangle:
         self.w = w
         self.h = h
 
+    def __iter__(self):
+        return iter((self.x, self.y, self.w, self.h))
+
     def contains(self, x, y):
         """Return true if a point is inside the rectangle."""
         left, bottom, right, top = self.bounds

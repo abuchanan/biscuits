@@ -1,18 +1,13 @@
 from collections import defaultdict
-from functools import partial
 
-from kivy.animation import Animation
-from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.event import EventDispatcher
 from kivy.graphics import *
-from kivy.properties import NumericProperty, ReferenceListProperty, \
-                            ObjectProperty, StringProperty
-from kivy.uix.image import Image
+from kivy.properties import StringProperty
 from kivy.uix.widget import Widget
 
-from World import Body, Direction
-from geometry import Rectangle as BoundingBox
+from biscuits.World import Body, Direction
+from biscuits.geometry import Rectangle as BoundingBox
+from biscuits.objects.base import Base
 
 
 class PlayerWidget(Widget):
@@ -49,8 +44,9 @@ class Bank:
 
 class PlayerBody(Body):
 
-    def __init__(self, world, *args, **kwargs):
+    def __init__(self, player, world, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.player = player
         self.world = world
 
     def move(self, direction, distance=1):
@@ -60,17 +56,26 @@ class PlayerBody(Body):
         n = BoundingBox(self.x + dx, self.y + dy,
                         self.w, self.h)
 
-        if self.world.hits_block(n):
-            return
+        blocked = False
 
-        self.set_from_rectangle(n)
+        collisions = self.world.query(n)
+
+        for hit in collisions:
+            hit.signals.player_collision.send(self.player)
+            if hit.body.is_block:
+                blocked = True
+
+        if not blocked:
+            self.set_from_rectangle(n)
 
 
-class Player:
+class Player(Base):
 
     def __init__(self, world):
+        super().__init__()
+
         # TODO initial position and direction from map
-        self.body = PlayerBody(world, 10, 10, 1, 1)
+        self.body = PlayerBody(self, world, 10, 10, 1, 1)
         self.world = world
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
@@ -82,10 +87,10 @@ class Player:
     def update(self, dt):
         self.actions.update(dt)
 
-    def dispatch_forward(self, event, *args, **kwargs):
+    def dispatch_forward(self, signal_name, *args, **kwargs):
         q = self.body.copy()
         q.grow(self.body.direction.forward)
-        self.world.dispatch(q, event, self, *args, **kwargs)
+        self.world.dispatch(q, signal_name, self, *args, **kwargs)
 
 
 class Keybindings:

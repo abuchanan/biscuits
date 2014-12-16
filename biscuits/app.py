@@ -1,240 +1,25 @@
+from functools import partial
+import logging
 import math
 from pathlib import Path
 
 from kivy.app import App
 from kivy.base import EventLoop
 from kivy.clock import Clock
-from kivy.graphics import *
-from kivy.uix.widget import Widget
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.label import Label
-from kivy.properties import NumericProperty
 
-from TileGrid import TileGrid
-from TiledMap import TiledMap
-from Player import Player
-from World import World, Body
+import biscuits.objects
+from biscuits.debug import DebugWidget
+from biscuits.hud import HUDWidget
+from biscuits.TileGrid import TileGrid
+from biscuits.Player import Player
+from biscuits.World import World
+from biscuits.map_loaders.tiled import TiledMap
 
+
+log = logging.getLogger('biscuits')
 
 maps_path = Path(__file__).parent / '..' / 'maps' / 'Tiled_data'
-
-
-class Wall:
-
-    def __init__(self, x, y, w, h):
-        self.body = Body(x, y, w, h, is_block=True)
-
-    def update(self, dt):
-        pass
-
-
-class BasicItemWidget(Widget):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.size_hint = (None, None)
-
-        with self.canvas:
-            PushState('color')
-            self.color = Color(1, 0, 0)
-            self.rect = Rectangle(pos=self.pos, size=self.size)
-            PopState('color')
-
-    def remove(self):
-        if self.parent:
-            self.parent.remove_widget(self)
-
-
-class BasicItem:
-
-    def __init__(self, name, x, y, w, h, value, world):
-        self.name = name
-        # TODO resolve this tile width/height crap
-        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
-        self.body = Body(x, y, w, h)
-        self.world = world
-        self.value = value
-        world.add(self)
-
-    def update(self, dt):
-        for hit in self.world.query(self.body):
-            if isinstance(hit, Player):
-                getattr(hit, self.name).balance += self.value
-                self.widget.remove()
-                self.world.remove(self)
-                break
-
-
-class Coin(BasicItem):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__('coins', *args, **kwargs)
-
-
-class Key(BasicItem):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__('keys', *args, **kwargs)
-        self.widget.color.rgb = (1, 1, 0)
-
-
-class Chest:
-
-    def __init__(self, x, y, w, h, world):
-        # TODO resolve this tile width/height crap
-        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
-        self.widget.color.rgb = (0, 0, 1)
-        self.body = Body(x, y, w, h, is_block=True)
-        world.add(self)
-        self.is_open = False
-
-    def on_use(self, player):
-        if not self.is_open:
-            self.is_open = True
-            self.widget.color.rgb = (0, 0, 0)
-            self.on_chest_opened(player)
-
-    def on_chest_opened(self, player):
-        pass
-
-    def update(self, dt):
-        pass
-
-
-class CoinChest(Chest):
-
-    def __init__(self, x, y, w, h, world, value=1):
-        super().__init__(x, y, w, h, world)
-        self.value = value
-
-    def on_chest_opened(self, player):
-        player.coins.balance += self.value
-
-
-class Jar:
-
-    def __init__(self, x, y, w, h, world):
-        # TODO resolve this tile width/height crap
-        self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
-        self.widget.color.rgb = (.5, .25, 0)
-        self.body = Body(x, y, w, h, is_block=True)
-        self.world = world
-        world.add(self)
-
-    def on_attack(self, player):
-        print('attacked!')
-        self.world.remove(self)
-        self.widget.remove()
-
-    def update(self, dt):
-        pass
-
-
-def load_object_groups(map, world, container):
-    for group_i in map.visible_object_groups:
-        for obj in map.layers[group_i]:
-
-            w = obj.width / map.tilewidth
-            h = obj.height / map.tileheight
-
-            x = obj.x / map.tilewidth
-            y = map.height - (obj.y / map.tileheight) - h
-
-            if obj.type == 'Wall':
-                wall = Wall(x, y, w, h)
-                world.add(wall)
-
-            elif obj.type == 'Coin':
-                try:
-                    value = int(obj.coinValue)
-                except AttributeError:
-                    value = 1
-                coin = Coin(x, y, w, h, value, world)
-                # TODO move to Coin constructor?
-                container.add_widget(coin.widget)
-
-            elif obj.type == 'Key':
-                key = Key(x, y, w, h, 1, world)
-                container.add_widget(key.widget)
-
-            elif obj.type == 'Chest':
-                chest = Chest(x, y, w, h, world)
-                container.add_widget(chest.widget)
-
-            elif obj.type == 'CoinChest':
-                try:
-                    value = int(obj.coinValue)
-                except AttributeError:
-                    value = 1
-
-                chest = CoinChest(x, y, w, h, world, value)
-                container.add_widget(chest.widget)
-
-            elif obj.type == 'Jar':
-                jar = Jar(x, y, w, h, world)
-                container.add_widget(jar.widget)
-
-
-class HUDWidget(BoxLayout):
-
-    coins = NumericProperty(0)
-    keys = NumericProperty(0)
-    health = NumericProperty(0)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        with self.canvas.before:
-            PushState('color')
-            Color(0, 0, 0, 1)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-            PopState('color')
-
-        self.health_label = Label(text='Health: ' + str(self.health))
-        self.bind(health=self.redraw)
-        self.add_widget(self.health_label)
-
-        self.coins_label = Label(text='Coins: ' + str(self.coins))
-        self.bind(coins=self.redraw)
-        self.add_widget(self.coins_label)
-
-        self.keys_label = Label(text='Keys: ' + str(self.keys))
-        self.bind(keys=self.redraw)
-        self.add_widget(self.keys_label)
-
-        self.bind(pos=self.redraw, size=self.redraw)
-
-    def redraw(self, *args):
-        self.rect.size = self.size
-        self.rect.pos = self.pos
-        self.coins_label.text = 'Coins: ' + str(self.coins)
-        self.health_label.text = 'Health: ' + str(self.health)
-        self.keys_label.text = 'Keys: ' + str(self.keys)
-
-
-class DebugPanel(BoxLayout):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        with self.canvas.before:
-            PushState('color')
-            Color(0, 0, 0, 1)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-            PopState('color')
-
-        self.label = Label(text='FPS: ')
-        self.add_widget(self.label)
-        self.bind(pos=self.update, size=self.update)
-        Clock.schedule_interval(self.update, .1)
-
-    def update(self, *args):
-        self.rect.size = self.size
-        self.rect.pos = self.pos
-        self.label.text = 'FPS: ' + str(int(Clock.get_fps()))
 
 
 class BiscuitsGame(RelativeLayout):
@@ -242,40 +27,36 @@ class BiscuitsGame(RelativeLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        map_path = maps_path / 'foo.tmx'
-        map_path = str(map_path.resolve())
+        map_path = (maps_path / 'foo.tmx').resolve()
 
-        map = TiledMap(filename=map_path)
+        map = self.map = TiledMap(map_path)
 
         # TODO hard-coded
         # TODO handle multiple tile layers
-        tile_layer = next(map.visible_tile_layers)
-        grid = TileGrid(tile_layer, map.tileheight, map.tilewidth)
-        self.add_widget(grid)
+        tile_layer = map.load_tile_layers()[0]
+        self.grid = TileGrid(tile_layer, map.tileheight, map.tilewidth)
+        self.add_widget(self.grid)
 
-        world = World()
-        self.world = world
+        self.world = World()
+
         objects_layer = RelativeLayout()
         self.objects_layer = objects_layer
         self.add_widget(objects_layer)
-        load_object_groups(map, world, objects_layer)
 
-        player = Player(world)
+        for config in map.load_objects():
+            self.load_object(config)
+
+        player = self.player = Player(self.world)
         player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         # TODO scale player images
         player.widget.size = (map.tileheight, map.tilewidth)
         player.widget.size_hint = (None, None)
-
-        self.map = map
-        self.grid = grid
-        self.player = player
-
         self.add_widget(player.widget)
 
         self.hud = HUDWidget(size_hint=(1, .05), pos_hint={'top': 1})
         self.add_widget(self.hud)
 
-        debug = DebugPanel(size_hint=(1, .05))
+        debug = DebugWidget(size_hint=(1, .05))
         self.add_widget(debug)
 
         Clock.schedule_interval(self.update, 1 / 60)
@@ -307,6 +88,33 @@ class BiscuitsGame(RelativeLayout):
         self.objects_layer.x = self.center_x - x
         self.objects_layer.y = self.center_y - y
 
+    def cleanup(self, obj):
+        try:
+            self.world.remove(obj)
+        except ValueError:
+            pass
+
+        try:
+            self.objects_layer.remove_widget(obj.widget)
+        except AttributeError:
+            pass
+
+    def load_object(self, config):
+        try:
+            cls = getattr(biscuits.objects, config.type)
+        except AttributeError:
+            log.warning('Unknown object type: {}'.format(config.type))
+        else:
+            obj = cls.from_config(config)
+
+            obj.signals.destroy.connect(self.cleanup)
+            self.world.add(obj)
+
+            try:
+                self.objects_layer.add_widget(obj.widget)
+            except AttributeError:
+                pass
+
 
 class BiscuitsApp(App):
 
@@ -317,7 +125,3 @@ class BiscuitsApp(App):
         Clock.schedule_interval(game.update, 1.0 / 60.0)
 
         return game
-
-
-if __name__ == '__main__':
-    BiscuitsApp().run()

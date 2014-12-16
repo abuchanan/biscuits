@@ -1,4 +1,3 @@
-from kivy.properties import ObjectProperty
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
 

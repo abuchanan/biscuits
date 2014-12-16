@@ -1,7 +1,7 @@
 from copy import copy
 from enum import Enum
 
-from geometry import Rectangle as BoundingBox
+from biscuits.geometry import Rectangle as BoundingBox
 
 
 class Direction(Enum):
@@ -98,8 +98,7 @@ class World:
 
         return False
 
-    def dispatch(self, q, event_name, *args, **kwargs):
+    def dispatch(self, q, signal_name, *args, **kwargs):
         for hit in self.query(q):
-            method = getattr(hit, 'on_' + event_name, None)
-            if method:
-                method(*args, **kwargs)
+            method = getattr(hit.signals, signal_name)
+            method.send(*args, **kwargs)
