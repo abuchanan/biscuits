@@ -111,11 +111,13 @@
   <object name="Room 8" type="Region" x="2208" y="256" width="640" height="480"/>
   <object name="Room 8" type="Region" x="352" y="64" width="1312" height="160"/>
   <object name="Room 8" type="Region" x="352" y="256" width="800" height="480"/>
+  <object type="Key" x="832" y="320" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Doors">
   <object name="Room 1 to 2" type="Door" x="1120" y="864" width="32" height="96">
    <properties>
     <property name="Destination" value="Loadpoint 2a"/>
+    <property name="locks" value="generic"/>
    </properties>
   </object>
   <object name="Room 2 to 1" type="Door" x="1184" y="864" width="32" height="96">
@@ -376,7 +378,7 @@
   </object>
  </objectgroup>
  <objectgroup name="Keys">
-  <object type="Key" x="832" y="320" width="32" height="32"/>
+  <object type="Key" x="800" y="864" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Jars">
   <object type="Jar" x="736" y="1088" width="32" height="32"/>
