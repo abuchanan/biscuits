@@ -5,6 +5,31 @@ import pytmx
 from biscuits.geometry import Rectangle
 
 
+class Region:
+
+    def __init__(self, tile_layers, objects):
+        self.tile_layers = tile_layers
+        self.objects = objects
+
+
+class RegionTileLayer:
+    def __init__(self, x, y, tiles, width, height, tilewidth, tileheight):
+        self.x = x
+        self.y = y
+        self.tiles = tiles
+        self.width = width
+        self.height = height
+        self.tilewidth = tilewidth
+        self.tileheight = tileheight
+
+
+class Loadpoint:
+    def __init__(self, ID, config, region):
+        self.ID = ID
+        self.config = config
+        self.region = region
+
+
 class TiledMap:
 
     def __init__(self, path):
@@ -16,13 +41,76 @@ class TiledMap:
         self.width = self._map.width
         self.height = self._map.height
 
+        self.tile_layers = self._load_tile_layers()
+        self.objects = self._load_objects()
+        self.regions = self._load_regions()
+        self.loadpoints = self._load_loadpoints()
+
     def _iter_layers(self, indices):
         return (self._map.layers[i] for i in indices)
 
-    def load_tile_layers(self):
+    def _load_loadpoints(self):
+        loadpoints = {}
+
+        for region in self.regions:
+            for obj in region.objects:
+                if obj.type == 'Loadpoint':
+                    loadpoints[obj.name] = Loadpoint(obj.name, obj, region)
+
+        return loadpoints
+                
+
+    # TODO this could be majorly optimized with some smart data structures
+    #      but for now it's easy
+    def _load_regions(self):
+        regions = []
+
+        for obj in self.objects:
+            if obj.type == 'Region':
+                objects = self._load_objects_in_region(obj)
+                tile_layers = self._load_tile_layers_in_region(obj)
+                region = Region(tile_layers, objects)
+                regions.append(region)
+
+        return regions
+
+    def _load_objects_in_region(self, region):
+        objects = []
+        rect = region.rectangle
+
+        for obj in self.objects:
+            if obj.type != 'Region' and obj.rectangle.overlaps(rect):
+                objects.append(obj)
+
+        return objects
+
+    def _load_tile_layers_in_region(self, region):
+        layers = []
+        rect = region.rectangle
+
+        for layer in self.tile_layers:
+            tiles = []
+
+            for tile in layer.tiles():
+                x, y, image = tile
+                y = self.height - y - 1
+                tile_rect = Rectangle(x, y, 1, 1)
+
+                if tile_rect.overlaps(rect):
+                    tiles.append(tile)
+
+            if tiles:
+                r = RegionTileLayer(x, y, tiles, int(region.width), int(region.height),
+                                    self.tilewidth, self.tileheight)
+                layers.append(r)
+
+        return layers
+
+
+    def _load_tile_layers(self):
         return list(self._iter_layers(self._map.visible_tile_layers))
 
-    def load_objects(self):
+    def _load_objects(self):
         tile_w = self._map.tilewidth
         tile_h = self._map.tileheight
 
@@ -65,7 +153,6 @@ class KivyImageLoader:
 
     def __init__(self, filename, colorkey):
         self._texture = Image(filename).texture
-        print(self._texture.height)
 
     def __call__(self, rect, flags):
 

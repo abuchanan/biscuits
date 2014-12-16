@@ -102,15 +102,15 @@
    eJztmksTgiAURrFW5aqHu3Lh//+R2UzOME6AD5BPPIuzsot4T8WFa2uMaQFgNVXPSZizQI625NJzFaYWyBE+8KHK0Xzceu4OOosl16cQGuMhkCM4Lr76yv7u2rVO5bjuq49c9wmNEYqfWp/FrCNT1nxz1o96oxil+K3XNHzo+nga/9o7rK2+GuBLI5TPPfuIdZ9/Y+IDH/iI76P7xXeZ4vGBD3zgY+6zs37gI7ePl4lznvAWyueefaQgdz7xoZXPvfkInX2sJXTGMrX/kSp+zTMBDKTqP0ztf7jm4Yov/b2U3P//c+dRet8dH1rkOu/Ah7YPu05qRp+1+2ml10AqPnxzKv03EcNH7PUDH/hQBB9a4EMLfGiBDy3woQU+tFibz6X9B98+ezxm6XvymD4AHyWDDy3woQU+tMCHFvjQAh9a4EOLFPtrgBx8AFSSuW8=
   </data>
  </layer>
- <objectgroup name="Regions" visible="0">
-  <object name="Room 1" type="region" x="672" y="768" width="480" height="800"/>
-  <object name="Room 2" type="region" x="1184" y="768" width="480" height="480"/>
-  <object name="Room 3" type="region" x="1184" y="256" width="480" height="480"/>
-  <object name="Room 4" type="region" x="1696" y="256" width="480" height="480"/>
-  <object name="Room 5" type="region" x="1760" y="768" width="352" height="480"/>
-  <object name="Room 6" type="region" x="2208" y="256" width="640" height="480"/>
-  <object name="Room 7" type="region" x="352" y="64" width="1312" height="160"/>
-  <object name="Room 8" type="region" x="352" y="256" width="800" height="480"/>
+ <objectgroup name="Regions">
+  <object name="Room 8" type="Region" x="672" y="768" width="480" height="800"/>
+  <object name="Room 8" type="Region" x="1184" y="768" width="480" height="480"/>
+  <object name="Room 8" type="Region" x="1184" y="256" width="480" height="480"/>
+  <object name="Room 8" type="Region" x="1696" y="256" width="480" height="480"/>
+  <object name="Room 8" type="Region" x="1760" y="768" width="352" height="480"/>
+  <object name="Room 8" type="Region" x="2208" y="256" width="640" height="480"/>
+  <object name="Room 8" type="Region" x="352" y="64" width="1312" height="160"/>
+  <object name="Room 8" type="Region" x="352" y="256" width="800" height="480"/>
  </objectgroup>
  <objectgroup name="Doors">
   <object name="Room 1 to 2" type="Door" x="1120" y="864" width="32" height="96">
@@ -272,7 +272,7 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup name="Walls" visible="0">
+ <objectgroup name="Walls">
   <object type="Wall" x="672" y="768" width="32" height="800"/>
   <object type="Wall" x="672" y="768" width="480" height="32"/>
   <object type="Wall" x="1120" y="768" width="32" height="96"/>

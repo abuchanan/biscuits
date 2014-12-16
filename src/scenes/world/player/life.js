@@ -1,9 +1,7 @@
-define(['lib/EventEmitter'], function(EventEmitter) {
 
     function PlayerLife(s) {
 
         var life = 100;
-        var events = new EventEmitter();
 
         s.body.on('hit', function() {
             // TODO variable hit amounts
@@ -21,8 +19,3 @@ define(['lib/EventEmitter'], function(EventEmitter) {
           return life;
         };
     }
-
-
-    return PlayerLife;
-
-});

@@ -7,13 +7,13 @@ from kivy.app import App
 from kivy.base import EventLoop
 from kivy.clock import Clock
 from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.image import Image
 
 import biscuits.objects
 from biscuits.debug import DebugWidget
 from biscuits.hud import HUDWidget
-from biscuits.TileGrid import TileGrid
 from biscuits.Player import Player
-from biscuits.World import World
+from biscuits.World import World, Direction
 from biscuits.map_loaders.tiled import TiledMap
 
 
@@ -22,34 +22,50 @@ log = logging.getLogger('biscuits')
 maps_path = Path(__file__).parent / '..' / 'maps' / 'Tiled_data'
 
 
+# TODO don't subclass layout, provide as "game.widget"
 class BiscuitsGame(RelativeLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        map_path = (maps_path / 'foo.tmx').resolve()
+        map_path = (maps_path / 'Level 1' / 'Level 1.tmx').resolve()
+        map = TiledMap(map_path)
 
-        map = self.map = TiledMap(map_path)
+        self.tilewidth = map.tilewidth
+        self.tileheight = map.tileheight
 
-        # TODO hard-coded
-        # TODO handle multiple tile layers
-        tile_layer = map.load_tile_layers()[0]
-        self.grid = TileGrid(tile_layer, map.tileheight, map.tilewidth)
-        self.add_widget(self.grid)
+        loadpoint = map.loadpoints['Loadpoint 1a']
+        region = loadpoint.region
 
         self.world = World()
 
-        objects_layer = RelativeLayout()
-        self.objects_layer = objects_layer
-        self.add_widget(objects_layer)
+        self.objects_layer = RelativeLayout()
+        self.add_widget(self.objects_layer)
 
-        for config in map.load_objects():
+        for tile_layer in region.tile_layers:
+            for tile in tile_layer.tiles:
+                # TODO move this
+                x, y, texture = tile
+                image = Image(texture=texture, size=texture.size)
+                image.x = x * self.tilewidth
+                image.y = (map.height - y - 1) * self.tileheight
+                image.size = (self.tileheight, self.tilewidth)
+                image.size_hint = (None, None)
+                self.objects_layer.add_widget(image)
+
+        for config in region.objects:
             self.load_object(config)
 
-        player = self.player = Player(self.world)
+        print(loadpoint.config.__dict__)
+        start_x = int(loadpoint.config.x)
+        start_y = int(loadpoint.config.y)
+        start_direction = Direction[loadpoint.config.direction]
+
+        player = self.player = Player(self.world, start_x, start_y,
+                                      start_direction)
         player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         # TODO scale player images
-        player.widget.size = (map.tileheight, map.tilewidth)
+        player.widget.size = (self.tileheight, self.tilewidth)
         player.widget.size_hint = (None, None)
         self.add_widget(player.widget)
 
@@ -71,19 +87,9 @@ class BiscuitsGame(RelativeLayout):
         self.hud.keys = self.player.keys.balance
         self.track_player()
 
-    # TODO abstract to reusable component
     def track_player(self):
-        # TODO could (should) use grid layout details instead of map tile details
-        #      that would account for any extra information defined in the grid
-        #      (e.g. padding, scaling, etc)
-        x = math.floor((self.player.body.x + 0.5) * self.map.tilewidth)
-        y = math.floor((self.player.body.y + 0.5) * self.map.tileheight)
-
-        # TODO getting low FPS during movement, seems to be happening here
-        #      I guess it's not surprising since all those sprites are moving
-        #      Grid layout probably isn't the best option
-        self.grid.x = self.center_x - x
-        self.grid.y = self.center_y - y
+        x = math.floor((self.player.body.x + 0.5) * self.tilewidth)
+        y = math.floor((self.player.body.y + 0.5) * self.tileheight)
 
         self.objects_layer.x = self.center_x - x
         self.objects_layer.y = self.center_y - y

@@ -71,11 +71,10 @@ class PlayerBody(Body):
 
 class Player(Base):
 
-    def __init__(self, world):
+    def __init__(self, world, x, y, direction):
         super().__init__()
 
-        # TODO initial position and direction from map
-        self.body = PlayerBody(self, world, 10, 10, 1, 1)
+        self.body = PlayerBody(self, world, x, y, 1, 1, direction=direction)
         self.world = world
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
