@@ -121,10 +121,13 @@ class Jar:
         self.widget = BasicItemWidget(pos=(x * 32, y * 32), size=(32, 32))
         self.widget.color.rgb = (.5, .25, 0)
         self.body = Body(x, y, w, h, is_block=True)
+        self.world = world
         world.add(self)
 
     def on_attack(self, player):
         print('attacked!')
+        self.world.remove(self)
+        self.widget.remove()
 
     def update(self, dt):
         pass

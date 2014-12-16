@@ -265,6 +265,8 @@ class TimedAction:
             self.done = True
 
 
+# TODO be able to walk and attack at the same time
+# TODO different attack strengths, weapons, etc
 class Attack(TimedAction):
 
     def __init__(self, player):
