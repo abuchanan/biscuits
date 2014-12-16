@@ -1,4 +1,5 @@
 from collections import defaultdict
+import itertools
 
 from kivy.core.window import Window
 from kivy.graphics import *
@@ -10,25 +11,75 @@ from biscuits.geometry import Rectangle as BoundingBox
 from biscuits.objects.base import Base
 
 
+class SpriteCycle:
+
+    speed = 1
+    image_paths = []
+
+    def __init__(self):
+        self._time = 0
+        self._last_frame = 0
+        self._cycle = itertools.cycle(self.image_paths)
+        self.current = next(self._cycle)
+
+    def update(self, dt):
+        self._time += dt
+
+        if self._time - self._last_frame >= self.speed:
+            self._last_frame = self._time
+            self.current = next(self._cycle)
+
+
+class WalkCycle(SpriteCycle):
+
+    speed = 0.36
+    image_paths = [
+        'media/player/{direction}-0.png',
+        'media/player/{direction}-1.png',
+        'media/player/{direction}-2.png',
+        'media/player/{direction}-3.png',
+    ]
+
+
+class IdleCycle(SpriteCycle):
+
+    image_paths = [
+        'media/player/{direction}-0.png',
+    ]
+
+
 class PlayerWidget(Widget):
 
+    action = StringProperty('idle')
     direction = StringProperty('south')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self._cycles = {
+            'idle': IdleCycle,
+            'walk': WalkCycle,
+        }
+
+        self._current = self._cycles[self.action]()
+
         with self.canvas:
-            source = 'media/player/' + self.direction + '-0.png'
-            self.rect = Rectangle(source=source, pos=self.pos)
+            self.rect = Rectangle()
 
-        # TODO defining this stuff in kv language might be cleaner
-        self.bind(pos=self.redraw, size=self.redraw, direction=self.redraw)
+        self.bind(direction=self._change_cycle, action=self._change_cycle)
 
-    def redraw(self, *args):
+
+    def _change_cycle(self, *args):
+        self._current = self._cycles[self.action]()
+        
+    def update(self, dt):
+        self._current.update(dt)
+        source = self._current.current
+        source = source.format(direction=self.direction)
+        self.rect.source = source
+
         self.rect.size = self.size
         self.rect.pos = self.pos
-        source = 'media/player/' + self.direction + '-0.png'
-        self.rect.source = source
 
 
 class Bank:
@@ -88,6 +139,7 @@ class Player(Base):
 
     def update(self, dt):
         self.actions.update(dt)
+        self.widget.update(dt)
 
     def dispatch_forward(self, signal_name, *args, **kwargs):
         q = self.body.copy()
@@ -124,11 +176,6 @@ class Keybindings:
     def _on_key_down(self, keyboard, keycode, text, modifiers):
         k = self._map.get(keycode[1], keycode[1])
         self._input.activate(k)
-
-
-class Idle:
-    def update(self, dt):
-        pass
 
 
 class Key:
@@ -191,7 +238,7 @@ class PlayerActions:
         self.player = player
         self._input = Input()
         Keybindings(self._input)
-        self.idle = Idle()
+        self.idle = Idle(player)
         self.current = self.idle
 
     def transition(self):
@@ -274,6 +321,16 @@ class TimedAction:
 
 # TODO be able to walk and attack at the same time
 # TODO different attack strengths, weapons, etc
+
+
+class Idle:
+    def __init__(self, player):
+        self.player = player
+
+    def update(self, dt):
+        self.player.widget.action = 'idle'
+
+
 class Attack(TimedAction):
 
     def __init__(self, player):
@@ -301,8 +358,8 @@ class Walk:
         self.direction = direction
 
     def update(self, dt):
-        # TODO sprite animation
         self.player.body.direction = self.direction
+        self.player.widget.action = 'walk'
         self.player.widget.direction = self.direction.name
 
         speed = .6

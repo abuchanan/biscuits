@@ -1,3 +1,26 @@
 https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/renderers.pyx
 
 http://stackoverflow.com/questions/17280341/how-do-you-check-for-keyboard-events-with-kivy
+
+
+TODO
+- pathfinding and squirrel
+- sound
+- clean up Player.py
+- use KV language for widgets?
+- map cache
+- save scene state
+- loadpoints preprocessing
+
+- dead screen
+- start menu
+- comic screen
+
+- inventory
+- secondary action/attack
+- attack dynamics (hit power, block chance, etc)
+- projectile attack
+
+- touch screen path planning for player movement
+- editor
+- smooth maps
