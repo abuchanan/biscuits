@@ -6,7 +6,6 @@ http://stackoverflow.com/questions/17280341/how-do-you-check-for-keyboard-events
 TODO
 - pathfinding and squirrel
 - sound
-- clean up Player.py
 - use KV language for widgets?
 - map cache
 - save scene state

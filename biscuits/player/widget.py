@@ -23,6 +23,13 @@ class IdleCycle(SpriteCycle):
     ]
 
 
+class SwordCycle(SpriteCycle):
+
+    image_paths = [
+        'media/player/sword-{direction}-0.png',
+    ]
+
+
 class PlayerWidget(Widget):
 
     action = StringProperty('idle')
@@ -34,6 +41,7 @@ class PlayerWidget(Widget):
         self._cycles = {
             'idle': IdleCycle,
             'walk': WalkCycle,
+            'sword': SwordCycle,
         }
 
         self._current = self._cycles[self.action]()

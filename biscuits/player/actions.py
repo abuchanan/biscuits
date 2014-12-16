@@ -88,6 +88,7 @@ class Attack(TimedAction):
 
     def on_start(self):
         self.player.dispatch_forward('attack')
+        self.player.widget.action = 'sword'
 
 
 class Use(TimedAction):
