@@ -54,5 +54,10 @@
   <object name="squirrel" type="squirrel" x="128" y="128" width="32" height="32"/>
   <object name="coin1" type="Coin" x="448" y="96" width="32" height="32"/>
   <object name="chest1" type="Chest" x="480" y="448" width="32" height="32"/>
+  <object name="chest1" type="CoinChest" x="480" y="576" width="32" height="32">
+   <properties>
+    <property name="coinValue" value="10"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

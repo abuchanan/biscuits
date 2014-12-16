@@ -95,9 +95,23 @@ class Chest:
         if not self.is_open:
             self.is_open = True
             self.widget.color.rgb = (0, 0, 0)
+            self.on_chest_opened(player)
+
+    def on_chest_opened(self, player):
+        pass
 
     def update(self, dt):
         pass
+
+
+class CoinChest(Chest):
+
+    def __init__(self, x, y, w, h, world, value=1):
+        super().__init__(x, y, w, h, world)
+        self.value = value
+
+    def on_chest_opened(self, player):
+        player.coins.balance += self.value
 
 
 def load_object_groups(map, world, container):
@@ -129,6 +143,15 @@ def load_object_groups(map, world, container):
 
             elif obj.type == 'Chest':
                 chest = Chest(x, y, w, h, world)
+                container.add_widget(chest.widget)
+
+            elif obj.type == 'CoinChest':
+                try:
+                    value = int(obj.coinValue)
+                except AttributeError:
+                    value = 1
+
+                chest = CoinChest(x, y, w, h, world, value)
                 container.add_widget(chest.widget)
 
 
