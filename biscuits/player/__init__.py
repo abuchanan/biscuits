@@ -22,6 +22,11 @@ class Player(Base):
         self.health = Bank(100)
         world.add(self)
 
+        self.signals.attack.connect(self.on_attack)
+
+    def on_attack(self, *args):
+        print('player hit!')
+
     def update(self, dt):
         self.actions.update(dt)
         self.widget.update(dt)

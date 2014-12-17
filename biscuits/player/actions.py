@@ -1,4 +1,4 @@
-from biscuits.actions import TimedAction
+from biscuits.actions import TimedAction, Walk, Idle, Attack
 from biscuits.World import Direction
 from biscuits.input import Input
 
@@ -72,25 +72,6 @@ class PlayerActions:
 # TODO different attack strengths, weapons, etc
 
 
-class Idle:
-    def __init__(self, player):
-        self.player = player
-
-    def update(self, dt):
-        self.player.widget.action = 'idle'
-
-
-class Attack(TimedAction):
-
-    def __init__(self, player):
-        super().__init__()
-        self.player = player
-
-    def on_start(self):
-        self.player.dispatch_forward('attack')
-        self.player.widget.action = 'sword'
-
-
 class Use(TimedAction):
 
     def __init__(self, player):
@@ -99,19 +80,3 @@ class Use(TimedAction):
 
     def on_start(self):
         self.player.dispatch_forward('use')
-
-
-class Walk:
-
-    def __init__(self, player, direction=Direction.north):
-        self.player = player
-        self.direction = direction
-
-    def update(self, dt):
-        self.player.body.direction = self.direction
-        self.player.widget.action = 'walk'
-        self.player.widget.direction = self.direction.name
-
-        speed = .6
-        progress = dt / speed
-        self.player.body.move(self.direction, progress)

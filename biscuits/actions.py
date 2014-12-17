@@ -1,3 +1,5 @@
+from biscuits.World import Direction
+
 
 class TimedAction:
 
@@ -19,3 +21,38 @@ class TimedAction:
 
         if self.elapsed_time >= self.duration:
             self.done = True
+
+
+class Idle:
+    def __init__(self, character):
+        self.character = character
+
+    def update(self, dt):
+        self.character.widget.action = 'idle'
+
+
+class Attack(TimedAction):
+
+    def __init__(self, character):
+        super().__init__()
+        self.character = character
+
+    def on_start(self):
+        self.character.dispatch_forward('attack')
+        self.character.widget.action = 'attack'
+
+
+class Walk:
+
+    def __init__(self, character, direction=Direction.north):
+        self.character = character
+        self.direction = direction
+
+    def update(self, dt):
+        self.character.body.direction = self.direction
+        self.character.widget.action = 'walk'
+        self.character.widget.direction = self.direction.name
+
+        speed = .6
+        progress = dt / speed
+        self.character.body.move(self.direction, progress)

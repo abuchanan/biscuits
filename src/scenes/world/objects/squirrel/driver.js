@@ -38,7 +38,6 @@ define(function() {
     }
 
 
-     // TODO sporadic animation. a squirrel isn't a fluid animation loop.
     function SquirrelSporadicDriver(s, actions) {
 
         var body = s.body;

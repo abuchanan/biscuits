@@ -1,11 +1,3 @@
-define([
-    './renderer',
-    './actions',
-    './driver',
-    '../../Body'
-
-], function(SquirrelRenderer, SquirrelActions, SquirrelDriver, Body) {
-
 
     function Squirrel(s, obj) {
 
@@ -14,20 +6,6 @@ define([
         s.actions = s.create(SquirrelActions);
         s.create(SquirrelRenderer, s.actions.moveManager);
         var driver = s.create(SquirrelDriver, s.actions);
-
-        var life = 20;
-
-        s.body.on('hit', function() {
-          life -= 10;
-
-          if (life <= 0) {
-              s.trigger('dead');
-              s.destroy();
-          } else {
-              console.log('squirrel hit!', life);
-          }
-        });
-
 
         // TODO happens when player moves and collides with object,
         //      but should probably happen the other way around too;
@@ -56,10 +34,3 @@ define([
             }
         });
     }
-
-    return Squirrel;
-});
-
-
-
-// TODO gosh it would be nice not to have to prefix everything with "Squirrel"
