@@ -1,10 +1,6 @@
 
     function Squirrel(s, obj) {
 
-        s.body = s.create(Body, obj.x, obj.y, obj.w, obj.h, false);
-
-        s.actions = s.create(SquirrelActions);
-        s.create(SquirrelRenderer, s.actions.moveManager);
         var driver = s.create(SquirrelDriver, s.actions);
 
         // TODO happens when player moves and collides with object,

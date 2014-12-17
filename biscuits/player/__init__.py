@@ -22,10 +22,19 @@ class Player(Base):
         self.health = Bank(100)
         world.add(self)
 
+        # TODO this is a common pattern. make resuable
+        self.life = 2
         self.signals.attack.connect(self.on_attack)
 
+
+    # TODO player is hitting self
     def on_attack(self, *args):
+        # TODO this will be a common pattern. needs reusable component
         print('player hit!')
+        self.life -= 1
+
+        if self.life <= 0:
+            self.signals.load_scene.send('dead')
 
     def update(self, dt):
         self.actions.update(dt)

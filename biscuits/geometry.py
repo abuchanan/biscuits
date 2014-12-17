@@ -38,10 +38,30 @@ class Rectangle:
     def __iter__(self):
         return iter((self.x, self.y, self.w, self.h))
 
-    def contains(self, x, y):
+    def adjacent(self, other):
+        left, bottom, right, top = self.bounds
+        other_left, other_bottom, other_right, other_top = other.bounds
+
+        if bottom < other_top and top > other_bottom:
+            if left == other_right or right == other_left:
+                return True
+
+        if left < other_right and right > other_left:
+            if top == other_bottom or bottom == other_top:
+                return True
+
+        return False
+
+    def contains_point(self, x, y):
         """Return true if a point is inside the rectangle."""
         left, bottom, right, top = self.bounds
         return left <= x <= right and top <= y <= bottom
+
+    def contains(self, other):
+        left, bottom, right, top = self.bounds
+        other_left, other_bottom, other_right, other_top = other.bounds
+        return (other_left >= left and other_right <= right and
+                other_top <= top and other_bottom >= bottom)
 
     def overlaps(self, other):
         """Return true if a rectangle overlaps this rectangle."""
