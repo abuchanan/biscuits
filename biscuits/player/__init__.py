@@ -23,7 +23,6 @@ class Player(Base):
         self.life = 2
         self.signals.attack.connect(self.on_attack)
 
-    # TODO player is hitting self
     def on_attack(self, *args):
         # TODO this will be a common pattern. needs reusable component
         print('player hit!')
@@ -46,4 +45,4 @@ class Player(Base):
     def dispatch_forward(self, signal_name, *args, **kwargs):
         q = self.body.copy()
         q.grow(self.body.direction.forward)
-        self.world.dispatch(q, signal_name, self, *args, **kwargs)
+        self.world.dispatch(self, q, signal_name, self, *args, **kwargs)

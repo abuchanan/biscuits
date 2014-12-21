@@ -98,7 +98,8 @@ class World:
 
         return False
 
-    def dispatch(self, q, signal_name, *args, **kwargs):
+    def dispatch(self, source, q, signal_name, *args, **kwargs):
         for hit in self.query(q):
-            method = getattr(hit.signals, signal_name)
-            method.send(*args, **kwargs)
+            if hit is not source:
+                method = getattr(hit.signals, signal_name)
+                method.send(*args, **kwargs)
