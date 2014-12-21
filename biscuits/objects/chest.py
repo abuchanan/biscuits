@@ -5,8 +5,7 @@ from biscuits.World import Body
 
 class Chest(Base):
 
-    def __init__(self, rectangle):
-        super().__init__()
+    def init(self, rectangle):
 
         # TODO resolve this tile width/height crap
         self.widget = BasicWidget(pos=(rectangle.x * 32, rectangle.y * 32),
@@ -17,9 +16,8 @@ class Chest(Base):
 
         self.signals.use.connect(self.on_use)
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(config.rectangle)
+    def init_from_config(self, config):
+        self.init(config.rectangle)
 
     def on_use(self, player):
         if not self.is_open:
@@ -39,13 +37,12 @@ class Chest(Base):
 
 class CoinChest(Chest):
 
-    def __init__(self, rectangle, value=1):
-        super().__init__(rectangle)
+    def init(self, rectangle, value=1):
+        super().init(rectangle)
         self.value = value
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(config.rectangle, value=config.coin_value)
+    def init_from_config(self, config):
+        self.init(config.rectangle, value=config.coin_value)
 
     def on_chest_opened(self, player):
         player.coins.balance += self.value

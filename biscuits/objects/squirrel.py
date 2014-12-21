@@ -9,8 +9,7 @@ from biscuits.World import Body, Direction
 
 class Squirrel(Base):
 
-    def __init__(self, rectangle):
-        super().__init__()
+    def init(self, rectangle):
 
         self.widget = SquirrelWidget()
         # TODO this size_hint stuff sucks! Need to get away from relative layout
@@ -25,8 +24,11 @@ class Squirrel(Base):
         self.life = 2
         self.signals.attack.connect(self.on_attack)
 
+    def init_from_config(self, config):
+        self.init(config.rectangle)
+
     def update(self, dt):
-        self.actions.update(dt)
+# TODO temp        self.actions.update(dt)
         self.widget.update(dt)
         self.widget.pos = (self.body.x * 32, self.body.y * 32)
 
@@ -36,10 +38,6 @@ class Squirrel(Base):
 
         if self.life <= 0:
             self.destroy()
-
-    @classmethod
-    def from_config(cls, config):
-        return cls(config.rectangle)
 
 
 class IdleCycle(SpriteCycle):

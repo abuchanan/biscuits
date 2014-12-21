@@ -7,12 +7,20 @@ TODO
 - loadpoints preprocessing
 
 - squirrel attack
+- I made map loading super slow with the pass stuff....F
+
+- player action input: getting pretty solid, but still needs a tweak: up takes precedence
+                       over left, but really what you want is the last pressed direction
+                       has precedence. obvious when passing through a door
+
+
+- warning on duplicate object ID
 
 - dead screen
 - start menu
 - comic screen
 
-- save scene state on game quit
+- persist scene state past cache (e.g. save on quit, save when region removed from cache)
 
 - inventory
 - secondary action/attack
@@ -22,3 +30,21 @@ TODO
 - touch screen path planning for player movement
 - editor
 - smooth maps
+
+- what if you wanted to reference an object in a different region?
+  currently, that would conflict with region loading/unloading semantics
+  - could implement system that could load any object by ID (and cache it)
+    regardless of region. regions would just be a list of IDs to load.
+
+
+- tree data structure for map definition. e.g. allows
+
+  region
+     obj 1
+     obj 2
+        obj 3
+
+  could be very useful, especially for simplifying region code
+
+
+- python ABCs are interesting. there might be a place for them in biscuits

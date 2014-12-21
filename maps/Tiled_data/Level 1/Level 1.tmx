@@ -126,6 +126,7 @@
   <object name="Room 2 to 3" type="Door" x="1376" y="768" width="96" height="32">
    <properties>
     <property name="Destination" value="Loadpoint 3a"/>
+    <property name="locks" value="Squirrel 2, Squirrel 3, Squirrel 4, Squirrel 5"/>
    </properties>
   </object>
   <object name="Room 3 to 2" type="Door" x="1376" y="704" width="96" height="32">
@@ -342,46 +343,30 @@
  </objectgroup>
  <objectgroup name="Squirrels">
   <object name="Squirrel 1" type="Squirrel" x="1024" y="1376" width="32" height="32"/>
-  <object name="Squirrel 2" type="SquirrelLock" x="1280" y="1152" width="32" height="32">
-   <properties>
-    <property name="lockTarget" value="Room 2 to 3"/>
-   </properties>
-  </object>
-  <object name="Squirrel 3" type="SquirrelLock" x="1536" y="1152" width="32" height="32">
-   <properties>
-    <property name="lockTarget" value="Room 2 to 3"/>
-   </properties>
-  </object>
-  <object name="Squirrel 4" type="SquirrelLock" x="1280" y="832" width="32" height="32">
-   <properties>
-    <property name="lockTarget" value="Room 2 to 3"/>
-   </properties>
-  </object>
-  <object name="Squirrel 5" type="SquirrelLock" x="1536" y="832" width="32" height="32">
-   <properties>
-    <property name="lockTarget" value="Room 2 to 3"/>
-   </properties>
-  </object>
+  <object name="Squirrel 2" type="Squirrel" x="1280" y="1152" width="32" height="32"/>
+  <object name="Squirrel 3" type="Squirrel" x="1536" y="1152" width="32" height="32"/>
+  <object name="Squirrel 4" type="Squirrel" x="1280" y="832" width="32" height="32"/>
+  <object name="Squirrel 5" type="Squirrel" x="1536" y="832" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Coins">
-  <object type="Coin" x="736" y="1280" width="32" height="32"/>
-  <object type="Coin" x="736" y="1216" width="32" height="32"/>
-  <object type="Coin" x="736" y="1152" width="32" height="32"/>
+  <object name="Coin 1" type="Coin" x="736" y="1280" width="32" height="32"/>
+  <object name="Coin 2" type="Coin" x="736" y="1216" width="32" height="32"/>
+  <object name="Coin 3" type="Coin" x="736" y="1152" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Chests">
-  <object type="CoinChest" x="1056" y="1152" width="32" height="32">
+  <object name="Chest 1" type="CoinChest" x="1056" y="1152" width="32" height="32">
    <properties>
     <property name="coinValue" value="10"/>
    </properties>
   </object>
  </objectgroup>
  <objectgroup name="Keys">
-  <object type="Key" x="800" y="864" width="32" height="32"/>
-  <object type="Key" x="832" y="320" width="32" height="32"/>
+  <object name="Key 1" type="Key" x="800" y="864" width="32" height="32"/>
+  <object name="Key 2" type="Key" x="832" y="320" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Jars">
-  <object type="Jar" x="736" y="1088" width="32" height="32"/>
-  <object type="Jar" x="736" y="1024" width="32" height="32"/>
-  <object type="Jar" x="736" y="960" width="32" height="32"/>
+  <object name="Jar 1" type="Jar" x="736" y="1088" width="32" height="32"/>
+  <object name="Jar 2" type="Jar" x="736" y="1024" width="32" height="32"/>
+  <object name="Jar 3" type="Jar" x="736" y="960" width="32" height="32"/>
  </objectgroup>
 </map>

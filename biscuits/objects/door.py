@@ -1,3 +1,5 @@
+import re
+
 from kivy.properties import BooleanProperty
 
 from biscuits.objects.base import Base
@@ -24,8 +26,7 @@ class DoorWidget(BasicWidget):
 
 class Door(Base):
 
-    def __init__(self, rectangle, destination, locks=None):
-        super().__init__()
+    def init(self, rectangle, destination, locks=None):
 
         self.body = Body(*rectangle, is_block=True)
         self.destination = destination
@@ -43,17 +44,27 @@ class Door(Base):
         if self._locks:
             self.widget.locked = True
 
+        for lock in self._locks:
+            obj = self.objects[lock]
+            # TODO this is an intersting case *against* using weakref.
+            #      there's a difference between being destroyed in the game
+            #      (e.g. via attack) and being created/destroyed in the cycle
+            #      of region/map loading/unloading. weakref is probably still
+            #      useful, but the terminaology and use of the different cases
+            #      needs to be clear
+            obj.signals.destroy.connect(self.on_lock_destroyed)
+
         self.signals.player_collision.connect(self.on_player_collision)
 
+    def on_lock_destroyed(self, obj):
+        self.remove_lock(obj.ID)
+
     def add_lock(self, name):
-        self._lock.append(name)
+        self._locks.append(name)
         self.widget.locked = True
 
     def remove_lock(self, name):
-        try:
-            self._lock.remove(name)
-        except ValueError:
-            pass
+        self._locks.remove(name)
 
         if not self._locks:
             self.widget.locked = False
@@ -61,12 +72,15 @@ class Door(Base):
     def on_player_collision(self, player):
         if 'generic' in self._locks and player.keys.balance > 0:
             player.keys.balance -= 1
-            self._locks.remove('generic')
+            self.remove_lock('generic')
 
         if not self._locks:
             self.signals.load_scene.send(self.destination)
 
-    @classmethod
-    def from_config(cls, config):
-        locks = getattr(config, 'locks', '').split()
-        return cls(config.rectangle, config.Destination, locks=locks)
+    def init_from_config(self, config):
+        try:
+            locks = re.split(', *', config.locks)
+        except AttributeError:
+            locks = None
+
+        self.init(config.rectangle, config.Destination, locks=locks)

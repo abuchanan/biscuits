@@ -5,8 +5,7 @@ from biscuits.World import Body
 
 class Jar(Base):
 
-    def __init__(self, rectangle):
-        super().__init__()
+    def init(self, rectangle):
 
         # TODO resolve this tile width/height crap
         self.widget = BasicWidget(pos=(rectangle.x * 32, rectangle.y * 32),
@@ -16,6 +15,5 @@ class Jar(Base):
 
         self.signals.attack.connect(self.destroy)
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(config.rectangle)
+    def init_from_config(self, config):
+        self.init(config.rectangle)

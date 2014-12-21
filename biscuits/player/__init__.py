@@ -10,9 +10,7 @@ from biscuits.World import Direction
 
 class Player(Base):
 
-    def __init__(self, world, x, y, direction=Direction.north):
-        super().__init__()
-
+    def init(self, world, x, y, direction=Direction.north):
         self.body = PlayerBody(self, world, x, y, 1, 1, direction=direction)
         self.world = world
         self.actions = PlayerActions(self)

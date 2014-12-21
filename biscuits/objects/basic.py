@@ -21,9 +21,7 @@ class BasicWidget(Widget):
 
 class Basic(Base):
 
-    def __init__(self, name, rectangle, value=1):
-        super().__init__()
-
+    def init(self, name, rectangle, value=1):
         self.name = name
         # TODO resolve this tile width/height crap
         self.widget = BasicWidget(pos=(rectangle.x * 32, rectangle.y * 32),

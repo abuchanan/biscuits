@@ -2,9 +2,8 @@ from biscuits.objects.basic import Basic
 
 class Coin(Basic):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__('coins', *args, **kwargs)
+    def init(self, *args, **kwargs):
+        super().init('coins', *args, **kwargs)
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(config.rectangle, config.coin_value)
+    def init_from_config(self, config):
+        self.init(config.rectangle, config.coin_value)

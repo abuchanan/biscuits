@@ -2,6 +2,7 @@ from functools import partial
 import logging
 import math
 from pathlib import Path
+import weakref
 
 from kivy.app import App
 from kivy.base import EventLoop
@@ -39,19 +40,50 @@ def load_map(path):
 loadpoints = map.loadpoints
 
 
+class UnknownObjectType(Exception): pass
+
+class ObjectLoader:
+
+    def __init__(self, configs):
+        self.configs = configs
+        self.cache = weakref.WeakValueDictionary()
+
+    def __getitem__(self, ID):
+        return self.load(ID)
+
+    def load(self, ID):
+        try:
+            return self.cache[ID]
+        except KeyError:
+            pass
+
+        config = self.configs[ID]
+
+        try:
+            cls = getattr(biscuits.objects, config.type)
+        except AttributeError:
+            raise UnknownObjectType('Unknown object type: {}'.format(config.type))
+        else:
+            obj = cls(ID, self)
+            obj.init_from_config(config)
+            self.cache[ID] = obj
+            return obj
+
+
 class Region:
 
-    def __init__(self, region_config):
+    def __init__(self, loader, region_config):
 
+        self.loader = loader
         self.signals = Signals()
         self.widget = RelativeLayout()
         self.objects = set()
 
         for tile in region_config.tiles:
-            self.widget.add_widget(tile)
+            self.widget.add_widget(tile.image)
 
-        for config in region_config.objects:
-            self.load_object(config)
+        for ID in region_config.object_IDs:
+            self.load_object(ID)
 
 
     def update(self, dt):
@@ -59,26 +91,22 @@ class Region:
             obj.update(dt)
 
 
-    def load_object(self, config):
+    def load_object(self, ID):
+        obj = self.loader.load(ID)
+
+        obj.signals.destroy.connect(self.cleanup)
+        obj.signals.load_scene.connect(self.signals.load_scene.send)
+        self.objects.add(obj)
+
         try:
-            cls = getattr(biscuits.objects, config.type)
+            self.widget.add_widget(obj.widget)
         except AttributeError:
-            log.warning('Unknown object type: {}'.format(config.type))
-        else:
-            obj = cls.from_config(config)
-
-            obj.signals.destroy.connect(self.cleanup)
-            obj.signals.load_scene.connect(self.signals.load_scene.send)
-            self.objects.add(obj)
-
-            try:
-                self.widget.add_widget(obj.widget)
-            except AttributeError:
-                pass
+            pass
 
     def cleanup(self, obj):
         self.objects.remove(obj)
 
+        # TODO consider using weakref.finalize
         try:
             self.widget.remove_widget(obj.widget)
         except AttributeError:
@@ -94,6 +122,8 @@ class BiscuitsGame:
         self.widget = RelativeLayout()
         self.objects_layer = RelativeLayout()
 
+        self.objects_loader = ObjectLoader(map.objects)
+
         # TODO figure out a nice way to get rid of this
         self.tilewidth = map.tilewidth
         self.tileheight = map.tileheight
@@ -101,7 +131,8 @@ class BiscuitsGame:
         self.region = None
         self.region_cache = {}
 
-        player = self.player = Player(self.world, 0, 0)
+        player = self.player = Player('player', self.objects_loader)
+        player.init(self.world, 0, 0)
         player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         # TODO scale player images
         player.widget.size = (self.tileheight, self.tilewidth)
@@ -119,9 +150,13 @@ class BiscuitsGame:
 
     def load(self, loadpoint):
 
+        # Unload the current region
+        # TODO would be stellar if weak references could account
+        #      for all of this
         if self.region:
             self.objects_layer.remove_widget(self.region.widget)
             for obj in self.region.objects:
+                # TODO use weakref
                 self.world.remove(obj)
 
         region_config = loadpoint.region
@@ -132,17 +167,20 @@ class BiscuitsGame:
             self.region = self._create_region(region_config)
             self.region_cache[region_config.ID] = self.region
 
+        # TODO can use weakref to pass reference to add_widget()?
+        #      would be awesome for maintaining ownership!
         self.objects_layer.add_widget(self.region.widget)
         self.player.set_position(loadpoint.x, loadpoint.y, loadpoint.direction)
 
         for obj in self.region.objects:
+            # TODO use weakref
             obj.signals.destroy.connect(self.world.remove)
             self.world.add(obj)
 
         return self
 
     def _create_region(self, region_config):
-        region = Region(region_config)
+        region = Region(self.objects_loader, region_config)
         # TODO a simple helper for doing this would be nice
         region.signals.load_scene.connect(self.signals.load_scene.send)
         return region

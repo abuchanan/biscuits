@@ -1,3 +1,5 @@
+import uuid
+
 from kivy.core.image import Image as CoreImage
 from kivy.uix.image import Image as UIImage
 import pytmx
@@ -7,35 +9,15 @@ from biscuits.geometry import Rectangle
 from biscuits.World import Direction
 
 
-class Region:
 
-    def __init__(self, ID, tiles, objects):
-        self.ID = ID
-        self.tiles = tiles
-        self.objects = objects
-
-
-class RegionTileLayer:
-    def __init__(self, x, y, tiles, width, height, tilewidth, tileheight):
-        self.x = x
-        self.y = y
-        self.tiles = tiles
-        self.width = width
-        self.height = height
-        self.tilewidth = tilewidth
-        self.tileheight = tileheight
+class Tile:
+    def __init__(self, rectangle, image):
+        self.type = 'tile'
+        self.rectangle = rectangle
+        self.image = image
 
 
-class Loadpoint:
-    def __init__(self, ID, config, region):
-        self.ID = ID
-        self.x = config.x
-        self.y = config.y
-        self.direction = Direction[config.direction]
-        self.config = config
-        self.region = region
-
-
+# TODO be consistent about "name" vs "ID" throughout biscuits
 class TiledMap:
 
     def __init__(self, path):
@@ -47,111 +29,151 @@ class TiledMap:
         self.width = self._map.width
         self.height = self._map.height
 
-        self.tile_layers = self._load_tile_layers()
-        self.objects = self._load_objects()
-        self.regions = self._load_regions()
-        self.loadpoints = self._load_loadpoints()
+        tiles_pass = TilesPass(self.tilewidth, self.tileheight, self.height)
+        tiles_pass.run(self._load_tiles())
 
-    def _iter_layers(self, indices):
-        return (self._map.layers[i] for i in indices)
+        objects_pass = ObjectsPass(self.tilewidth, self.tileheight, self.height)
+        objects_pass.run(self._load_object_configs())
 
-    def _load_loadpoints(self):
-        loadpoints = {}
+        regions_pass = RegionObjectsPass(objects_pass.regions)
+        regions_pass.run(objects_pass.objects.values())
+        regions_pass.run(tiles_pass.tiles)
 
-        for region in self.regions:
-            for obj in region.objects:
-                if obj.type == 'Loadpoint':
-                    loadpoints[obj.name] = Loadpoint(obj.name, obj, region)
-
-        return loadpoints
-                
-
-    # TODO this could be majorly optimized with some smart data structures
-    #      but for now it's easy
-    def _load_regions(self):
-        regions = []
-
-        for obj in self.objects:
-            if obj.type == 'Region':
-                objects = self._load_objects_in_region(obj)
-                tiles = self._load_tiles_in_region(obj)
-                region = Region(obj.name, tiles, objects)
-                regions.append(region)
-
-        return regions
-
-    def _load_objects_in_region(self, region):
-        objects = []
-        rect = region.rectangle
-
-        for obj in self.objects:
-            if obj.type != 'Region' and obj.rectangle.overlaps(rect):
-                objects.append(obj)
-
-        return objects
-
-    def _load_tiles_in_region(self, region):
-        tiles = []
-
-        for layer in self.tile_layers:
-            for tile in layer.tiles():
-                x, y, image = tile
-                y = self.height - y - 1
-                tile_rect = Rectangle(x, y, 1, 1)
-
-                if tile_rect.overlaps(region.rectangle):
-                    tile = self._load_tile(tile)
-                    tiles.append(tile)
-
-        return tiles
+        self.regions = regions_pass.regions
+        self.loadpoints = objects_pass.loadpoints
+        self.objects = objects_pass.objects
 
 
-    def _load_tile_layers(self):
-        return list(self._iter_layers(self._map.visible_tile_layers))
+    def _load_object_configs(self):
+        groups_i = self._map.visible_object_groups
+        groups = (self._map.layers[i] for i in groups_i)
+        return list(obj for group in groups for obj in group)
+
+    def _load_tiles(self):
+        layers_i = self._map.visible_tile_layers
+        layers = (self._map.layers[i] for i in layers_i)
+        return list(tile for layer in layers for tile in layer.tiles())
 
 
-    def _load_tile(self, tile):
-        x, y, texture = tile
+class Pass:
+
+    def before_each(self, item):
+        pass
+
+    def after_each(self, item):
+        pass
+
+    def run(self, items):
+        for item in items:
+            self.before_each(item)
+
+            try:
+                method = getattr(self, 'handle_' + item.type)
+            except AttributeError:
+                pass
+            else:
+                method(item)
+
+            self.after_each(item)
+
+
+class TilesPass(Pass):
+
+    def __init__(self, tile_width, tile_height, map_height):
+        self.tile_width = tile_width
+        self.tile_height = tile_height
+        self.map_height = map_height
+        self.tiles = []
+
+    def before_each(self, obj):
+        x, y, texture = obj
+        y = self.map_height - y - 1
+
+        # TODO this is probably slow. could be more lazy and only load UI Image
+        #      (and texture for that matter) when needed 
         image = UIImage(texture=texture, size=texture.size)
-        image.x = x * self._map.tilewidth
-        image.y = (self._map.height - y - 1) * self._map.tileheight
-        image.size = (self._map.tileheight, self._map.tilewidth)
+        image.x = x * self.tile_width
+        image.y = y * self.tile_height
+        image.size = (self.tile_width, self.tile_width)
         image.size_hint = (None, None)
-        return image
 
-    def _load_objects(self):
-        tile_w = self._map.tilewidth
-        tile_h = self._map.tileheight
+        rectangle = Rectangle(x, y, 1, 1)
 
-        objects = []
+        tile = Tile(rectangle, image)
+        self.tiles.append(tile)
 
-        for group in self._iter_layers(self._map.visible_object_groups):
-            for obj in group:
 
-                obj.width = obj.width / tile_w
-                obj.height = obj.height / tile_h
+class ObjectsPass(Pass):
 
-                obj.x = obj.x / tile_w
-                obj.y = self._map.height - (obj.y / tile_w) - obj.height
-                obj.rectangle = Rectangle(obj.x, obj.y, obj.width, obj.height)
+    def __init__(self, tile_width, tile_height, map_height):
+        self.tile_width = tile_width
+        self.tile_height = tile_height
+        self.map_height = map_height
+        self.loadpoints = {}
+        self.regions = []
+        self.objects = {}
+        # TODO move this
+        self.ignore = ('SquirrelLock', 'DoorSwitch')
 
-                self.visit(obj)
-                objects.append(obj)
+    def before_each(self, obj):
+        obj.width = obj.width / self.tile_width
+        obj.height = obj.height / self.tile_height
 
-        return objects
+        obj.x = obj.x / self.tile_width
+        obj.y = self.map_height - (obj.y / self.tile_width) - obj.height
+        obj.rectangle = Rectangle(obj.x, obj.y, obj.width, obj.height)
 
-    def visit(self, obj):
-        try:
-            method = getattr(self, 'handle_' + obj.type)
-            method(obj)
-        except AttributeError:
-            pass
+        if not obj.name:
+            obj.name = str(uuid.uuid4())
+
+    def handle_Region(self, obj):
+        region = Region(obj.name, obj.rectangle)
+        self.regions.append(region)
 
     def handle_Coin(self, obj):
         obj.coin_value = int(getattr(obj, 'coinValue', 1))
 
     def handle_CoinChest(self, obj):
         obj.coin_value = int(getattr(obj, 'coinValue', 1))
+
+    def handle_Loadpoint(self, obj):
+        obj.direction = Direction[obj.direction]
+        self.loadpoints[obj.name] = obj
+
+    def after_each(self, obj):
+        if obj.type in self.ignore:
+            return
+
+        self.objects[obj.name] = obj
+
+
+class RegionObjectsPass(Pass):
+    def __init__(self, regions):
+        self.regions = regions
+
+    def before_each(self, obj):
+
+        # TODO this would add to multiple regions if they overlapped
+        for region in self.regions:
+            if obj.rectangle.overlaps(region.rectangle):
+                if obj.type == 'Region':
+                    continue
+                elif obj.type == 'tile':
+                    region.tiles.append(obj)
+                elif obj.type == 'Loadpoint':
+                    obj.region = region
+                else:
+                    region.object_IDs.append(obj.name)
+
+
+
+class Region:
+
+    def __init__(self, ID, rectangle):
+        self.ID = ID
+        self.rectangle = rectangle
+        self.tiles = []
+        self.object_IDs = []
 
 
 class KivyImageLoader:
