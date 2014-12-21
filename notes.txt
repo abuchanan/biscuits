@@ -4,16 +4,17 @@ http://stackoverflow.com/questions/17280341/how-do-you-check-for-keyboard-events
 
 
 TODO
-- pathfinding and squirrel
-- sound
+- pathfinding
 - use KV language for widgets?
-- map cache
-- save scene state
 - loadpoints preprocessing
+
+- squirrel attack
 
 - dead screen
 - start menu
 - comic screen
+
+- save scene state on game quit
 
 - inventory
 - secondary action/attack

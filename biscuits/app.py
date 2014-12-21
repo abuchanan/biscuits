@@ -7,99 +7,57 @@ from kivy.app import App
 from kivy.base import EventLoop
 from kivy.clock import Clock
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.image import Image
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 import biscuits.objects
 from biscuits.debug import DebugWidget
 from biscuits.hud import HUDWidget
 from biscuits.player import Player
-from biscuits.World import World, Direction
+from biscuits.signals import Signals
+from biscuits.World import World
 from biscuits.map_loaders.tiled import TiledMap
 
 
 log = logging.getLogger('biscuits')
 
 maps_path = Path(__file__).parent / '..' / 'maps' / 'Tiled_data'
+# TODO needs to come from loadpoint or something
+map_path = (maps_path / 'Level 1' / 'Level 1.tmx').resolve()
+# TODO needs a service for loading and caching
+map = TiledMap(map_path)
+
+map_cache = {}
+
+def load_map(path):
+    try:
+        return map_cache[path]
+    except KeyError:
+        map = TiledMap(path)
+        map_cache[path] = map
+        return map
+
+loadpoints = map.loadpoints
 
 
-# TODO don't subclass layout, provide as "game.widget"
-class BiscuitsGame(RelativeLayout):
+class Region:
 
-    def load_scene(self, ID):
-        map_path = (maps_path / 'Level 1' / 'Level 1.tmx').resolve()
-        map = TiledMap(map_path)
+    def __init__(self, region_config):
 
-        self.tilewidth = map.tilewidth
-        self.tileheight = map.tileheight
+        self.signals = Signals()
+        self.widget = RelativeLayout()
+        self.objects = set()
 
-        loadpoint = map.loadpoints[ID]
-        region = loadpoint.region
+        for tile in region_config.tiles:
+            self.widget.add_widget(tile)
 
-        self.clear_widgets()
-        self.world = World()
-
-        self.objects_layer = RelativeLayout()
-        self.add_widget(self.objects_layer)
-
-        for tile_layer in region.tile_layers:
-            for tile in tile_layer.tiles:
-                # TODO move this
-                x, y, texture = tile
-                image = Image(texture=texture, size=texture.size)
-                image.x = x * self.tilewidth
-                image.y = (map.height - y - 1) * self.tileheight
-                image.size = (self.tileheight, self.tilewidth)
-                image.size_hint = (None, None)
-                self.objects_layer.add_widget(image)
-
-        for config in region.objects:
+        for config in region_config.objects:
             self.load_object(config)
 
-        start_x = int(loadpoint.config.x)
-        start_y = int(loadpoint.config.y)
-        start_direction = Direction[loadpoint.config.direction]
-
-        player = self.player = Player(self.world, start_x, start_y,
-                                      start_direction)
-        player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
-        # TODO scale player images
-        player.widget.size = (self.tileheight, self.tilewidth)
-        player.widget.size_hint = (None, None)
-        self.add_widget(player.widget)
-
-        self.hud = HUDWidget(size_hint=(1, .05), pos_hint={'top': 1})
-        self.add_widget(self.hud)
-
-        debug = DebugWidget(size_hint=(1, .05))
-        self.add_widget(debug)
 
     def update(self, dt):
-        for obj in self.world:
+        for obj in self.objects:
             obj.update(dt)
-        
-        self.player.update(dt)
-        self.hud.coins = self.player.coins.balance
-        self.hud.health = self.player.health.balance
-        self.hud.keys = self.player.keys.balance
-        self.track_player()
 
-    def track_player(self):
-        x = math.floor((self.player.body.x + 0.5) * self.tilewidth)
-        y = math.floor((self.player.body.y + 0.5) * self.tileheight)
-
-        self.objects_layer.x = self.center_x - x
-        self.objects_layer.y = self.center_y - y
-
-    def cleanup(self, obj):
-        try:
-            self.world.remove(obj)
-        except ValueError:
-            pass
-
-        try:
-            self.objects_layer.remove_widget(obj.widget)
-        except AttributeError:
-            pass
 
     def load_object(self, config):
         try:
@@ -110,22 +68,134 @@ class BiscuitsGame(RelativeLayout):
             obj = cls.from_config(config)
 
             obj.signals.destroy.connect(self.cleanup)
-            obj.signals.load_scene.connect(self.load_scene)
-            self.world.add(obj)
+            obj.signals.load_scene.connect(self.signals.load_scene.send)
+            self.objects.add(obj)
 
             try:
-                self.objects_layer.add_widget(obj.widget)
+                self.widget.add_widget(obj.widget)
             except AttributeError:
                 pass
+
+    def cleanup(self, obj):
+        self.objects.remove(obj)
+
+        try:
+            self.widget.remove_widget(obj.widget)
+        except AttributeError:
+            pass
+
+
+class BiscuitsGame:
+
+    def __init__(self):
+
+        self.signals = Signals()
+        self.world = World()
+        self.widget = RelativeLayout()
+        self.objects_layer = RelativeLayout()
+
+        # TODO figure out a nice way to get rid of this
+        self.tilewidth = map.tilewidth
+        self.tileheight = map.tileheight
+
+        self.region = None
+        self.region_cache = {}
+
+        player = self.player = Player(self.world, 0, 0)
+        player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        # TODO scale player images
+        player.widget.size = (self.tileheight, self.tilewidth)
+        player.widget.size_hint = (None, None)
+        self.world.add(player)
+
+        self.hud = HUDWidget(size_hint=(1, .05), pos_hint={'top': 1})
+        # TODO move debug to app
+        debug = DebugWidget(size_hint=(1, .05))
+
+        self.widget.add_widget(self.objects_layer)
+        self.widget.add_widget(player.widget)
+        self.widget.add_widget(self.hud)
+        self.widget.add_widget(debug)
+
+    def load(self, loadpoint):
+
+        if self.region:
+            self.objects_layer.remove_widget(self.region.widget)
+            for obj in self.region.objects:
+                self.world.remove(obj)
+
+        region_config = loadpoint.region
+
+        try:
+            self.region = self.region_cache[region_config.ID]
+        except KeyError:
+            self.region = self._create_region(region_config)
+            self.region_cache[region_config.ID] = self.region
+
+        self.objects_layer.add_widget(self.region.widget)
+        self.player.set_position(loadpoint.x, loadpoint.y, loadpoint.direction)
+
+        for obj in self.region.objects:
+            obj.signals.destroy.connect(self.world.remove)
+            self.world.add(obj)
+
+        return self
+
+    def _create_region(self, region_config):
+        region = Region(region_config)
+        # TODO a simple helper for doing this would be nice
+        region.signals.load_scene.connect(self.signals.load_scene.send)
+        return region
+
+
+    def update(self, dt):
+        if self.region:
+            self.region.update(dt)
+
+        self.player.update(dt)
+        self.hud.coins = self.player.coins.balance
+        self.hud.health = self.player.health.balance
+        self.hud.keys = self.player.keys.balance
+        self.track_player()
+
+    def unload(self):
+        pass
+
+    def track_player(self):
+        x = math.floor((self.player.body.x + 0.5) * self.tilewidth)
+        y = math.floor((self.player.body.y + 0.5) * self.tileheight)
+
+        self.objects_layer.x = self.widget.center_x - x
+        self.objects_layer.y = self.widget.center_y - y
 
 
 class BiscuitsApp(App):
 
+    def __init__(self):
+        super().__init__()
+        self.widget = RelativeLayout()
+        self.scene = None
+        self.game = BiscuitsGame()
+
+    def load_scene(self, loadpoint_ID):
+
+        if self.scene:
+            self.scene.unload()
+            self.widget.remove_widget(self.scene.widget)
+
+        loadpoint = loadpoints[loadpoint_ID]
+        scene = self.game.load(loadpoint)
+        scene.signals.load_scene.connect(self.load_scene)
+        self.widget.add_widget(scene.widget)
+
+        self.scene = scene
+
+    def update(self, dt):
+        self.scene.update(dt)
+
     def build(self):
         EventLoop.ensure_window()
+        self.load_scene('Loadpoint 1a')
+        Clock.schedule_interval(self.update, 1.0 / 60.0)
 
-        game = BiscuitsGame()
-        game.load_scene('Loadpoint 1a')
-        Clock.schedule_interval(game.update, 1.0 / 60.0)
-
-        return game
+        return self.widget

@@ -1,14 +1,17 @@
-from kivy.core.image import Image
+from kivy.core.image import Image as CoreImage
+from kivy.uix.image import Image as UIImage
 import pytmx
 
 # TODO need a plugin system and graceful way to do this
 from biscuits.geometry import Rectangle
+from biscuits.World import Direction
 
 
 class Region:
 
-    def __init__(self, tile_layers, objects):
-        self.tile_layers = tile_layers
+    def __init__(self, ID, tiles, objects):
+        self.ID = ID
+        self.tiles = tiles
         self.objects = objects
 
 
@@ -26,6 +29,9 @@ class RegionTileLayer:
 class Loadpoint:
     def __init__(self, ID, config, region):
         self.ID = ID
+        self.x = config.x
+        self.y = config.y
+        self.direction = Direction[config.direction]
         self.config = config
         self.region = region
 
@@ -68,8 +74,8 @@ class TiledMap:
         for obj in self.objects:
             if obj.type == 'Region':
                 objects = self._load_objects_in_region(obj)
-                tile_layers = self._load_tile_layers_in_region(obj)
-                region = Region(tile_layers, objects)
+                tiles = self._load_tiles_in_region(obj)
+                region = Region(obj.name, tiles, objects)
                 regions.append(region)
 
         return regions
@@ -84,31 +90,34 @@ class TiledMap:
 
         return objects
 
-    def _load_tile_layers_in_region(self, region):
-        layers = []
-        rect = region.rectangle
+    def _load_tiles_in_region(self, region):
+        tiles = []
 
         for layer in self.tile_layers:
-            tiles = []
-
             for tile in layer.tiles():
                 x, y, image = tile
                 y = self.height - y - 1
                 tile_rect = Rectangle(x, y, 1, 1)
 
-                if tile_rect.overlaps(rect):
+                if tile_rect.overlaps(region.rectangle):
+                    tile = self._load_tile(tile)
                     tiles.append(tile)
 
-            if tiles:
-                r = RegionTileLayer(x, y, tiles, int(region.width), int(region.height),
-                                    self.tilewidth, self.tileheight)
-                layers.append(r)
-
-        return layers
+        return tiles
 
 
     def _load_tile_layers(self):
         return list(self._iter_layers(self._map.visible_tile_layers))
+
+
+    def _load_tile(self, tile):
+        x, y, texture = tile
+        image = UIImage(texture=texture, size=texture.size)
+        image.x = x * self._map.tilewidth
+        image.y = (self._map.height - y - 1) * self._map.tileheight
+        image.size = (self._map.tileheight, self._map.tilewidth)
+        image.size_hint = (None, None)
+        return image
 
     def _load_objects(self):
         tile_w = self._map.tilewidth
@@ -152,7 +161,7 @@ class KivyImageLoader:
     """
 
     def __init__(self, filename, colorkey):
-        self._texture = Image(filename).texture
+        self._texture = CoreImage(filename).texture
 
     def __call__(self, rect, flags):
 

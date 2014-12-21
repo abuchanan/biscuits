@@ -53,6 +53,6 @@ class Walk:
         self.character.widget.action = 'walk'
         self.character.widget.direction = self.direction.name
 
-        speed = .6
+        speed = .3
         progress = dt / speed
         self.character.body.move(self.direction, progress)
