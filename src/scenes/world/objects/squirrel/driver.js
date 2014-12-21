@@ -37,33 +37,5 @@ define(function() {
         });
     }
 
-
-    function SquirrelSporadicDriver(s, actions) {
-
-        var body = s.body;
-        var driver = s.create(SquirrelPathDriver, actions);
-
-        function randomDestination() {
-            var radius = 5;
-            var bb = body.getRectangle();
-
-            return {
-                x: bb.x + Math.floor(Math.random() * radius * 2) - radius,
-                y: bb.y + Math.floor(Math.random() * radius * 2) - radius,
-            };
-        }
-
-        driver.on('Reached destination', function() {
-            if (Math.random() < 0.25) {
-              var dest = randomDestination();
-              driver.setDestination(dest);
-            } else {
-              actions.moveManager.start(actions.stay);
-            }
-            
-        });
-    }
-
-
     return SquirrelSporadicDriver;
 });

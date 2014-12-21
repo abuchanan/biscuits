@@ -11,24 +11,22 @@ from biscuits.World import Direction
 class Player(Base):
 
     def init(self, x, y, direction=Direction.north):
-        self.body = PlayerBody(self, self.world, x, y, 1, 1, direction=direction)
+        self.body = PlayerBody(self.world, x, y, 1, 1, direction=direction)
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
         self.widget.direction = direction.name
         self.coins = Bank()
         self.keys = Bank()
+        # TODO this will be a common pattern. needs reusable component
         self.health = Bank(100)
 
-        # TODO this is a common pattern. make resuable
-        self.life = 2
         self.signals.attack.connect(self.on_attack)
 
     def on_attack(self, *args):
         # TODO this will be a common pattern. needs reusable component
-        print('player hit!')
-        self.life -= 1
+        self.health.balance -= 1
 
-        if self.life <= 0:
+        if self.health.balance <= 0:
             self.signals.load_scene.send('dead')
 
     def set_position(self, x, y, direction):
@@ -38,8 +36,13 @@ class Player(Base):
         self.widget.direction = direction.name
         self.actions.current = self.actions.idle
 
+    def trigger_collisions(self):
+        for hit in self.world.query(self.body):
+            hit.signals.player_collision.send(self)
+
     def update(self, dt):
         self.actions.update(dt)
+        self.trigger_collisions()
         self.widget.update(dt)
 
     def dispatch_forward(self, signal_name, *args, **kwargs):

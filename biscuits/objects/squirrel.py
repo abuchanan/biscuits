@@ -21,17 +21,23 @@ class Squirrel(Base):
         self.body = CharacterBody(self.world, *rectangle)
 
         self.actions = SquirrelSporadicActions(self)
+        self.hit_actions = SquirrelHitActions()
 
         self.life = 2
         self.signals.attack.connect(self.on_attack)
+        self.signals.player_collision.connect(self.on_player_collision)
 
     def init_from_config(self, config):
         self.init(config.rectangle)
 
     def update(self, dt):
         self.actions.update(dt)
+        self.hit_actions.update(dt)
         self.widget.update(dt)
         self.widget.pos = (self.body.x * 32, self.body.y * 32)
+
+    def on_player_collision(self, player):
+        self.hit_actions.hit(player)
 
     def on_attack(self, player):
         # TODO this will be a common pattern. needs reusable component
@@ -116,3 +122,20 @@ class SquirrelSporadicActions:
         if _next:
             self.current = _next
         self.current.update(dt)
+
+
+class SquirrelHitActions:
+    def __init__(self):
+        self.current = None
+
+    def update(self, dt):
+        if self.current is not None and self.current.done:
+            self.current = None
+
+        if self.current is not None:
+            self.current.update(dt)
+
+    def hit(self, player):
+        if self.current is None:
+            self.current = TimedAction()
+            player.signals.attack.send()
