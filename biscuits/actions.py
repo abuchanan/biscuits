@@ -47,6 +47,7 @@ class Walk:
     def __init__(self, character, direction=Direction.north):
         self.character = character
         self.direction = direction
+        self.blocked = False
 
     def update(self, dt):
         self.character.body.direction = self.direction
@@ -55,4 +56,5 @@ class Walk:
 
         speed = .3
         progress = dt / speed
-        self.character.body.move(self.direction, progress)
+        blocked, collisions = self.character.body.move(self.direction, progress)
+        self.blocked = blocked

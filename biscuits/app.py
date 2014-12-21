@@ -44,8 +44,9 @@ class UnknownObjectType(Exception): pass
 
 class ObjectLoader:
 
-    def __init__(self, configs):
+    def __init__(self, configs, world):
         self.configs = configs
+        self.world = world
         self.cache = weakref.WeakValueDictionary()
 
     def __getitem__(self, ID):
@@ -64,7 +65,7 @@ class ObjectLoader:
         except AttributeError:
             raise UnknownObjectType('Unknown object type: {}'.format(config.type))
         else:
-            obj = cls(ID, self)
+            obj = cls(ID, self, self.world)
             obj.init_from_config(config)
             self.cache[ID] = obj
             return obj
@@ -122,7 +123,7 @@ class BiscuitsGame:
         self.widget = RelativeLayout()
         self.objects_layer = RelativeLayout()
 
-        self.objects_loader = ObjectLoader(map.objects)
+        self.objects_loader = ObjectLoader(map.objects, self.world)
 
         # TODO figure out a nice way to get rid of this
         self.tilewidth = map.tilewidth
@@ -131,8 +132,8 @@ class BiscuitsGame:
         self.region = None
         self.region_cache = {}
 
-        player = self.player = Player('player', self.objects_loader)
-        player.init(self.world, 0, 0)
+        player = self.player = Player('player', self.objects_loader, self.world)
+        player.init(0, 0)
         player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
         # TODO scale player images
         player.widget.size = (self.tileheight, self.tilewidth)

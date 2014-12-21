@@ -1,10 +1,11 @@
 import random
 
 from biscuits.actions import Idle, Walk, TimedAction
+from biscuits.character import CharacterBody
 from biscuits.objects.base import Base
 from biscuits.sprites import SpriteCycle
 from biscuits.widgets import CharacterWidget
-from biscuits.World import Body, Direction
+from biscuits.World import Direction
 
 
 class Squirrel(Base):
@@ -17,7 +18,7 @@ class Squirrel(Base):
         self.widget.pos = (rectangle.x * 32, rectangle.y * 32)
         self.widget.size = (32, 32)
         self.widget.size_hint = (None, None)
-        self.body = Body(*rectangle)
+        self.body = CharacterBody(self.world, *rectangle)
 
         self.actions = SquirrelSporadicActions(self)
 
@@ -28,7 +29,7 @@ class Squirrel(Base):
         self.init(config.rectangle)
 
     def update(self, dt):
-# TODO temp        self.actions.update(dt)
+        self.actions.update(dt)
         self.widget.update(dt)
         self.widget.pos = (self.body.x * 32, self.body.y * 32)
 

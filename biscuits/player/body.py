@@ -1,29 +1,16 @@
-from biscuits.geometry import Rectangle as BoundingBox
-from biscuits.World import Body
+from biscuits.character import CharacterBody
 
 
-class PlayerBody(Body):
+class PlayerBody(CharacterBody):
 
-    def __init__(self, player, world, *args, **kwargs):
+    def __init__(self, player, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.player = player
-        self.world = world
 
     def move(self, direction, distance=1):
-        dx = direction.dx * distance
-        dy = direction.dy * distance
-
-        n = BoundingBox(self.x + dx, self.y + dy,
-                        self.w, self.h)
-
-        blocked = False
-
-        collisions = self.world.query(n)
+        blocked, collisions = super().move(direction, distance)
 
         for hit in collisions:
             hit.signals.player_collision.send(self.player)
-            if hit.body.is_block:
-                blocked = True
 
-        if not blocked:
-            self.set_from_rectangle(n)
+        return blocked, collisions
