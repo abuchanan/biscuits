@@ -24,40 +24,59 @@ class PlayerActions:
         elif isinstance(cur, Attack) and cur.done:
             return self.idle
 
-        elif cur is self.idle or isinstance(cur, Walk):
+        elif cur is self.idle:
 
-            if inp.use.keydown:
+            if inp.use.active:
                 return Use(self.player)
 
-            elif inp.attack.keydown:
+            elif inp.attack.active:
                 return Attack(self.player)
 
-            elif inp.up.keydown:
+            elif inp.up.active:
                 return Walk(self.player, Direction.north)
 
-            elif inp.down.keydown:
+            elif inp.down.active:
                 return Walk(self.player, Direction.south)
 
-            elif inp.left.keydown:
+            elif inp.left.active:
                 return Walk(self.player, Direction.west)
 
-            elif inp.right.keydown:
+            elif inp.right.active:
                 return Walk(self.player, Direction.east)
 
-            elif isinstance(cur, Walk):
-                d = cur.direction
+        elif isinstance(cur, Walk):
 
-                if d == Direction.north and inp.up.keyup:
-                    return self.idle
+            d = cur.direction
 
-                elif d == Direction.south and inp.down.keyup:
-                    return self.idle
+            if inp.use.first:
+                return Use(self.player)
 
-                elif d == Direction.west and inp.left.keyup:
-                    return self.idle
+            elif inp.attack.first:
+                return Attack(self.player)
 
-                elif d == Direction.east and inp.right.keyup:
-                    return self.idle
+            elif inp.up.first:
+                return Walk(self.player, Direction.north)
+
+            elif inp.down.first:
+                return Walk(self.player, Direction.south)
+
+            elif inp.left.first:
+                return Walk(self.player, Direction.west)
+
+            elif inp.right.first:
+                return Walk(self.player, Direction.east)
+
+            elif d == Direction.north and inp.up.last:
+                return self.idle
+
+            elif d == Direction.south and inp.down.last:
+                return self.idle
+
+            elif d == Direction.west and inp.left.last:
+                return self.idle
+
+            elif d == Direction.east and inp.right.last:
+                return self.idle
 
 
     def update(self, dt):

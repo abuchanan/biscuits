@@ -37,9 +37,10 @@ class Keybindings:
 class Key:
 
     def __init__(self):
-        self.keydown = False
+        self.first = False
+        self.active = False
         self.repeat = False
-        self.keyup = False
+        self.last = False
 
 
 class Input:
@@ -69,21 +70,24 @@ class Input:
             key = self._keys[name]
 
             if type == 'activate':
-                if key.keydown:
-                    key.keydown = False
+                if key.first:
+                    key.first = False
                     key.repeat = True
                 elif not key.repeat:
-                    key.keydown = True
+                    key.first = True
 
-                key.keyup = False
+                key.active = True
+                key.last = False
 
             elif type == 'deactivate':
-                key.keydown = False
+                key.first = False
                 key.repeat = False
-                key.keyup = True
+                key.active = False
+                key.last = True
                 self._updates[name] = 'clear'
 
             elif type == 'clear':
-                key.keydown = False
+                key.first = False
                 key.repeat = False
-                key.keyup = False
+                key.active = False
+                key.last = False
