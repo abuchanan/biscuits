@@ -6,9 +6,8 @@ from biscuits.widgets import CharacterWidget
 
 class WalkCycle(SpriteCycle):
 
-    speed = 0.36
+    speed = 0.25
     image_paths = [
-        'media/player/{direction}-0.png',
         'media/player/{direction}-1.png',
         'media/player/{direction}-2.png',
         'media/player/{direction}-3.png',
