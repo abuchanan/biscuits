@@ -99,3 +99,4 @@ class Use(TimedAction):
 
     def on_start(self):
         self.player.dispatch_forward('use')
+        self.player.widget.action = 'use'

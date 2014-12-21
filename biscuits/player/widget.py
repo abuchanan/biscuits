@@ -21,6 +21,11 @@ class IdleCycle(SpriteCycle):
     ]
 
 
+# TODO 
+class UseCycle(IdleCycle):
+    pass
+
+
 class SwordCycle(SpriteCycle):
 
     image_paths = [
@@ -34,6 +39,7 @@ class PlayerWidget(CharacterWidget):
         'idle': IdleCycle,
         'walk': WalkCycle,
         'attack': SwordCycle,
+        'use': UseCycle,
     }
     
     def __init__(self, *args, **kwargs):
