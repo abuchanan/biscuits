@@ -5,10 +5,22 @@ TODO
 
 - inventory
 
-- attack dynamics (hit power, block chance, etc)
+- obstacles
+-- wall-mounted flame thrower
+
+- attack dynamics
 -- stun squirrel on hit
+-- squirrel runs from attack
 -- faster sword swing
 -- visual cues for hits
+-- blocking hits
+-- hit power
+-- per-character stats variation 
+-- distance attacks
+--- projectile attack
+-- delayed weapon, e.g. bomb
+
+- enemy seeking player
 
 - loadpoints preprocessing
 -- comic design and preprocessing
@@ -23,7 +35,6 @@ TODO
 - I made map loading super slow with the pass stuff....F
 - secondary action/attack
 
-- projectile attack
 - pathfinding
 
 - be able to pause scene while some action occurs

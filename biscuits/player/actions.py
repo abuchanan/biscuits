@@ -2,6 +2,12 @@ from biscuits.actions import TimedAction, Walk, Idle, Attack
 from biscuits.World import Direction
 
 
+class PlayerAttack(Attack):
+    def __init__(self, *args, **kwargs):
+        kwargs['duration'] = 0.4
+        super().__init__(*args, **kwargs)
+
+
 class PlayerActions:
 
     def __init__(self, player, input):
@@ -28,7 +34,7 @@ class PlayerActions:
                 return Use(self.player)
 
             elif inp.attack.active:
-                return Attack(self.player)
+                return PlayerAttack(self.player)
 
             elif inp.up.active:
                 return Walk(self.player, Direction.north)
@@ -50,7 +56,7 @@ class PlayerActions:
                 return Use(self.player)
 
             elif inp.attack.first:
-                return Attack(self.player)
+                return PlayerAttack(self.player)
 
             elif inp.up.first:
                 return Walk(self.player, Direction.north)

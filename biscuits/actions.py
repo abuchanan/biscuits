@@ -33,8 +33,8 @@ class Idle:
 
 class Attack(TimedAction):
 
-    def __init__(self, character):
-        super().__init__()
+    def __init__(self, character, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.character = character
 
     def on_start(self):
