@@ -116,6 +116,7 @@
   <object name="Room 1 to 2" type="Door" x="1120" y="864" width="32" height="96">
    <properties>
     <property name="Destination" value="Loadpoint 2a"/>
+    <property name="switches" value="Door Switch 1"/>
    </properties>
   </object>
   <object name="Room 2 to 1" type="Door" x="1184" y="864" width="32" height="96">
@@ -361,7 +362,6 @@
   </object>
  </objectgroup>
  <objectgroup name="Keys">
-  <object name="Key 1" type="Key" x="800" y="864" width="32" height="32"/>
   <object name="Key 2" type="Key" x="832" y="320" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Jars">

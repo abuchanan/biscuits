@@ -113,7 +113,7 @@ class ObjectsPass(Pass):
         self.regions = []
         self.objects = {}
         # TODO move this
-        self.ignore = ('SquirrelLock', 'DoorSwitch')
+        self.ignore = []
 
     def before_each(self, obj):
         obj.width = obj.width / self.tile_width

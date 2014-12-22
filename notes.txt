@@ -3,27 +3,31 @@ https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/rend
 
 TODO
 
-- I made map loading super slow with the pass stuff....F
+
+- start menu
+- comic screen
+- persist scene state past cache (e.g. save on quit, save when region removed from cache)
+- inventory
+
+- loadpoints preprocessing
+
+- be able to pause scene while some action occurs
+
+- squirrels can go through doors....F
+
 
 - player action input: getting pretty solid, but still needs a tweak: up takes precedence
                        over left, but really what you want is the last pressed direction
                        has precedence. obvious when passing through a door
 
 
-- warning on duplicate object ID
-
-- start menu
-- comic screen
-
-- pathfinding
-- loadpoints preprocessing
-
-- persist scene state past cache (e.g. save on quit, save when region removed from cache)
-
-- inventory
+- I made map loading super slow with the pass stuff....F
 - secondary action/attack
 - attack dynamics (hit power, block chance, etc)
 - projectile attack
+- pathfinding
+
+- warning on duplicate object ID
 
 - touch screen path planning for player movement
 - editor
