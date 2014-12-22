@@ -14,11 +14,12 @@ from biscuits.signals import Signals
 #      benefit of classical DI.
 class Base:
 
-    def __init__(self, ID, objects, world):
+    def __init__(self, ID, objects, world, app):
         self.ID = ID
         self.signals = Signals()
         self.objects = objects
         self.world = world
+        self.app = app
 
     def destroy(self, *args, **kwargs):
         self.signals.destroy.send(self)

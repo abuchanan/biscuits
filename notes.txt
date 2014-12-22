@@ -2,11 +2,7 @@ https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/rend
 
 
 TODO
-- pathfinding
-- use KV language for widgets?
-- loadpoints preprocessing
 
-- squirrel attack
 - I made map loading super slow with the pass stuff....F
 
 - player action input: getting pretty solid, but still needs a tweak: up takes precedence
@@ -16,9 +12,11 @@ TODO
 
 - warning on duplicate object ID
 
-- dead screen
 - start menu
 - comic screen
+
+- pathfinding
+- loadpoints preprocessing
 
 - persist scene state past cache (e.g. save on quit, save when region removed from cache)
 
@@ -30,6 +28,7 @@ TODO
 - touch screen path planning for player movement
 - editor
 - smooth maps
+- use KV language for widgets?
 
 - what if you wanted to reference an object in a different region?
   currently, that would conflict with region loading/unloading semantics

@@ -28,7 +28,7 @@ class Door(Base):
 
     def init(self, rectangle, destination, locks=None):
 
-        self.body = Body(*rectangle, is_block=True)
+        self.body = Body(*rectangle)
         self.destination = destination
 
         if locks is None:
@@ -75,7 +75,7 @@ class Door(Base):
             self.remove_lock('generic')
 
         if not self._locks:
-            self.signals.load_scene.send(self.destination)
+            self.app.load_scene(self.destination)
 
     def init_from_config(self, config):
         try:

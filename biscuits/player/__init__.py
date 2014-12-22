@@ -18,16 +18,13 @@ class Player(Base):
         self.coins = Bank()
         self.keys = Bank()
         # TODO this will be a common pattern. needs reusable component
-        self.health = Bank(100)
+        self.health = Bank(5)
 
         self.signals.attack.connect(self.on_attack)
 
     def on_attack(self, *args):
         # TODO this will be a common pattern. needs reusable component
         self.health.balance -= 1
-
-        if self.health.balance <= 0:
-            self.signals.load_scene.send('dead')
 
     def set_position(self, x, y, direction):
         self.body.x = x
@@ -43,6 +40,10 @@ class Player(Base):
     def update(self, dt):
         self.actions.update(dt)
         self.trigger_collisions()
+
+        if self.health.balance <= 0:
+            self.signals.dead.send()
+
         self.widget.update(dt)
 
     def dispatch_forward(self, signal_name, *args, **kwargs):
