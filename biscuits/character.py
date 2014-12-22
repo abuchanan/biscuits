@@ -15,15 +15,14 @@ class CharacterBody(Body):
         n = BoundingBox(self.x + dx, self.y + dy,
                         self.w, self.h)
 
-        blocked = False
-
+        blocks = []
         collisions = self.world.query(n)
 
         for hit in collisions:
             if hit.body.is_block:
-                blocked = True
+                blocks.append(hit)
 
-        if not blocked:
+        if not blocks:
             self.set_from_rectangle(n)
 
-        return blocked, collisions
+        return blocks

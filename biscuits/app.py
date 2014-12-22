@@ -42,13 +42,16 @@ loadpoints = map.loadpoints
 
 class UnknownObjectType(Exception): pass
 
+
+# TODO maybe object loader should be the owner of all objects and return
+#      only weak references. 
 class ObjectLoader:
 
     def __init__(self, configs, world, app):
         self.configs = configs
         self.world = world
         self.app = app
-        self.cache = weakref.WeakValueDictionary()
+        self.cache = {}
 
     def __getitem__(self, ID):
         return self.load(ID)

@@ -56,5 +56,5 @@ class Walk:
 
         speed = .3
         progress = dt / speed
-        blocked, collisions = self.character.body.move(self.direction, progress)
-        self.blocked = blocked
+        blocks = self.character.body.move(self.direction, progress)
+        self.blocked = len(blocks) > 0

@@ -11,7 +11,7 @@ from biscuits.World import Direction
 class Player(Base):
 
     def init(self, x, y, direction=Direction.north):
-        self.body = PlayerBody(self.world, x, y, 1, 1, direction=direction)
+        self.body = PlayerBody(self, self.world, x, y, 1, 1, direction=direction)
         self.actions = PlayerActions(self)
         self.widget = PlayerWidget()
         self.widget.direction = direction.name
@@ -35,7 +35,8 @@ class Player(Base):
 
     def trigger_collisions(self):
         for hit in self.world.query(self.body):
-            hit.signals.player_collision.send(self)
+            if hit is not self:
+                hit.signals.player_collision.send(self)
 
     def update(self, dt):
         self.actions.update(dt)

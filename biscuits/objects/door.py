@@ -61,7 +61,7 @@ class Door(Base):
 
     def init(self, rectangle, destination, locks=None, switches=None):
 
-        self.body = Body(*rectangle)
+        self.body = Body(*rectangle, is_block=True)
         self.destination = destination
 
         # TODO resolve this tile width/height crap
