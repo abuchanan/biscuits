@@ -1,14 +1,12 @@
 from biscuits.actions import TimedAction, Walk, Idle, Attack
 from biscuits.World import Direction
-from biscuits.input import Input
 
 
 class PlayerActions:
 
-    def __init__(self, player):
+    def __init__(self, player, input):
         self.player = player
-        # TODO this doesn't belong here. but where does it belong?
-        self._input = Input()
+        self.input = input
         self.idle = Idle(player)
         self.current = self.idle
 
@@ -16,7 +14,7 @@ class PlayerActions:
 
         # For brevity
         cur = self.current
-        inp = self._input
+        inp = self.input
 
         if isinstance(cur, Use) and cur.done:
             return self.idle
@@ -80,7 +78,6 @@ class PlayerActions:
 
 
     def update(self, dt):
-        self._input.update(dt)
         _next = self.transition()
         if _next:
             self.current = _next

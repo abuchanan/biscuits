@@ -11,12 +11,15 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 import biscuits.objects
+from biscuits.comic_scene import ComicScene
 from biscuits.dead import DeadScene
 from biscuits.debug import DebugWidget
 from biscuits.hud import HUDWidget
-from biscuits.player import Player
-from biscuits.World import World
+from biscuits.input import Input
 from biscuits.map_loaders.tiled import TiledMap
+from biscuits.player import Player
+from biscuits.start_scene import StartScene
+from biscuits.World import World
 
 
 log = logging.getLogger('biscuits')
@@ -37,7 +40,17 @@ def load_map(path):
         map_cache[path] = map
         return map
 
+class Loadpoint:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
 loadpoints = map.loadpoints
+
+loadpoints['start'] = Loadpoint(type='start')
+loadpoints['dead'] = Loadpoint(type='dead')
+loadpoints['comic 1'] = Loadpoint(type='comic', path=Path('media/comic-1'), pages=2,
+                                  exitpoint='start')
 
 
 class UnknownObjectType(Exception): pass
@@ -218,6 +231,7 @@ class BiscuitsApp(App):
         super().__init__()
         self.widget = RelativeLayout()
         self._scene = None
+        self.input = Input()
         self.game = BiscuitsGame(self)
 
         # TODO some screens, such as inventory or storefront, will want access
@@ -238,19 +252,26 @@ class BiscuitsApp(App):
         self.widget.add_widget(scene.widget)
 
     def load_scene(self, loadpoint_ID):
+        loadpoint = loadpoints[loadpoint_ID]
 
-        if loadpoint_ID == 'dead':
+        if loadpoint.type == 'dead':
             self.scene = DeadScene(self)
+
+        elif loadpoint.type == 'start':
+            self.scene = StartScene(self)
+
+        elif loadpoint.type == 'comic':
+            self.scene = ComicScene(self, loadpoint)
         else:
-            loadpoint = loadpoints[loadpoint_ID]
             self.scene = self.game.load(loadpoint)
 
     def update(self, dt):
+        self.input.update(dt)
         self.scene.update(dt)
 
     def build(self):
         EventLoop.ensure_window()
-        self.load_scene('Loadpoint 1a')
+        self.load_scene('comic 1')
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
         return self.widget

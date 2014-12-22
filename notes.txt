@@ -3,16 +3,12 @@ https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/rend
 
 TODO
 
-- start menu
-- comic screen
 - persist scene state past cache (e.g. save on quit, save when region removed from cache)
 - inventory
 
 - loadpoints preprocessing
 
 - be able to pause scene while some action occurs
-
-- squirrels can go through doors....F
 
 
 - player action input: getting pretty solid, but still needs a tweak: up takes precedence

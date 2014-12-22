@@ -12,7 +12,7 @@ class Player(Base):
 
     def init(self, x, y, direction=Direction.north):
         self.body = PlayerBody(self, self.world, x, y, 1, 1, direction=direction)
-        self.actions = PlayerActions(self)
+        self.actions = PlayerActions(self, self.app.input)
         self.widget = PlayerWidget()
         self.widget.direction = direction.name
         self.coins = Bank()
