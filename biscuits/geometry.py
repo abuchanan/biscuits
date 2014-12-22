@@ -23,7 +23,6 @@ class Rectangle:
 
     contains  -- is a point inside?
     overlaps  -- does a rectangle overlap?
-    grow  -- grow (or shrink)
     """
 
     __slots__ = ('x', 'y', 'w', 'h')

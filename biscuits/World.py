@@ -52,12 +52,14 @@ class Body(BoundingBox):
             if dx > 0:
                 self.w += dx
             elif dx < 0:
-                self.x -= dx
+                self.x += dx
+                self.w -= dx
 
             if dy > 0:
                 self.h += dy
             elif dy < 0:
-                self.y -= dy
+                self.y += dy
+                self.h -= dy
         else:
             self.x -= distance
             self.y -= distance

@@ -3,24 +3,30 @@ https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/rend
 
 TODO
 
-- persist scene state past cache (e.g. save on quit, save when region removed from cache)
 - inventory
 
-- loadpoints preprocessing
+- attack dynamics (hit power, block chance, etc)
+-- stun squirrel on hit
+-- faster sword swing
+-- visual cues for hits
 
-- be able to pause scene while some action occurs
+- loadpoints preprocessing
+-- comic design and preprocessing
+
+- persist scene state past cache (e.g. save on quit, save when region removed from cache)
 
 
 - player action input: getting pretty solid, but still needs a tweak: up takes precedence
                        over left, but really what you want is the last pressed direction
                        has precedence. obvious when passing through a door
 
-
 - I made map loading super slow with the pass stuff....F
 - secondary action/attack
-- attack dynamics (hit power, block chance, etc)
+
 - projectile attack
 - pathfinding
+
+- be able to pause scene while some action occurs
 
 - warning on duplicate object ID
 

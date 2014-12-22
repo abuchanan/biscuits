@@ -365,8 +365,11 @@
   <object name="Key 2" type="Key" x="832" y="320" width="32" height="32"/>
  </objectgroup>
  <objectgroup name="Jars">
-  <object name="Jar 1" type="Jar" x="736" y="1088" width="32" height="32"/>
-  <object name="Jar 2" type="Jar" x="736" y="1024" width="32" height="32"/>
-  <object name="Jar 3" type="Jar" x="736" y="960" width="32" height="32"/>
+  <object name="Jar 1" type="Jar" x="768" y="1088" width="32" height="32"/>
+  <object name="Jar 2" type="Jar" x="768" y="1024" width="32" height="32"/>
+  <object name="Jar 3" type="Jar" x="768" y="960" width="32" height="32"/>
+  <object name="Jar 4" type="Jar" x="768" y="1472" width="32" height="32"/>
+  <object name="Jar 5" type="Jar" x="768" y="1408" width="32" height="32"/>
+  <object name="Jar 6" type="Jar" x="768" y="1344" width="32" height="32"/>
  </objectgroup>
 </map>
