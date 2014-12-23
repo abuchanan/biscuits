@@ -90,10 +90,6 @@ class PlayerActions:
         self.current.update(dt)
 
 
-# TODO be able to walk and attack at the same time
-# TODO different attack strengths, weapons, etc
-
-
 class Use(TimedAction):
 
     def __init__(self, player):

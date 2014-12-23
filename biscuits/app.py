@@ -51,6 +51,11 @@ loadpoints['start'] = Loadpoint(type='start')
 loadpoints['dead'] = Loadpoint(type='dead')
 loadpoints['comic 1'] = Loadpoint(type='comic', path=Path('media/comic-1'), pages=2,
                                   exitpoint='start')
+loadpoints['win comic'] = Loadpoint(type='comic', path=Path('media/win-comic'), pages=1,
+                                    exitpoint='start')
+loadpoints['boss squirrel comic'] = Loadpoint(type='comic', path=Path('media/boss squirrel'),
+                                    pages=1,
+                                    exitpoint='Loadpoint 6a')
 
 
 class UnknownObjectType(Exception): pass
@@ -271,7 +276,8 @@ class BiscuitsApp(App):
 
     def build(self):
         EventLoop.ensure_window()
-        self.load_scene('comic 1')
+        #self.load_scene('comic 1')
+        self.load_scene('Loadpoint 4a')
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
         return self.widget
