@@ -53,7 +53,9 @@ loadpoints['comic 1'] = Loadpoint(type='comic', path=Path('media/comic-1'), page
                                   exitpoint='start')
 loadpoints['win comic'] = Loadpoint(type='comic', path=Path('media/win-comic'), pages=1,
                                     exitpoint='start')
+
 loadpoints['boss squirrel comic'] = Loadpoint(type='comic', path=Path('media/boss squirrel'),
+                                    sound='media/sounds/Boss Squirrel.wav',
                                     pages=1,
                                     exitpoint='Loadpoint 6a')
 

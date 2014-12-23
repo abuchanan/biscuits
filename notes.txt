@@ -3,8 +3,6 @@ https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/rend
 
 TODO
 
-- use action  that triggers comic strip
-
 - obstacles
 -- wall-mounted flame thrower
 
@@ -22,6 +20,8 @@ TODO
 
 -- be able to walk and attack at the same time
 
+- use action  that triggers comic strip
+
 - start needs to reset world
 - enemy seeking player
 
@@ -29,6 +29,10 @@ TODO
 
 - loadpoints preprocessing
 -- comic design and preprocessing
+
+- minimum comic time.  for matching sounds.
+-- comic background sound.
+-- per-page sounds
 
 - persist scene state past cache (e.g. save on quit, save when region removed from cache)
 
