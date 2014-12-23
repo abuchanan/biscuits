@@ -1,3 +1,0 @@
-export {SkipTest};
-
-class SkipTest {};
