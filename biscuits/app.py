@@ -279,7 +279,7 @@ class BiscuitsApp(App):
     def build(self):
         EventLoop.ensure_window()
         #self.load_scene('comic 1')
-        self.load_scene('Loadpoint 4a')
+        self.load_scene('Loadpoint 6a')
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 
         return self.widget

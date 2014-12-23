@@ -5,22 +5,30 @@ class TimedAction:
 
     def __init__(self, duration=1):
         self.duration = duration
+        self.reset()
+
+    def reset(self):
         self.elapsed_time = 0
         self.done = False
-        self.started = False
+        self.running = True
 
     def on_start(self):
         pass
 
+    def on_done(self):
+        pass
+
     def update(self, dt):
-        self.elapsed_time += dt
+        if self.running:
+            if self.elapsed_time == 0:
+                self.on_start()
 
-        if not self.started:
-            self.on_start()
-            self.started = True
+            self.elapsed_time += dt
 
-        if self.elapsed_time >= self.duration:
-            self.done = True
+            if self.elapsed_time >= self.duration:
+                self.done = True
+                self.running = False
+                self.on_done()
 
 
 class Idle:

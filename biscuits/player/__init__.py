@@ -25,6 +25,7 @@ class Player(Base):
     def on_attack(self, *args):
         # TODO this will be a common pattern. needs reusable component
         self.health.balance -= 1
+        self.widget.hit()
 
     def set_position(self, x, y, direction):
         self.body.x = x

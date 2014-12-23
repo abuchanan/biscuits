@@ -18,9 +18,11 @@ class ComicSceneWidget(FloatLayout):
         self.bind(page=self.update_source)
         self.add_widget(self.image)
 
-        if loadpoint.sound:
+        try:
             self._sound = SoundLoader.load(loadpoint.sound)
             self._sound.play()
+        except AttributeError:
+            pass
 
     def get_source(self):
         return str(self.scene.loadpoint.path / 'page-{}.png'.format(self.page))

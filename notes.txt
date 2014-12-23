@@ -22,8 +22,12 @@ TODO
 
 - use action  that triggers comic strip
 
+- comic that proceeds automatically after timeout
+
 - start needs to reset world
 - enemy seeking player
+
+- cross-region background sound playing
 
 - inventory
 

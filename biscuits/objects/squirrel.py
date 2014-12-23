@@ -42,6 +42,7 @@ class Squirrel(Base):
     def on_attack(self, player):
         # TODO this will be a common pattern. needs reusable component
         self.life -= 1
+        self.widget.hit()
 
         if self.life <= 0:
             self.destroy()
