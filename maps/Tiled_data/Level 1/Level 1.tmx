@@ -115,80 +115,80 @@
  <objectgroup name="Doors">
   <object name="Room 1 to 2" type="Door" x="1120" y="864" width="32" height="96">
    <properties>
-    <property name="Destination" value="Loadpoint 2a"/>
+    <property name="destination" value="Loadpoint 2a"/>
     <property name="switches" value="Door Switch 1"/>
    </properties>
   </object>
   <object name="Room 2 to 1" type="Door" x="1184" y="864" width="32" height="96">
    <properties>
-    <property name="Destination" value="Loadpoint 1b"/>
+    <property name="destination" value="Loadpoint 1b"/>
    </properties>
   </object>
   <object name="Room 2 to 3" type="Door" x="1376" y="768" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 3a"/>
+    <property name="destination" value="Loadpoint 3a"/>
     <property name="locks" value="Squirrel 2, Squirrel 3, Squirrel 4, Squirrel 5"/>
    </properties>
   </object>
   <object name="Room 3 to 2" type="Door" x="1376" y="704" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 2b"/>
+    <property name="destination" value="Loadpoint 2b"/>
    </properties>
   </object>
   <object name="Room 3 to 7" type="Door" x="1376" y="256" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 7a"/>
+    <property name="destination" value="Loadpoint 7a"/>
    </properties>
   </object>
   <object name="Room 7 to 3" type="Door" x="1376" y="192" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 3c"/>
+    <property name="destination" value="Loadpoint 3c"/>
    </properties>
   </object>
   <object name="Room 3 to 4" type="Door" x="1632" y="448" width="32" height="96">
    <properties>
-    <property name="Destination" value="Loadpoint 4a"/>
+    <property name="destination" value="Loadpoint 4a"/>
    </properties>
   </object>
   <object name="Room 4 to 3" type="Door" x="1696" y="448" width="32" height="96">
    <properties>
-    <property name="Destination" value="Loadpoint 3b"/>
+    <property name="destination" value="Loadpoint 3b"/>
    </properties>
   </object>
   <object name="Room 4 to 5" type="Door" x="1888" y="704" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 5a"/>
+    <property name="destination" value="Loadpoint 5a"/>
    </properties>
   </object>
   <object name="Room 5 to 4" type="Door" x="1888" y="768" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 4c"/>
+    <property name="destination" value="Loadpoint 4c"/>
    </properties>
   </object>
   <object name="Room 4 to 6" type="Door" x="2144" y="448" width="32" height="96">
    <properties>
-    <property name="Destination" value="boss squirrel comic"/>
+    <property name="destination" value="boss squirrel comic"/>
     <property name="locks" value="generic"/>
    </properties>
   </object>
   <object name="Room 6 to 4" type="Door" x="2208" y="448" width="32" height="96">
    <properties>
-    <property name="Destination" value="Loadpoint 4b"/>
+    <property name="destination" value="Loadpoint 4b"/>
    </properties>
   </object>
   <object name="Room 8a to 7a" type="Door" x="576" y="256" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 7b"/>
+    <property name="destination" value="Loadpoint 7b"/>
    </properties>
   </object>
   <object name="Room 7a to 8a" type="Door" x="576" y="192" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 8a"/>
+    <property name="destination" value="Loadpoint 8a"/>
    </properties>
   </object>
   <object name="Room 8b to 7b" type="Door" x="832" y="256" width="96" height="32">
    <properties>
-    <property name="Destination" value="Loadpoint 7c"/>
+    <property name="destination" value="Loadpoint 7c"/>
    </properties>
   </object>
  </objectgroup>

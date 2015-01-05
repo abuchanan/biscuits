@@ -1,10 +1,25 @@
 from collections import OrderedDict
 import inspect
+from types import SimpleNamespace
 
 from biscuits.signals import Signals
 
 
-class Config(dict): pass
+class Config:
+    def __init__(self, **kwargs):
+        object.__setattr__(self, '_data', dict(**kwargs))
+
+    def items(self):
+        return self._data.items()
+
+    def __getattr__(self, key):
+        try:
+            return self._data[key]
+        except KeyError:
+            raise AttributeError
+
+    def __setattr__(self, key, value):
+        self._data[key] = value
 
 
 class ConfigError(Exception): pass

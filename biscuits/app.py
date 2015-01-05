@@ -11,6 +11,7 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 import biscuits.objects
+from biscuits.objects.base import Config
 from biscuits.comic_scene import ComicScene
 from biscuits.dead import DeadScene
 from biscuits.debug import DebugWidget
@@ -21,6 +22,7 @@ from biscuits.player import Player
 from biscuits.start_scene import StartScene
 from biscuits.World import World
 from biscuits.objectloader import ObjectLoader
+from biscuits.region import Region
 
 
 log = logging.getLogger('biscuits')
@@ -41,10 +43,7 @@ def load_map(path):
         map_cache[path] = map
         return map
 
-class Loadpoint:
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+class Loadpoint(Config): pass
 
 loadpoints = map.loadpoints
 
@@ -62,45 +61,17 @@ loadpoints['boss squirrel comic'] = Loadpoint(type='comic', path=Path('media/bos
 
 
 
-class Region:
-
-    def __init__(self, loader, region_config):
-
-        self.loader = loader
-        self.widget = RelativeLayout()
-        self.objects = set()
-
-        for tile in region_config.tiles:
-            self.widget.add_widget(tile.image)
-
-        for ID in region_config.object_IDs:
-            self.load_object(ID)
 
 
-    def update(self, dt):
-        for obj in self.objects:
-            obj.update(dt)
+class WorldScene:
+    def __init__(self, object_configs, world, app):
+        # TODO circular reference to scene?
+        self.objects = ObjectLoader(object_configs, self)
+        self.world = world
+        self.app = app
 
-
-    def load_object(self, ID):
-        obj = self.loader.load(ID)
-
-        obj.signals.destroy.connect(self.cleanup)
-        self.objects.add(obj)
-
-        try:
-            self.widget.add_widget(obj.widget)
-        except AttributeError:
-            pass
-
-    def cleanup(self, obj):
-        self.objects.remove(obj)
-
-        # TODO consider using weakref.finalize
-        try:
-            self.widget.remove_widget(obj.widget)
-        except AttributeError:
-            pass
+    def load_scene(self, name):
+        self.app.load_scene(name)
 
 
 class BiscuitsGame:
@@ -114,7 +85,12 @@ class BiscuitsGame:
         self.widget = RelativeLayout()
         self.objects_layer = RelativeLayout()
 
-        self.objects_loader = ObjectLoader(map.objects, self.world, app)
+        object_configs = dict(map.objects)
+        object_configs['player'] = Config(type='Player',
+                                          body=Config(x=0, y=0, w=1, h=1))
+
+        scene = WorldScene(object_configs, self.world, app)
+        self.scene = scene
 
         # TODO figure out a nice way to get rid of this
         self.tilewidth = map.tilewidth
@@ -123,14 +99,8 @@ class BiscuitsGame:
         self.region = None
         self.region_cache = {}
 
-        # TODO try to use ObjectsLoader for player too
-        player = self.player = Player('player', self.objects_loader, self.world, app)
-        player.init(0, 0)
-        player.widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
-        # TODO scale player images
-        player.widget.size = (self.tileheight, self.tilewidth)
-        player.widget.size_hint = (None, None)
-        player.signals.dead.connect(self.dead)
+        player = scene.objects.load('player')
+
         self.player = player
         self.world.add(player)
 
@@ -139,12 +109,10 @@ class BiscuitsGame:
         debug = DebugWidget(player, size_hint=(1, .05))
 
         self.widget.add_widget(self.objects_layer)
-        self.widget.add_widget(player.widget)
+        # TODO 
+        self.widget.add_widget(player.widget._kivy_widget)
         self.widget.add_widget(self.hud)
         self.widget.add_widget(debug)
-
-    def dead(self, *args):
-        self.app.load_scene('dead')
 
     def load(self, loadpoint):
 
@@ -157,12 +125,13 @@ class BiscuitsGame:
                 # TODO use weakref
                 self.world.remove(obj)
 
+        print(loadpoint)
         region_config = loadpoint.region
 
         try:
             self.region = self.region_cache[region_config.ID]
         except KeyError:
-            self.region = Region(self.objects_loader, region_config)
+            self.region = Region(self.scene.objects, region_config)
             self.region_cache[region_config.ID] = self.region
 
         # TODO can use weakref to pass reference to add_widget()?
@@ -192,8 +161,8 @@ class BiscuitsGame:
         pass
 
     def track_player(self):
-        x = math.floor((self.player.body.x + 0.5) * self.tilewidth)
-        y = math.floor((self.player.body.y + 0.5) * self.tileheight)
+        x = math.floor((self.player.body.bb.x + 0.5) * self.tilewidth)
+        y = math.floor((self.player.body.bb.y + 0.5) * self.tileheight)
 
         self.objects_layer.x = self.widget.center_x - x
         self.objects_layer.y = self.widget.center_y - y
@@ -207,10 +176,6 @@ class BiscuitsApp(App):
         self._scene = None
         self.input = Input()
         self.game = BiscuitsGame(self)
-
-        # TODO some screens, such as inventory or storefront, will want access
-        #      to the player object. but that's currently buried in the world
-        #      scene.
 
     @property
     def scene(self):
@@ -245,7 +210,6 @@ class BiscuitsApp(App):
 
     def build(self):
         EventLoop.ensure_window()
-        #self.load_scene('comic 1')
         self.load_scene('Loadpoint 6a')
         Clock.schedule_interval(self.update, 1.0 / 60.0)
 

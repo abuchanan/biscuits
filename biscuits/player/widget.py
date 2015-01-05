@@ -41,6 +41,15 @@ class PlayerWidget(CharacterWidget):
         'attack': SwordCycle,
         'use': UseCycle,
     }
+
+    def __init__(self):
+        super().__init__()
+
+        # TODO need to find a good home for this stuff
+        self._kivy_widget.pos_hint = {'center_x': 0.5, 'center_y': 0.5}
+        # TODO scale self images
+        self._kivy_widget.size = (32, 32)
+        self._kivy_widget.size_hint = (None, None)
     
         # TODO move this to the Cycle. a cycle can handle more that just sprites
         #self._attack_sound = SoundLoader.load('media/sounds/swings.wav')

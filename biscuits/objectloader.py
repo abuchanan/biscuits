@@ -8,6 +8,7 @@ from biscuits.objects.key import Key
 from biscuits.objects.squirrel import Squirrel
 from biscuits.objects.boss_squirrel import BossSquirrel
 from biscuits.objects.wall import Wall
+from biscuits.player import Player
 
 
 class UnknownObjectType(Exception): pass
@@ -27,6 +28,7 @@ class ObjectLoader:
         'Squirrel': Squirrel(),
         'BossSquirrel': BossSquirrel(),
         'Wall': Wall(),
+        'Player': Player(),
     }
 
     def __init__(self, configs, scene):
@@ -44,12 +46,11 @@ class ObjectLoader:
             pass
 
         config = self.configs[ID]
-        type_ = config['type']
 
         try:
-            tpl = self._types[type_]
+            tpl = self._types[config.type]
         except KeyError:
-            raise UnknownObjectType('Unknown object type: {}'.format(type_))
+            raise UnknownObjectType('Unknown object type: {}'.format(config.type))
         else:
             obj = tpl.config(config).attach(self.scene)
             self.cache[ID] = obj

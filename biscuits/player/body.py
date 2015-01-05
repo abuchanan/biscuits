@@ -1,4 +1,5 @@
 from biscuits.character import CharacterBody
+from biscuits.geometry import Rectangle
 
 
 class PlayerBody(CharacterBody):

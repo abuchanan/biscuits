@@ -25,9 +25,12 @@ class Player(Base):
     def on_update(self, dt):
         self.trigger_collisions()
 
+    def on_dead(self):
+        self.scene.load_scene('dead')
+
     def set_position(self, x, y, direction):
-        self.body.x = x
-        self.body.y = y
+        self.body.bb.x = x
+        self.body.bb.y = y
         self.body.direction = direction
         self.widget.direction = direction.name
         self.actions.current = self.actions.idle

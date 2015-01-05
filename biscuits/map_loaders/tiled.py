@@ -6,6 +6,7 @@ from kivy.uix.image import Image as UIImage
 import pytmx
 
 # TODO need a plugin system and graceful way to do this
+from biscuits.objects.base import Config
 from biscuits.geometry import Rectangle
 from biscuits.World import Direction
 
@@ -18,7 +19,6 @@ class Tile:
         self.image = image
 
 
-# TODO be consistent about "name" vs "ID" throughout biscuits
 class TiledMap:
 
     def __init__(self, path):
@@ -33,8 +33,11 @@ class TiledMap:
         tiles_pass = TilesPass(self.tilewidth, self.tileheight, self.height)
         tiles_pass.run(self._load_tiles())
 
+        configs_pass = ObjectsToConfigsPass()
+        configs_pass.run(self._load_object_configs())
+
         objects_pass = ObjectsPass(self.tilewidth, self.tileheight, self.height)
-        objects_pass.run(self._load_object_configs())
+        objects_pass.run(configs_pass.configs)
 
         regions_pass = RegionObjectsPass(objects_pass.regions)
         regions_pass.run(objects_pass.objects.values())
@@ -104,6 +107,22 @@ class TilesPass(Pass):
         self.tiles.append(tile)
 
 
+class ObjectsToConfigsPass(Pass):
+    def __init__(self):
+        self.configs = []
+
+    def before_each(self, obj):
+        # TODO this is pretty hacky
+        config = Config(ID=obj.name,
+                        type=obj.type,
+                        x=obj.x,
+                        y=obj.y,
+                        width=obj.width,
+                        height=obj.height,
+                        **obj.properties)
+        self.configs.append(config)
+
+
 class ObjectsPass(Pass):
 
     def __init__(self, tile_width, tile_height, map_height):
@@ -122,13 +141,16 @@ class ObjectsPass(Pass):
 
         obj.x = obj.x / self.tile_width
         obj.y = self.map_height - (obj.y / self.tile_width) - obj.height
-        obj.rectangle = Rectangle(obj.x, obj.y, obj.width, obj.height)
+        r= Rectangle(obj.x, obj.y, obj.width, obj.height)
 
-        if not obj.name:
-            obj.name = str(uuid.uuid4())
+        obj.rectangle = r
+        obj.body = Config(x=r.x, y=r.y, w=r.w, h=r.h)
+
+        if not obj.ID:
+            obj.ID = str(uuid.uuid4())
 
     def handle_Region(self, obj):
-        region = Region(obj.name, obj.rectangle)
+        region = Region(obj.ID, obj.rectangle)
         self.regions.append(region)
 
     def handle_Coin(self, obj):
@@ -139,7 +161,7 @@ class ObjectsPass(Pass):
 
     def handle_Loadpoint(self, obj):
         obj.direction = Direction[obj.direction]
-        self.loadpoints[obj.name] = obj
+        self.loadpoints[obj.ID] = obj
 
     def handle_Door(self, obj):
         try:
@@ -156,7 +178,7 @@ class ObjectsPass(Pass):
         if obj.type in self.ignore:
             return
 
-        self.objects[obj.name] = obj
+        self.objects[obj.ID] = obj
 
 
 class RegionObjectsPass(Pass):
@@ -175,7 +197,7 @@ class RegionObjectsPass(Pass):
                 elif obj.type == 'Loadpoint':
                     obj.region = region
                 else:
-                    region.object_IDs.append(obj.name)
+                    region.object_IDs.append(obj.ID)
 
 
 

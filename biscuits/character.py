@@ -10,8 +10,8 @@ class CharacterBody(Body):
         dx = direction.dx * distance
         dy = direction.dy * distance
 
-        n = BoundingBox(self.x + dx, self.y + dy,
-                        self.w, self.h)
+        n = BoundingBox(self.bb.x + dx, self.bb.y + dy,
+                        self.bb.w, self.bb.h)
 
         blocks = []
         collisions = self.scene.world.query(n)
