@@ -25,7 +25,7 @@ class DoorSwitch(Base):
     body = Body()
     widget = DoorSwitchWidget()
 
-    def init(self):
+    def __init__(self):
         self.active = False
 
     def on_player_collision(self, player):

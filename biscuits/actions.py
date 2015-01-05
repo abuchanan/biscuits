@@ -74,7 +74,7 @@ class Attack(TimedAction):
         self.character = character
 
     def on_start(self):
-        self.character.dispatch_forward('attack')
+        self.character.dispatch_forward('attacked')
         self.character.widget.action = 'attack'
 
 

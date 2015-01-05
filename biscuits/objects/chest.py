@@ -43,6 +43,7 @@ class Chest(Base):
 class CoinChest(Chest):
 
     def __init__(self, value=1):
+        super().__init__()
         self.value = value
 
     def on_chest_opened(self, player):

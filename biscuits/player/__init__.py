@@ -25,7 +25,7 @@ class Player(Base):
     def on_update(self, dt):
         self.trigger_collisions()
 
-    def on_dead(self):
+    def on_dead(self, sender):
         self.scene.load_scene('dead')
 
     def set_position(self, x, y, direction):

@@ -6,6 +6,5 @@ class BossSquirrel(Squirrel):
 
     life = Life(10)
 
-    def destroy(self):
-        super().destroy()
-        self.app.load_scene('win comic')
+    def on_destroy(self, *args):
+        self.scene.load_scene('win comic')

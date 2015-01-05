@@ -46,7 +46,7 @@ class CharacterWidget(Component):
             self._current = self._cycles[value]()
         self._action = value
 
-    def on_hit(self):
+    def on_hit(self, *args):
         self._hit_timer.running = True
         
     def on_update(self, dt):

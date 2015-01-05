@@ -54,11 +54,12 @@ class Life(Component):
 class Attackable(Component):
 
     def on_attacked(self, attacker):
+        print('attacked')
         # TODO different types of attacks will yield different decrement amounts
         # TODO chance to block attack
         self.parent.life.amount -= 1
         # TODO use hit signal
-        self.parent.widget.hit()
+        self.parent.widget.signals.hit.send()
 
 
 class Character(Base):
@@ -66,3 +67,6 @@ class Character(Base):
     body = CharacterBody()
     life = Life(2)
     attackable = Attackable()
+
+    def on_dead(self, *args):
+        self.destroy()

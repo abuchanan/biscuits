@@ -15,11 +15,23 @@ class Region:
         for ID in region_config.object_IDs:
             self.load_object(ID)
 
+        self._to_cleanup = []
+
 
     def update(self, dt):
         for obj in self.objects:
             obj.signals.update.send(dt)
 
+        while self._to_cleanup:
+            obj = self._to_cleanup.pop()
+
+            self.objects.remove(obj)
+
+            # TODO consider using weakref.finalize
+            try:
+                self.widget.remove_widget(obj.widget._kivy_widget)
+            except AttributeError:
+                pass
 
     def load_object(self, ID):
         obj = self.loader.load(ID)
@@ -28,16 +40,10 @@ class Region:
         self.objects.add(obj)
 
         try:
-            # TODO
+            # TODO clean up this widget stuff
             self.widget.add_widget(obj.widget._kivy_widget)
         except AttributeError:
             pass
 
     def cleanup(self, obj):
-        self.objects.remove(obj)
-
-        # TODO consider using weakref.finalize
-        try:
-            self.widget.remove_widget(obj.widget._kivy_widget)
-        except AttributeError:
-            pass
+        self._to_cleanup.append(obj)

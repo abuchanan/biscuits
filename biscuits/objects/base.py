@@ -186,3 +186,6 @@ class Component(metaclass=ComponentMeta):
 
 class Base(Component):
     parent_name = 'scene'
+
+    def destroy(self):
+        self.signals.destroy.send(self)
