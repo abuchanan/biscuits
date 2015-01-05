@@ -19,7 +19,7 @@ class Player(Base):
 
     def on_attack(self, *args):
         # TODO this will be a common pattern. needs reusable component
-        self.health.balance -= 1
+        self.life.amount -= 1
         self.widget.hit()
 
     def on_update(self, dt):
@@ -36,11 +36,11 @@ class Player(Base):
         self.actions.current = self.actions.idle
 
     def trigger_collisions(self):
-        for hit in self.world.query(self.body):
+        for hit in self.scene.world.query(self.body.bb):
             if hit is not self:
                 hit.signals.player_collision.send(self)
 
     def dispatch_forward(self, signal_name, *args, **kwargs):
-        q = self.body.copy()
+        q = self.body.bb.copy()
         q.grow(self.body.direction.forward)
         self.scene.world.dispatch(self, q, signal_name, self, *args, **kwargs)

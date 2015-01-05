@@ -103,11 +103,11 @@ class ComponentTemplate:
         result = self._cls._create()
         self._set_parent(result, parent)
 
+        result._pre_init(*self._args, **self._kwargs)
+
         for key, value in self._components.items():
             component = value.attach(result)
             setattr(result, key, component)
-
-        result._pre_init(*self._args, **self._kwargs)
 
         try:
             result.__init__(*args, **kwargs)
@@ -166,18 +166,6 @@ class Component(metaclass=ComponentMeta):
         return super(Component, cls).__new__(cls)
 
     def _pre_init(self, *args, **kwargs):
-        pass
-
-
-class Base(Component):
-    parent_name = 'scene'
-
-    def _pre_init(self, *args, **kwargs):
-        super()._pre_init(*args, **kwargs)
-        self.ID = 'TODO'
-
-    def _pre_init(self, *args, **kwargs):
-
         self.signals = Signals()
         parent_signals = getattr(self.parent, 'signals', None)
 
@@ -194,3 +182,7 @@ class Base(Component):
             self.scene = self.parent.scene
         except AttributeError:
             pass
+
+
+class Base(Component):
+    parent_name = 'scene'

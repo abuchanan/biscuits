@@ -5,6 +5,7 @@ This code is in the public domain.
 Rectangle  -- two points, forming a rectangle
 """
 
+from copy import copy
 import math
 
 
@@ -74,6 +75,35 @@ class Rectangle:
         self.y = other.y
         self.w = other.w
         self.h = other.h
+
+    def move(self, direction, distance=1):
+        self.x += direction.dx * distance
+        self.y += direction.dy * distance
+
+    def grow(self, direction=None, distance=1):
+        if direction:
+            dx = direction.dx * distance
+            dy = direction.dy * distance
+
+            if dx > 0:
+                self.w += dx
+            elif dx < 0:
+                self.x += dx
+                self.w -= dx
+
+            if dy > 0:
+                self.h += dy
+            elif dy < 0:
+                self.y += dy
+                self.h -= dy
+        else:
+            self.x -= distance
+            self.y -= distance
+            self.w += distance
+            self.h += distance
+
+    def copy(self):
+        return copy(self)
 
     @property
     def bounds(self):

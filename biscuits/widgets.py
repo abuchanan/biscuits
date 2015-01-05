@@ -1,5 +1,4 @@
 from kivy.graphics import *
-from kivy.properties import StringProperty
 from kivy.uix.widget import Widget
 
 from biscuits.actions import TimedAction
@@ -7,9 +6,6 @@ from biscuits.objects.base import Component
 
 
 class CharacterKivyWidget(Widget):
-
-    action = StringProperty('idle')
-    direction = StringProperty('south')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,6 +32,7 @@ class CharacterWidget(Component):
         self._kivy_widget = CharacterKivyWidget(pos=(bb.x * 32, bb.y * 32))
         self._kivy_widget.color.rgb = self.clear_color
         self._hit_timer = HitTimer()
+        self._action = None
 
         self.action = 'idle'
 
@@ -45,8 +42,9 @@ class CharacterWidget(Component):
 
     @action.setter
     def action(self, value):
+        if value != self._action:
+            self._current = self._cycles[value]()
         self._action = value
-        self._current = self._cycles[value]()
 
     def on_hit(self):
         self._hit_timer.running = True
@@ -56,9 +54,9 @@ class CharacterWidget(Component):
         self._current.update(dt)
 
         if self._hit_timer.running:
-            self._kivy_widget.color.rgb = self._hit_color
+            self._kivy_widget.color.rgb = self.hit_color
         else:
-            self._kivy_widget.color.rgb = self._color_color
+            self._kivy_widget.color.rgb = self.clear_color
 
         source = self._current.current
         source = source.format(direction=self.parent.body.direction.name)
@@ -67,6 +65,8 @@ class CharacterWidget(Component):
         # TODO 32 is hard-coded
         bb = self.parent.body.bb
         self._kivy_widget.pos = (bb.x * 32, bb.y * 32)
+        self._kivy_widget.rect.pos = self._kivy_widget.pos
+        self._kivy_widget.rect.size = self._kivy_widget.size
 
 
 # TODO this works, but it feels like there's probably a nicer way to compose

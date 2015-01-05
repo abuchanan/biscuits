@@ -30,7 +30,7 @@ class DeadScene:
     def start_over(self):
         # TODO reset player
         # TODO reset world/regions?
-        self.app.game.player.health.balance = 5
+        self.app.game.player.life.amount = 5
         self.app.load_scene('Loadpoint 1a')
 
     def update(self, dt):

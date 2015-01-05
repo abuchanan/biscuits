@@ -1,4 +1,3 @@
-from copy import copy
 from enum import Enum
 
 from biscuits.objects.base import Component
@@ -41,34 +40,8 @@ class Body(Component):
         self.is_block = is_block
         self.direction = direction
 
-    def move(self, direction, distance=1):
-        self.bb.x += direction.dx * distance
-        self.bb.y += direction.dy * distance
-
-    def grow(self, direction=None, distance=1):
-        if direction:
-            dx = direction.dx * distance
-            dy = direction.dy * distance
-
-            if dx > 0:
-                self.bb.w += dx
-            elif dx < 0:
-                self.bb.x += dx
-                self.bb.w -= dx
-
-            if dy > 0:
-                self.bb.h += dy
-            elif dy < 0:
-                self.bb.y += dy
-                self.bb.h -= dy
-        else:
-            self.bb.x -= distance
-            self.bb.y -= distance
-            self.bb.w += distance
-            self.bb.h += distance
-
-    def copy(self):
-        return copy(self)
+    def move(self, *args, **kwargs):
+        self.bb.move(*args, **kwargs)
 
 
 class World:

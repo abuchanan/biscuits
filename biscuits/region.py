@@ -18,7 +18,7 @@ class Region:
 
     def update(self, dt):
         for obj in self.objects:
-            obj.update(dt)
+            obj.signals.update.send(dt)
 
 
     def load_object(self, ID):
@@ -38,6 +38,6 @@ class Region:
 
         # TODO consider using weakref.finalize
         try:
-            self.widget.remove_widget(obj.widget)
+            self.widget.remove_widget(obj.widget._kivy_widget)
         except AttributeError:
             pass

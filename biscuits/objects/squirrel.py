@@ -53,7 +53,6 @@ class SquirrelWalk(Walk, TimedAction):
         TimedAction.update(self, dt)
 
 
-# TODO allow components to refer to "obj" by another name, such as "squirrel"
 class SquirrelSporadicActions(Actions):
     parent_name = 'squirrel'
 
@@ -72,7 +71,7 @@ class SquirrelSporadicActions(Actions):
         if (isinstance(cur, TimedAction) and cur.done) or cur is self.idle:
             if random.randrange(1000) < 10:
                 d = random.choice(list(Direction))
-                return SquirrelWalk(self.obj, d)
+                return SquirrelWalk(self.squirrel, d)
             else:
                 return self.idle
 

@@ -25,7 +25,7 @@ class BasicWidget(Component):
         # TODO get rid of this hard-coded 32
         bb = self.parent.body.bb
         self._kivy_widget = BasicKivyWidget(pos=(bb.x * 32, bb.y * 32),
-                                            size=(32, 32))
+                                            size=(32 * bb.w, 32 * bb.h))
         self._kivy_widget.color.rgb = color
 
 

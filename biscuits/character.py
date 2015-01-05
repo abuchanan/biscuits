@@ -21,7 +21,7 @@ class CharacterBody(Body):
                 blocks.append(hit)
 
         if not blocks:
-            self.set_from_rectangle(n)
+            self.bb.set_from_rectangle(n)
 
         return blocks
 
@@ -47,7 +47,7 @@ class Life(Component):
 
     def on_update(self, dt):
         if self.amount == 0:
-            self.obj.destroy()
+            self.parent.signals.dead.send()
 
 
 
@@ -56,9 +56,9 @@ class Attackable(Component):
     def on_attacked(self, attacker):
         # TODO different types of attacks will yield different decrement amounts
         # TODO chance to block attack
-        self.obj.life.amount -= 1
+        self.parent.life.amount -= 1
         # TODO use hit signal
-        self.obj.widget.hit()
+        self.parent.widget.hit()
 
 
 class Character(Base):

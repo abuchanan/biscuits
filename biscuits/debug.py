@@ -28,7 +28,7 @@ class DebugWidget(BoxLayout):
         Clock.schedule_interval(self.update, .1)
 
     def kill_player(self, *args):
-        self.player.health.balance = 0
+        self.player.life.amount = 0
 
     def update(self, *args):
         self.rect.size = self.size

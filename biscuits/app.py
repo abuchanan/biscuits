@@ -69,6 +69,7 @@ class WorldScene:
         self.objects = ObjectLoader(object_configs, self)
         self.world = world
         self.app = app
+        self.input = app.input
 
     def load_scene(self, name):
         self.app.load_scene(name)
@@ -109,7 +110,6 @@ class BiscuitsGame:
         debug = DebugWidget(player, size_hint=(1, .05))
 
         self.widget.add_widget(self.objects_layer)
-        # TODO 
         self.widget.add_widget(player.widget._kivy_widget)
         self.widget.add_widget(self.hud)
         self.widget.add_widget(debug)
@@ -125,7 +125,6 @@ class BiscuitsGame:
                 # TODO use weakref
                 self.world.remove(obj)
 
-        print(loadpoint)
         region_config = loadpoint.region
 
         try:
@@ -151,10 +150,10 @@ class BiscuitsGame:
         if self.region:
             self.region.update(dt)
 
-        self.player.update(dt)
+        self.player.signals.update.send(dt)
         self.hud.coins = self.player.coins.balance
-        self.hud.health = self.player.health.balance
         self.hud.keys = self.player.keys.balance
+        self.hud.health = self.player.life.amount
         self.track_player()
 
     def unload(self):
