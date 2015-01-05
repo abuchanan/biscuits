@@ -343,7 +343,7 @@
   </object>
  </objectgroup>
  <objectgroup name="Squirrels">
-  <object name="Squirrel 1" type="Squirrel" x="1024" y="1376" width="32" height="32"/>
+  <object name="Squirrel 1" type="Zombie" x="1024" y="1376" width="32" height="32"/>
   <object name="Squirrel 2" type="Squirrel" x="1280" y="1152" width="32" height="32"/>
   <object name="Squirrel 3" type="Squirrel" x="1536" y="1152" width="32" height="32"/>
   <object name="Squirrel 4" type="Squirrel" x="1280" y="832" width="32" height="32"/>

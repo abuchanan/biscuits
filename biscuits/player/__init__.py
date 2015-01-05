@@ -1,5 +1,5 @@
 from biscuits.bank import Bank
-from biscuits.character import Life
+from biscuits.character import Life, Attackable
 from biscuits.objects.base import Base
 
 from biscuits.player.actions import PlayerActions
@@ -16,11 +16,7 @@ class Player(Base):
     coins = Bank()
     keys = Bank()
     life = Life(5)
-
-    def on_attack(self, *args):
-        # TODO this will be a common pattern. needs reusable component
-        self.life.amount -= 1
-        self.widget.hit()
+    attackable = Attackable()
 
     def on_update(self, dt):
         self.trigger_collisions()

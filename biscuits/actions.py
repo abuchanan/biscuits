@@ -80,8 +80,9 @@ class Attack(TimedAction):
 
 class Walk:
 
-    def __init__(self, character, direction=Direction.north):
+    def __init__(self, character, direction=Direction.north, speed=.3):
         self.character = character
+        self.speed = speed
         self.direction = direction
         self.blocked = False
 
@@ -89,7 +90,6 @@ class Walk:
         self.character.body.direction = self.direction
         self.character.widget.action = 'walk'
 
-        speed = .3
-        progress = dt / speed
+        progress = dt / self.speed
         blocks = self.character.body.move(self.direction, progress)
         self.blocked = len(blocks) > 0

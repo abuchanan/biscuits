@@ -54,7 +54,6 @@ class Life(Component):
 class Attackable(Component):
 
     def on_attacked(self, attacker):
-        print('attacked')
         # TODO different types of attacks will yield different decrement amounts
         # TODO chance to block attack
         self.parent.life.amount -= 1

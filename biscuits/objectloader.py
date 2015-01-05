@@ -8,6 +8,7 @@ from biscuits.objects.key import Key
 from biscuits.objects.squirrel import Squirrel
 from biscuits.objects.boss_squirrel import BossSquirrel
 from biscuits.objects.wall import Wall
+from biscuits.objects.zombie import Zombie
 from biscuits.player import Player
 
 
@@ -28,6 +29,7 @@ class ObjectLoader:
         'Squirrel': Squirrel(),
         'BossSquirrel': BossSquirrel(),
         'Wall': Wall(),
+        'Zombie': Zombie(),
         'Player': Player(),
     }
 
