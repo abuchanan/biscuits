@@ -1,6 +1,7 @@
 from copy import copy
 from enum import Enum
 
+from biscuits.objects.base import Component
 from biscuits.geometry import Rectangle as BoundingBox
 
 
@@ -33,10 +34,10 @@ class Direction(Enum):
         return Direction((self.index + 1) % 4)
 
 
-class Body(BoundingBox):
+class Body(Component):
 
     def __init__(self, x, y, w, h, direction=Direction.south, is_block=False):
-        super().__init__(x, y, w, h)
+        self.bb = BoundingBox(x, y, w, h)
         self.is_block = is_block
         self.direction = direction
 
@@ -88,7 +89,7 @@ class World:
         hits = []
 
         for obj in self._objects:
-            if rect.overlaps(obj.body):
+            if rect.overlaps(obj.body.bb):
                 hits.append(obj)
 
         return hits

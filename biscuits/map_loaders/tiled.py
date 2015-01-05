@@ -1,3 +1,4 @@
+import re
 import uuid
 
 from kivy.core.image import Image as CoreImage
@@ -139,6 +140,17 @@ class ObjectsPass(Pass):
     def handle_Loadpoint(self, obj):
         obj.direction = Direction[obj.direction]
         self.loadpoints[obj.name] = obj
+
+    def handle_Door(self, obj):
+        try:
+            obj.locks = re.split(', *', obj.locks)
+        except AttributeError:
+            obj.locks = None
+
+        try:
+            obj.switches = re.split(', *', obj.switches)
+        except AttributeError:
+            obj.switches = None
 
     def after_each(self, obj):
         if obj.type in self.ignore:

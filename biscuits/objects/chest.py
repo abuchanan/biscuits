@@ -3,26 +3,31 @@ from biscuits.objects.basic import BasicWidget
 from biscuits.World import Body
 
 
+
+class ChestWidget(BasicWidget):
+
+    closed_color = (0, 0, 1)
+    opened_color = (0, 0, 0)
+
+    def __init__(self):
+        super().__init__(color=self.closed_color)
+
+    def opened(self):
+        self._kivy_widget.color.rgb = self.opened_color
+
+
 class Chest(Base):
 
-    def init(self, rectangle):
+    body = Body(is_block=True)
+    widget = ChestWidget()
 
-        # TODO resolve this tile width/height crap
-        self.widget = BasicWidget(pos=(rectangle.x * 32, rectangle.y * 32),
-                                  size=(32, 32))
-        self.widget.color.rgb = (0, 0, 1)
-        self.body = Body(*rectangle, is_block=True)
+    def __init__(self):
         self.is_open = False
-
-        self.signals.use.connect(self.on_use)
-
-    def init_from_config(self, config):
-        self.init(config.rectangle)
 
     def on_use(self, player):
         if not self.is_open:
             self.is_open = True
-            self.widget.color.rgb = (0, 0, 0)
+            self.widget.opened()
             self.on_chest_opened(player)
 
     def on_chest_opened(self, player):
@@ -37,12 +42,8 @@ class Chest(Base):
 
 class CoinChest(Chest):
 
-    def init(self, rectangle, value=1):
-        super().init(rectangle)
+    def __init__(self, value=1):
         self.value = value
-
-    def init_from_config(self, config):
-        self.init(config.rectangle, value=config.coin_value)
 
     def on_chest_opened(self, player):
         player.coins.balance += self.value

@@ -1,6 +1,29 @@
 from biscuits.World import Direction
 
 
+class Actions(Component):
+
+    def init_component(self, idle=None):
+        if idle is None:
+            self.idle = Idle()
+        else:
+            self.idle = idle
+        self.current = idle
+
+    @property
+    def is_idle(self):
+        return self.current is self.idle
+
+    def transition(self):
+        raise NotImplementedError()
+
+    def update(self, dt):
+        _next = self.transition()
+        if _next:
+            self.current = _next
+        self.current.update(dt)
+
+
 class TimedAction:
 
     def __init__(self, duration=1):
@@ -32,6 +55,10 @@ class TimedAction:
 
 
 class Idle:
+    pass
+
+
+class CharacterIdle:
     def __init__(self, character):
         self.character = character
 

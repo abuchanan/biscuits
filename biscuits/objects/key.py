@@ -1,10 +1,7 @@
-from biscuits.objects.basic import Basic
+from biscuits.objects.basic import Basic, BasicWidget
+
 
 class Key(Basic):
 
-    def init(self, *args, **kwargs):
-        super().init('keys', *args, **kwargs)
-        self.widget.color.rgb = (1, 1, 0)
-
-    def init_from_config(self, config):
-        self.init(config.rectangle)
+    name = 'keys'
+    widget = BasicWidget(color=(1, 1, 0))

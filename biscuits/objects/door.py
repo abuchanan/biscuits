@@ -1,7 +1,3 @@
-import re
-
-from kivy.properties import BooleanProperty
-
 from biscuits.objects.base import Base
 from biscuits.objects.basic import BasicWidget
 from biscuits.World import Body
@@ -9,18 +5,17 @@ from biscuits.World import Body
 
 class DoorWidget(BasicWidget):
 
-    locked = BooleanProperty(False)
+    locked_color = (0, 0, 0)
+    unlocked_color = (0, 1, 1)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.color.rgb = (0, 1, 1)
-        self.bind(locked=self.redraw)
+    def __init__(self):
+        super().__init__(color=self.unlocked_color)
 
-    def redraw(self, *args, **kwargs):
-        if self.locked:
-            self.color.rgb = (0, 0, 0)
-        else:
-            self.color.rgb = (0, 1, 1)
+    def unlocked(self):
+        self._kivy_widget.color.rgb = self.unlocked_color
+
+    def locked(self):
+        self._kivy_widget.color.rgb = self.locked_color
             
 
 class Lock:
@@ -59,15 +54,12 @@ class ObjectLock(Lock):
 
 class Door(Base):
 
-    def init(self, rectangle, destination, locks=None, switches=None):
+    body = Body(is_block=True)
+    widget = DoorWidget()
 
-        self.body = Body(*rectangle, is_block=True)
+    def __init__(self, destination, locks=None, switches=None):
+
         self.destination = destination
-
-        # TODO resolve this tile width/height crap
-        pos = (rectangle.x * 32, rectangle.y * 32)
-        size = (rectangle.w * 32, rectangle.h * 32)
-        self.widget = DoorWidget(pos=pos, size=size)
 
         self._locks = set()
         self.generic_lock = Lock()
@@ -78,28 +70,29 @@ class Door(Base):
                 if key == 'generic':
                     self._locks.add(self.generic_lock)
                 else:
-                    obj = self.objects[key]
+                    obj = self.scene.objects[key]
                     lock = ObjectLock(obj)
                     self._locks.add(lock)
 
         if switches is not None:
             for switch in switches:
-                obj = self.objects[switch]
+                obj = self.scene.objects[switch]
                 lock = SwitchLock(obj)
                 self._locks.add(lock)
-
-        # TODO something to connect these kind of signals automatically
-        self.signals.player_collision.connect(self.on_player_collision)
 
     @property
     def locked(self):
         return any(lock.locked for lock in self._locks)
 
-    def update(self, dt):
+    def on_update(self, dt):
+        # TODO here's where I need a multi-level object/component tree
         for lock in self._locks:
             lock.update(dt)
 
-        self.widget.locked = self.locked
+        if self.locked:
+            self.widget.locked()
+        else:
+            self.widget.unlocked()
 
 
     def on_player_collision(self, player):
@@ -110,18 +103,4 @@ class Door(Base):
             self.generic_lock.locked = False
 
         if not self.locked:
-            self.app.load_scene(self.destination)
-
-    def init_from_config(self, config):
-        try:
-            locks = re.split(', *', config.locks)
-        except AttributeError:
-            locks = None
-
-        try:
-            switches = re.split(', *', config.switches)
-        except AttributeError:
-            switches = None
-
-        self.init(config.rectangle, config.Destination, locks=locks,
-                  switches=switches)
+            self.scene.load_scene(self.destination)

@@ -1,15 +1,16 @@
 from kivy.graphics import *
 from kivy.uix.widget import Widget
 
-from biscuits.objects.base import Base
+from biscuits.objects.base import Base, Component
 from biscuits.World import Body
 
 
-class BasicWidget(Widget):
+class BasicKivyWidget(Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # TODO get rid of size_hint?
         self.size_hint = (None, None)
 
         with self.canvas:
@@ -19,17 +20,21 @@ class BasicWidget(Widget):
             PopState('color')
 
 
+class BasicWidget(Component):
+    def __init__(self, color):
+        # TODO get rid of this hard-coded 32
+        bb = self.parent.body.bb
+        self._kivy_widget = BasicKivyWidget(pos=(bb.x * 32, bb.y * 32),
+                                            size=(32, 32))
+        self._kivy_widget.color.rgb = color
+
+
 class Basic(Base):
 
-    def init(self, name, rectangle, value=1):
-        self.name = name
-        # TODO resolve this tile width/height crap
-        self.widget = BasicWidget(pos=(rectangle.x * 32, rectangle.y * 32),
-                                  size=(32, 32))
-        self.body = Body(*rectangle)
-        self.value = value
+    body = Body()
 
-        self.signals.player_collision.connect(self.on_player_collision)
+    def __init__(self, value=1):
+        self.value = value
 
     def on_player_collision(self, player):
         getattr(player, self.name).balance += self.value

@@ -41,6 +41,9 @@ TODO
 - persist scene state past cache (e.g. save on quit, save when region removed from cache)
 
 
+- tighter bounding boxes/collisions for characters
+
+
 - player action input: getting pretty solid, but still needs a tweak: up takes precedence
                        over left, but really what you want is the last pressed direction
                        has precedence. obvious when passing through a door
