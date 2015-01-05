@@ -1,9 +1,10 @@
+from biscuits.objects.base import Component
 from biscuits.World import Direction
 
 
 class Actions(Component):
 
-    def init_component(self, idle=None):
+    def __init__(self, idle=None):
         if idle is None:
             self.idle = Idle()
         else:
@@ -17,7 +18,7 @@ class Actions(Component):
     def transition(self):
         raise NotImplementedError()
 
-    def update(self, dt):
+    def on_update(self, dt):
         _next = self.transition()
         if _next:
             self.current = _next
@@ -87,7 +88,6 @@ class Walk:
     def update(self, dt):
         self.character.body.direction = self.direction
         self.character.widget.action = 'walk'
-        self.character.widget.direction = self.direction.name
 
         speed = .3
         progress = dt / speed

@@ -15,8 +15,6 @@ class ComponentTemplate:
     def __init__(self, cls, components, *args, **kwargs):
         self._cls = cls
         self._components = components
-
-        self._check_init_args(args, kwargs, partial=True)
         self._args = args
         self._kwargs = kwargs
 
@@ -58,31 +56,34 @@ class ComponentTemplate:
             pass
 
 
-    def _check_init_args(self, args, kwargs, partial=False):
+    def _bind_init_args(self, args, kwargs):
+
+        # Get the signature of the component's __init__ method
         try:
             init_sig = inspect.signature(self._cls.__init__)
         except TypeError:
             init_sig = inspect.Signature()
 
-        if partial:
-            bind = init_sig.bind_partial
-        else:
-            bind = init_sig.bind
+        # Only bind kwargs that are in the signature. This allows the config
+        # to have extra information without raising an error on component init.
+        keys = kwargs.keys() & init_sig.parameters.keys()
+        kwargs_to_bind = dict((k, kwargs[k]) for k in keys)
 
         # Satisfy the "self" argument
-        args = (None,) + args
+        args_to_bind = (None,) + args
 
         try:
-            bind(*args, **kwargs)
+            init_sig.bind(*args_to_bind, **kwargs_to_bind)
         except TypeError as e:
             msg = 'while configuring {}: {}'
             msg = msg.format(self._cls.__name__, e)
             raise ConfigError(msg) from None
+        else:
+            return args, kwargs_to_bind
         
 
     def attach(self, parent):
-        init_sig = inspect.signature(self._cls.__init__)
-        self._check_init_args(self._args, self._kwargs)
+        args, kwargs = self._bind_init_args(self._args, self._kwargs)
 
         result = self._cls._create()
         self._set_parent(result, parent)
@@ -94,7 +95,7 @@ class ComponentTemplate:
         result._pre_init(*self._args, **self._kwargs)
 
         try:
-            result.__init__(*self._args, **self._kwargs)
+            result.__init__(*args, **kwargs)
         except Exception as e:
             # TODO do some intelligent checking here to provide nice error
             #      message when components are defined out of order

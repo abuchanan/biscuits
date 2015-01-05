@@ -20,6 +20,7 @@ from biscuits.map_loaders.tiled import TiledMap
 from biscuits.player import Player
 from biscuits.start_scene import StartScene
 from biscuits.World import World
+from biscuits.objectloader import ObjectLoader
 
 
 log = logging.getLogger('biscuits')
@@ -59,50 +60,6 @@ loadpoints['boss squirrel comic'] = Loadpoint(type='comic', path=Path('media/bos
                                     pages=1,
                                     exitpoint='Loadpoint 6a')
 
-
-class UnknownObjectType(Exception): pass
-
-
-from biscuits.objects.chest import Chest, CoinChest
-from biscuits.objects.coin import Coin
-from biscuits.objects.door import Door
-from biscuits.objects.door_switch import DoorSwitch
-from biscuits.objects.jar import Jar
-from biscuits.objects.key import Key
-from biscuits.objects.squirrel import Squirrel
-from biscuits.objects.boss_squirrel import BossSquirrel
-from biscuits.objects.wall import Wall
-
-# TODO maybe object loader should be the owner of all objects and return
-#      only weak references. 
-class ObjectLoader:
-
-    def __init__(self, configs, world, app):
-        self.configs = configs
-        self.world = world
-        self.app = app
-        self.cache = {}
-
-    def __getitem__(self, ID):
-        return self.load(ID)
-
-    def load(self, ID):
-        try:
-            return self.cache[ID]
-        except KeyError:
-            pass
-
-        config = self.configs[ID]
-
-        try:
-            cls = getattr(biscuits.objects, config.type)
-        except AttributeError:
-            raise UnknownObjectType('Unknown object type: {}'.format(config.type))
-        else:
-            obj = cls(ID, self, self.world, self.app)
-            obj.init_from_config(config)
-            self.cache[ID] = obj
-            return obj
 
 
 class Region:

@@ -1,4 +1,4 @@
-from biscuits.actions import TimedAction, Walk, Idle, Attack
+from biscuits.actions import Actions, TimedAction, Walk, CharacterIdle, Attack
 from biscuits.World import Direction
 
 
@@ -8,19 +8,20 @@ class PlayerAttack(Attack):
         super().__init__(*args, **kwargs)
 
 
-class PlayerActions:
+class PlayerActions(Actions):
 
-    def __init__(self, player, input):
-        self.player = player
+    parent_name = 'player'
+
+    def __init__(self):
         self.input = input
-        self.idle = Idle(player)
+        self.idle = CharacterIdle(self.player)
         self.current = self.idle
 
     def transition(self):
 
         # For brevity
         cur = self.current
-        inp = self.input
+        inp = self.scene.input
 
         if isinstance(cur, Use) and cur.done:
             return self.idle
@@ -81,13 +82,6 @@ class PlayerActions:
 
             elif d == Direction.east and inp.right.last:
                 return self.idle
-
-
-    def update(self, dt):
-        _next = self.transition()
-        if _next:
-            self.current = _next
-        self.current.update(dt)
 
 
 class Use(TimedAction):

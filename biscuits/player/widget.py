@@ -42,12 +42,5 @@ class PlayerWidget(CharacterWidget):
         'use': UseCycle,
     }
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._attack_sound = SoundLoader.load('media/sounds/swings.wav')
-        self.bind(action=self._change_action)
-
-    def _change_action(self, *args):
-        if self.action == 'attack':
-            self._attack_sound.play()
+        # TODO move this to the Cycle. a cycle can handle more that just sprites
+        #self._attack_sound = SoundLoader.load('media/sounds/swings.wav')

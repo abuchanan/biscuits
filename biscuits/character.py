@@ -1,7 +1,6 @@
 from biscuits.geometry import Rectangle as BoundingBox
 from biscuits.World import Body
 
-from biscuits.actions import Actions, TimedAction
 from biscuits.objects.base import Base, Component
 
 
@@ -58,12 +57,12 @@ class Attackable(Component):
         # TODO different types of attacks will yield different decrement amounts
         # TODO chance to block attack
         self.obj.life.amount -= 1
+        # TODO use hit signal
         self.obj.widget.hit()
 
 
 class Character(Base):
 
     body = CharacterBody()
-    widget = CharacterWidget()
     life = Life(2)
     attackable = Attackable()

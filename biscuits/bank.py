@@ -1,4 +1,8 @@
-class Bank:
+from biscuits.objects.base import Component
+
+
+class Bank(Component):
+
     def __init__(self, initial=0):
         self._balance = initial
 

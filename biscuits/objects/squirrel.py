@@ -55,9 +55,10 @@ class SquirrelWalk(Walk, TimedAction):
 
 # TODO allow components to refer to "obj" by another name, such as "squirrel"
 class SquirrelSporadicActions(Actions):
+    parent_name = 'squirrel'
 
     def __init__(self):
-        idle = CharacterIdle(squirrel)
+        idle = CharacterIdle(self.squirrel)
         super().__init__(idle)
 
     def transition(self):

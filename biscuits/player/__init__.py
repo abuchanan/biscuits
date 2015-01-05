@@ -1,31 +1,29 @@
 from biscuits.bank import Bank
+from biscuits.character import Life
 from biscuits.objects.base import Base
 
 from biscuits.player.actions import PlayerActions
 from biscuits.player.body import PlayerBody
 from biscuits.player.widget import PlayerWidget
-from biscuits.World import Direction
-
 
 
 class Player(Base):
 
-    def init(self, x, y, direction=Direction.north):
-        self.body = PlayerBody(x, y, 1, 1, direction=direction)
-        self.actions = PlayerActions(self, self.app.input)
-        self.widget = PlayerWidget()
-        self.widget.direction = direction.name
-        self.coins = Bank()
-        self.keys = Bank()
-        # TODO this will be a common pattern. needs reusable component
-        self.health = Bank(5)
+    body = PlayerBody()
+    actions = PlayerActions()
+    widget = PlayerWidget()
 
-        self.signals.attack.connect(self.on_attack)
+    coins = Bank()
+    keys = Bank()
+    life = Life(5)
 
     def on_attack(self, *args):
         # TODO this will be a common pattern. needs reusable component
         self.health.balance -= 1
         self.widget.hit()
+
+    def on_update(self, dt):
+        self.trigger_collisions()
 
     def set_position(self, x, y, direction):
         self.body.x = x
@@ -39,16 +37,7 @@ class Player(Base):
             if hit is not self:
                 hit.signals.player_collision.send(self)
 
-    def update(self, dt):
-        self.actions.update(dt)
-        self.trigger_collisions()
-
-        if self.health.balance <= 0:
-            self.signals.dead.send()
-
-        self.widget.update(dt)
-
     def dispatch_forward(self, signal_name, *args, **kwargs):
         q = self.body.copy()
         q.grow(self.body.direction.forward)
-        self.world.dispatch(self, q, signal_name, self, *args, **kwargs)
+        self.scene.world.dispatch(self, q, signal_name, self, *args, **kwargs)

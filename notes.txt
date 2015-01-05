@@ -1,5 +1,8 @@
 https://github.com/Kovak/KivEnt/blob/new_rendering/modules/core/kivent_core/renderers.pyx
 
+could use component templates to provide singleton services to decoupled components?
+this Input singleton
+
 
 TODO
 
@@ -67,6 +70,10 @@ TODO
   - could implement system that could load any object by ID (and cache it)
     regardless of region. regions would just be a list of IDs to load.
 
+
+might be better to have kivy widgets *pull* from widget components
+   rather than have widget components push. that way, widget components would know
+   nothing of the underlying system
 
 - tree data structure for map definition. e.g. allows
 
