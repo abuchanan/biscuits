@@ -43,6 +43,9 @@ TODO
 
 - persist scene state past cache (e.g. save on quit, save when region removed from cache)
 
+- enemies can drop items
+- jars can contain items
+
 
 - tighter bounding boxes/collisions for characters
 
