@@ -99,8 +99,8 @@ class Rectangle:
         else:
             self.x -= distance
             self.y -= distance
-            self.w += distance
-            self.h += distance
+            self.w += distance * 2
+            self.h += distance * 2
 
     def copy(self):
         return copy(self)
